@@ -1,7 +1,36 @@
-<template></template>
+<template>
+  <div class="app">
+    <router-view></router-view>
+    <button @click="$router.push('/main')">MAIN</button>
+  </div>
+</template>
 
 <script>
 export default {}
 </script>
 
-<style></style>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  /* box-sizing: border-box; */
+  font-family: "poppins", sans-serif;
+  list-style: none;
+  text-decoration: none;
+  user-select: none;
+}
+
+body {
+  background: #17202a;
+}
+
+/* body {
+  padding: 10px;
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #17202a;
+} */
+</style>
