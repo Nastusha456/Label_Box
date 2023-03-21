@@ -1,3 +1,3 @@
-import LoginForm from "@/components/UI/LoginForm"
+import MyList from "@/components/UI/MyList"
 
-export default [LoginForm]
+export default [MyList]
