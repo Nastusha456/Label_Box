@@ -1,6 +1,5 @@
 <template>
-  <!-- <form class="box" action="#" method="post"> -->
-  <form @submit.prevent="signIn" class="box">
+  <Form @submit="signIn" class="box">
     <div
       @click="$router.push('/')"
       class="changePage"
@@ -12,43 +11,57 @@
     <div @click="$router.push('/registration')" class="changePage">
       Registration
     </div>
-    <input
-      v-model="formData.userName"
+    <Field
+      name="user_name"
       class="data"
       type="text"
-      placeholder="Username"
+      placeholder="User name"
+      :rules="isRequired"
     />
-    <input
-      v-model="formData.password"
+    <ErrorMessage name="user_name" class="error" />
+    <Field
+      name="password"
       class="data"
       type="password"
       placeholder="Password"
+      :rules="isRequired"
     />
+    <ErrorMessage name="password" class="error" />
     <input type="submit" value="Login" />
-  </form>
+  </Form>
 </template>
 
 <script>
+import { Form, Field, ErrorMessage } from "vee-validate"
+
 export default {
+  components: {
+    Form,
+    Field,
+    ErrorMessage,
+  },
   data() {
     return {
-      formData: {
-        userName: "",
-        password: "",
-      },
+      min: 7,
     }
   },
   methods: {
-    signIn() {
-      console.log(this.formData)
+    signIn(values) {
+      console.log(values)
+    },
+    isRequired(value) {
+      if (value && value.trim()) {
+        return true
+      }
+      return "This field is required"
     },
   },
 }
 </script>
 
-<style>
+<style scoped>
 .box {
-  width: 300px;
+  width: 380px;
   padding: 40px;
   position: absolute;
   top: 50%;
@@ -109,5 +122,9 @@ export default {
 .box input[type="submit"]:hover {
   background: #2ecc71;
   color: #17202a;
+}
+
+.error {
+  color: red;
 }
 </style>

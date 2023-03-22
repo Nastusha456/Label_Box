@@ -1,5 +1,5 @@
 <template>
-  <form @submit.prevent="registration" class="box">
+  <Form @submit="registration" class="box">
     <div @click="$router.push('/')" class="changePage">Login</div>
     <br />
     <div
@@ -9,57 +9,107 @@
     >
       Registration
     </div>
-    <input
-      v-model="formData.userName"
+    <Field
+      name="user_name"
       class="data"
       type="text"
       placeholder="User name"
+      :rules="isRequired"
     />
-    <input
-      v-model="formData.email"
+    <ErrorMessage name="user_name" class="error" />
+    <Field
+      name="user_email"
       class="data"
       type="email"
       placeholder="User email"
+      :rules="validateEmail"
     />
-    <input
-      v-model="formData.password"
+    <ErrorMessage name="user_email" class="error" />
+    <Field
+      name="password"
       class="data"
       type="password"
       placeholder="Password"
+      :rules="validatePassword"
     />
-    <input
-      v-model="formData.confirmPassword"
+    <ErrorMessage name="password" class="error" />
+    <Field
+      name="confirm_password"
       class="data"
       type="password"
       placeholder="Confirm Password"
+      :rules="validateConfirmPassword"
     />
+    <ErrorMessage name="confirm_password" class="error" />
     <input type="submit" value="Register" />
-  </form>
+  </Form>
 </template>
 
 <script>
+import { Form, Field, ErrorMessage } from "vee-validate"
+
 export default {
+  components: {
+    Form,
+    Field,
+    ErrorMessage,
+  },
   data() {
     return {
-      formData: {
-        userName: "",
-        email: "",
-        password: "",
-        confirmPassword: "",
-      },
+      minPasswordLength: 7,
+      password: "",
     }
   },
   methods: {
-    registration() {
-      console.log(this.formData)
+    registration(values) {
+      console.log(values)
+    },
+    isRequired(value) {
+      if (value && value.trim()) {
+        return true
+      }
+      return "This field is required"
+    },
+    validateEmail(value) {
+      // if the field is empty
+      if (!value) {
+        return "This field is required"
+      }
+      // if the field is not a valid email
+      const regex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i
+      if (!regex.test(value)) {
+        return "This field must be a valid email"
+      }
+      // All is good
+      return true
+    },
+    validatePassword(value) {
+      if (value && value.trim()) {
+        if (value.length < this.minPasswordLength) {
+          return `Minimum password length is ${this.minPasswordLength}, currently ${value.length}`
+        }
+        this.password = value.trim()
+        return true
+      }
+      return "This field is required"
+    },
+    validateConfirmPassword(value) {
+      if (value && value.trim()) {
+        if (value != this.password) {
+          return "Passwords must match"
+        }
+        this.password = value.trim()
+        return true
+      }
+      return "This field is required"
     },
   },
 }
 </script>
 
-<style>
+<style scoped>
 .box {
-  width: 300px;
+  width: 380px;
   padding: 40px;
   position: absolute;
   top: 50%;
@@ -120,5 +170,9 @@ export default {
 .box input[type="submit"]:hover {
   background: #2ecc71;
   color: #17202a;
+}
+
+.error {
+  color: red;
 }
 </style>
