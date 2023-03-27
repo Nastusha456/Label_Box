@@ -16,7 +16,7 @@
       class="data"
       type="text"
       placeholder="User name"
-      :rules="isRequired"
+      :rules="validateUserName"
     />
     <ErrorMessage name="user_name" class="error" />
     <Field
@@ -24,7 +24,7 @@
       class="data"
       type="password"
       placeholder="Password"
-      :rules="isRequired"
+      :rules="validatePassword"
     />
     <ErrorMessage name="password" class="error" />
     <input type="submit" value="Login" />
@@ -42,6 +42,8 @@ export default {
   },
   data() {
     return {
+      currentPassword: "currentPassword",
+      userName: "name",
       min: 7,
     }
   },
@@ -49,8 +51,20 @@ export default {
     signIn(values) {
       console.log(values)
     },
-    isRequired(value) {
+    validateUserName(value) {
       if (value && value.trim()) {
+        if (value != this.userName) {
+          return "Incorrect user name"
+        }
+        return true
+      }
+      return "This field is required"
+    },
+    validatePassword(value) {
+      if (value && value.trim()) {
+        if (value != this.currentPassword) {
+          return "Incorrect password"
+        }
         return true
       }
       return "This field is required"

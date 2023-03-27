@@ -1,66 +1,70 @@
 <template>
   <div class="box">
-    <img src="@/images/me.png" alt="User image" />
-    <div v-if="nameBtn" @click="openNameForm" class="text">
-      User name: <span>{{ this.userName }}</span>
+    <div>
+      <img src="@/images/user-100.png" alt="User image" />
+      <div @click="openNameForm" class="text">
+        User name: <span>{{ this.userName }}</span>
+      </div>
+      <div @click="openEmailForm" class="text">
+        User email: <span>{{ this.userEmail }}</span>
+      </div>
     </div>
-    <div v-if="emailBtn" @click="openEmailForm" class="text">
-      User email: <span>{{ this.userEmail }}</span>
-    </div>
-    <div v-if="passwordBtn" @click="openPasswordForm" class="btn">
-      Change password
-    </div>
-    <!-- ------------------------------- -->
-    <Form v-if="nameFormIsVisible" @submit="changeName">
-      <Field
-        name="user_name"
-        class="data"
-        type="text"
-        placeholder="User name"
-        :rules="isRequired"
-      />
-      <ErrorMessage name="user_name" class="error" />
-      <input type="submit" value="Change name" class="btn" />
-    </Form>
-    <Form v-if="emailFormIsVisible" @submit="changeEmail">
-      <Field
-        name="user_email"
-        class="data"
-        type="email"
-        placeholder="User email"
-        :rules="validateEmail"
-      />
-      <ErrorMessage name="user_email" class="error" />
-      <input type="submit" value="Change email" class="btn" />
+    <div>
+      <div v-if="passwordBtn" @click="openPasswordForm" class="btn">
+        Change password
+      </div>
       <!-- ------------------------------- -->
-    </Form>
-    <Form v-if="passwordFormIsVisible" @submit="changePassword">
-      <Field
-        name="currentPassword"
-        class="data"
-        type="password"
-        placeholder="currentPassword"
-        :rules="validateCurrentPassword"
-      />
-      <ErrorMessage name="currentPassword" class="error" />
-      <Field
-        name="password"
-        class="data"
-        type="password"
-        placeholder="Password"
-        :rules="validatePassword"
-      />
-      <ErrorMessage name="password" class="error" />
-      <Field
-        name="confirm_password"
-        class="data"
-        type="password"
-        placeholder="Confirm Password"
-        :rules="validateConfirmPassword"
-      />
-      <ErrorMessage name="confirm_password" class="error" />
-      <input type="submit" value="Change" class="btn" />
-    </Form>
+      <Form v-if="nameFormIsVisible" @submit="changeName">
+        <Field
+          name="user_name"
+          class="data"
+          type="text"
+          placeholder="User name"
+          :rules="isRequired"
+        />
+        <ErrorMessage name="user_name" class="error" />
+        <input type="submit" value="Change name" class="btn" />
+      </Form>
+      <Form v-if="emailFormIsVisible" @submit="changeEmail">
+        <Field
+          name="user_email"
+          class="data"
+          type="email"
+          placeholder="User email"
+          :rules="validateEmail"
+        />
+        <ErrorMessage name="user_email" class="error" />
+        <input type="submit" value="Change email" class="btn" />
+        <!-- ------------------------------- -->
+      </Form>
+      <Form v-if="passwordFormIsVisible" @submit="changePassword">
+        <Field
+          name="currentPassword"
+          class="data"
+          type="password"
+          placeholder="currentPassword"
+          :rules="validateCurrentPassword"
+        />
+        <ErrorMessage name="currentPassword" class="error" />
+        <Field
+          name="password"
+          class="data"
+          type="password"
+          placeholder="Password"
+          :rules="validatePassword"
+        />
+        <ErrorMessage name="password" class="error" />
+        <Field
+          name="confirm_password"
+          class="data"
+          type="password"
+          placeholder="Confirm Password"
+          :rules="validateConfirmPassword"
+        />
+        <ErrorMessage name="confirm_password" class="error" />
+        <input type="submit" value="Change" class="btn" />
+      </Form>
+    </div>
   </div>
 </template>
 
@@ -81,9 +85,7 @@ export default {
       minPasswordLength: 7,
       password: "",
       nameFormIsVisible: false,
-      nameBtn: true,
       emailFormIsVisible: false,
-      emailBtn: true,
       passwordFormIsVisible: false,
       passwordBtn: true,
     }
@@ -91,21 +93,21 @@ export default {
   methods: {
     openNameForm() {
       this.nameFormIsVisible = true
-      this.nameBtn = false
+      this.passwordBtn = false
     },
     changeName(values) {
       this.nameFormIsVisible = false
-      this.nameBtn = true
+      this.passwordBtn = true
       this.userName = values.user_name
       console.log(values)
     },
     openEmailForm() {
       this.emailFormIsVisible = true
-      this.emailBtn = false
+      this.passwordBtn = false
     },
     changeEmail(values) {
       this.emailFormIsVisible = false
-      this.emailBtn = true
+      this.passwordBtn = true
       this.userEmail = values.user_email
       console.log(values)
     },
