@@ -17,9 +17,11 @@ from django.contrib import admin
 from django.urls import path, include
 
 from lablebox.views import index
+from classificator.views import ClassificatorAPIView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('users/', include("users.urls", namespace="users")),
     path('', index, name="index"),
+    path('api/v1/classificator', ClassificatorAPIView.as_view())
 ]
