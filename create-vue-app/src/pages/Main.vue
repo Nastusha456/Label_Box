@@ -6,6 +6,7 @@
       <center-panel ref="CenterPanel" />
       <right-panel />
     </div>
+    <classifier />
   </div>
 </template>
 
@@ -14,8 +15,9 @@ import NavBar from "@/components/NavBar.vue"
 import LeftPanel from "@/components/LeftPanel.vue"
 import RightPanel from "@/components/RightPanel.vue"
 import CenterPanel from "@/components/CenterPanel.vue"
+import Classifier from "@/components/Classifier.vue"
 export default {
-  components: { NavBar, LeftPanel, RightPanel, CenterPanel },
+  components: { NavBar, LeftPanel, RightPanel, CenterPanel, Classifier },
   data() {
     return {}
   },
@@ -43,6 +45,7 @@ export default {
   align-items: center;
   justify-content: center;
   background: #17202a;
+  flex-direction: column; /* Временно для классификатора!!! */
 }
 
 .container {
