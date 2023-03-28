@@ -2,11 +2,11 @@
   <nav-bar @addImages="addImages" />
   <div class="main">
     <div class="container">
-      <left-panel @download="download" />
+      <left-panel @download="download" @showClassifier="showClassifier" />
+      <classifier v-if="isShowClassifier" />
       <center-panel ref="CenterPanel" />
       <right-panel />
     </div>
-    <classifier />
   </div>
 </template>
 
@@ -19,7 +19,9 @@ import Classifier from "@/components/Classifier.vue"
 export default {
   components: { NavBar, LeftPanel, RightPanel, CenterPanel, Classifier },
   data() {
-    return {}
+    return {
+      isShowClassifier: false,
+    }
   },
   methods: {
     download() {
@@ -27,6 +29,9 @@ export default {
     },
     addImages() {
       this.$refs.CenterPanel.SelectFile()
+    },
+    showClassifier() {
+      this.isShowClassifier = !this.isShowClassifier
     },
   },
 }

@@ -5,7 +5,7 @@
         <i class="bx bx-images"></i>
         <p>Images</p>
       </li>
-      <li>
+      <li @click="Show_classifier">
         <i class="bx bx-network-chart"></i>
         <p>Classifier</p>
       </li>
@@ -26,11 +26,14 @@ export default {
     Download_btn() {
       this.$emit("download")
     },
+    Show_classifier() {
+      this.$emit("showClassifier")
+    },
   },
 }
 </script>
 
-<style>
+<style scoped>
 /*Tools part*/
 .Tools {
   height: 100%;
