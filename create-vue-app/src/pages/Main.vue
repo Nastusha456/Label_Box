@@ -5,7 +5,7 @@
       <left-panel @download="download" @showClassifier="showClassifier" />
       <classifier v-if="isShowClassifier" />
       <center-panel ref="CenterPanel" />
-      <right-panel />
+      <right-panel @delet="delet" />
     </div>
   </div>
 </template>
@@ -16,6 +16,7 @@ import LeftPanel from "@/components/LeftPanel.vue"
 import RightPanel from "@/components/RightPanel.vue"
 import CenterPanel from "@/components/CenterPanel.vue"
 import Classifier from "@/components/Classifier.vue"
+
 export default {
   components: { NavBar, LeftPanel, RightPanel, CenterPanel, Classifier },
   data() {
@@ -33,6 +34,9 @@ export default {
     showClassifier() {
       this.isShowClassifier = !this.isShowClassifier
     },
+    delet() {
+      this.$refs.CenterPanel.remove_img_btn()
+    },
   },
 }
 </script>
@@ -43,14 +47,17 @@ export default {
 }
 
 .main {
+  border: 3px solid red; /* ********** */
+  height: 100%;
+  margin-top: 150px;
+
   padding: 10px;
-  min-height: 100vh;
+  /* min-height: 100vh; */
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   background: #17202a;
-  flex-direction: column; /* Временно для классификатора!!! */
 }
 
 .container {

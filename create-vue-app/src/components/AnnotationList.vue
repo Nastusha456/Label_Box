@@ -1,7 +1,9 @@
 <template>
   <li class="drop">
-    <div class="item">Annotation &bigtriangledown;</div>
-    <ul class="subList">
+    <div @click="Show_subList" class="item">
+      Annotation {{ `${this.isSubListShow ? "\u{025B7}" : "\u{025BD}"}` }}
+    </div>
+    <ul class="subList" v-if="isSubListShow">
       <li><div class="item">Download annotation</div></li>
       <li><div class="item">Unload annotation</div></li>
       <li><div class="item">Save annotation</div></li>
@@ -12,9 +14,15 @@
 <script>
 export default {
   data() {
-    return {}
+    return {
+      isSubListShow: false,
+    }
   },
-  methods: {},
+  methods: {
+    Show_subList() {
+      this.isSubListShow = !this.isSubListShow
+    },
+  },
 }
 </script>
 
@@ -24,16 +32,12 @@ export default {
   left: 0;
   width: 180px;
   background: rgba(255, 255, 255, 0.05);
-  display: none;
+  display: block;
   transition: 0.5s;
 }
 
 .subList li {
   width: 100%;
   border: 1px solid rgba(0, 0, 0, 0.1);
-}
-
-.drop:hover > .subList {
-  display: initial;
 }
 </style>

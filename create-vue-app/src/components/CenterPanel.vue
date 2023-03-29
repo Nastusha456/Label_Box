@@ -1,27 +1,41 @@
 <template>
   <div class="content">
-    <p id="projectName">***Project name***</p>
-    <div class="choose_image">
-      <div v-if="!imageUrl" class="upload_img_box" @click="SelectFile">
-        <i class="bx bxs-image-add"></i><br />
-        <input
-          ref="fileInput"
-          type="file"
-          @change="onFileSelected"
-          id="selectedImage"
-          accept="image/jpeg, image/png"
+    <p id="projectName">*** {{ projectName }} ***</p>
+    <div>
+      <div class="choose_image">
+        <div v-if="!imageUrl" class="upload_img_box" @click="SelectFile">
+          <i class="bx bxs-image-add"></i><br />
+          <input
+            ref="fileInput"
+            type="file"
+            @change="onFileSelected"
+            id="selectedImage"
+            accept="image/jpeg, image/png"
+          />
+          <p>choose Image from folder</p>
+        </div>
+      </div>
+      <canvas id="image_canvas"></canvas>
+      <div class="image_holder" v-if="imageUrl">
+        <img
+          :src="imageUrl"
+          alt="img"
+          id="image"
+          @load="onImageLoad"
+          ref="Image"
         />
-        <p>choose Image from folder</p>
       </div>
     </div>
-    <canvas id="image_canvas"></canvas>
-    <div class="image_holder" v-if="imageUrl">
-      <button id="remove_img_btn" @click="remove_img_btn">
-        <i class="bx bxs-message-square-x"></i>
-      </button>
-      <img :src="imageUrl" alt="img" id="image" />
+    <div id="imgData">
+      <div>
+        {{ this.imageName ? ` Image: ${this.imageName};` : null }}
+      </div>
+      <div>
+        {{ this.imageWidth ? ` width: ${this.imageWidth}px;` : null }}
+        {{ this.imageHeigth ? ` heigth: ${this.imageHeigth}px;` : null }}
+        {{ this.imageSize ? ` size: ${this.imageSize}КБ` : null }}
+      </div>
     </div>
-    <button id="clearAll"><span>Reset</span><i class="bx bx-reset"></i></button>
   </div>
 </template>
 
@@ -29,53 +43,80 @@
 export default {
   data() {
     return {
-      imageUrl: "",
+      projectName: "Project name",
+      imageUrl: null,
       selectedFile: null,
-      Edited: false,
+      imageWidth: null,
+      imageHeigth: null,
+      imageSize: null,
+      imageName: null,
+      // Edited: false,
     }
   },
   methods: {
+    onImageLoad() {
+      this.imageWidth = this.$refs.Image.naturalWidth
+      this.imageHeigth = this.$refs.Image.naturalHeight
+      this.imageSize = Math.ceil((this.selectedFile.size / 1024) * 10) / 10
+      this.imageName = this.selectedFile.name
+    },
     SelectFile() {
       this.$refs.fileInput.click()
     },
     onFileSelected(event) {
       this.selectedFile = event.target.files[0]
       this.imageUrl = URL.createObjectURL(this.selectedFile)
-      if (this.Edited == false) {
-        this.Edited = true
-      }
+
+      // if (this.Edited == false) {
+      //   this.Edited = true
+      // }
     },
     remove_img_btn() {
-      this.imageUrl = ""
+      this.imageUrl = null
+      this.imageWidth = null
+      this.imageHeigth = null
+      this.imageSize = null
+      this.imageName = null
     },
     Download_btn() {
-      const image = this.$refs.image
+      // const image = this.$refs.image
       if (this.imageUrl !== "") {
-        if (this.edited) {
-          const canvas = document.createElement("canvas")
-          canvas.width = image.naturalWidth
-          canvas.height = image.naturalHeight
-          const context = canvas.getContext("2d")
-          context.drawImage(image, 0, 0)
-          const jpegUrl = canvas.toDataURL("image/jpeg")
-          const link = document.createElement("a")
-          link.setAttribute("href", jpegUrl)
-          link.setAttribute("download", this.selectedFile)
-          link.style.display = "none"
-          document.body.appendChild(link)
-          link.click()
-          document.body.removeChild(link)
-        } else {
-          const link = document.createElement("a")
-          link.setAttribute("href", this.imageUrl)
-          link.setAttribute("download", this.selectedFile)
-          link.style.display = "none"
-          document.body.appendChild(link)
-          link.click()
-          document.body.removeChild(link)
-        }
+        // if (this.Edited) {
+        //   const canvas = document.createElement("canvas")
+        //   canvas.width = image.naturalWidth
+        //   canvas.height = image.naturalHeight
+        //   const context = canvas.getContext("2d")
+        //   context.drawImage(image, 0, 0)
+        //   const jpegUrl = canvas.toDataURL("image/jpeg")
+        //   const link = document.createElement("a")
+        //   link.setAttribute("href", jpegUrl)
+        //   link.setAttribute("download", this.selectedFile)
+        //   link.style.display = "none"
+        //   document.body.appendChild(link)
+        //   link.click()
+        //   document.body.removeChild(link)
+        // } else {
+        const link = document.createElement("a")
+        link.setAttribute("href", this.imageUrl)
+        link.setAttribute("download", this.selectedFile)
+        link.style.display = "none"
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
       }
+      // }
     },
+  },
+  mounted() {
+    // установка высоты и ширины изображения в натуральный размер
+    const image = this.$refs.Image
+    console.log(image)
+    if (image) {
+      image.onload = () => {
+        image.style.width = `${image.naturalWidth}px`
+        image.style.height = `${image.naturalHeight}px`
+      }
+    }
   },
 }
 </script>
@@ -83,6 +124,8 @@ export default {
 <style>
 /*content part */
 .content {
+  border: 3px solid white; /* **************** */
+
   position: relative;
   width: 90%;
   display: flex;
@@ -100,6 +143,18 @@ export default {
   color: rgba(255, 255, 255, 0.5);
 }
 
+.content #imgData {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  bottom: 0;
+  letter-spacing: 3px;
+  font-family: "Staatliches", cursive;
+  color: rgba(255, 255, 255, 0.5);
+}
+
 .choose_image {
   width: 70%;
   height: 200px;
@@ -110,7 +165,7 @@ export default {
 }
 
 .upload_img_box {
-  margin-top: 10px;
+  margin: 15px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -153,6 +208,7 @@ export default {
 }
 
 /*image holder part*/
+
 .image_holder {
   position: relative;
   display: block;
@@ -179,29 +235,5 @@ export default {
   font-size: 1.8em;
   background: none;
   transform: rotate(270deg);
-}
-
-/*clear or reset btn */
-#clearAll {
-  position: absolute;
-  bottom: 10px;
-  right: 20px;
-  outline: none;
-  border: none;
-  cursor: pointer;
-  border-radius: 5px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: 0.5s;
-  padding: 10px;
-  color: #17202a;
-  background: #ff7043;
-  transform: translateX(150px);
-  box-shadow: 0.1px 4px 8px 5px rgba(0, 0, 0, 0.1);
-}
-
-#clearAll span {
-  margin-right: 10px;
 }
 </style>

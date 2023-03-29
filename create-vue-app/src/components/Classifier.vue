@@ -57,6 +57,8 @@
 </template>
 
 <script>
+import axios from "axios"
+
 export default {
   data() {
     return {
@@ -67,7 +69,6 @@ export default {
       isShowGroups: false,
       isShowClasses: [],
       isShowLables: [],
-      //   symbol: "\u{025BD}",
     }
   },
   methods: {
@@ -79,7 +80,6 @@ export default {
     },
     showClass(groupId) {
       this.isShowClasses[groupId - 1] = !this.isShowClasses[groupId - 1]
-      console.log(this.isShowClasses[groupId - 1])
       if (this.isShowLables.length === 0) {
         this.isShowLables = Array.from(
           { length: Object.keys(this.classifierData.groups).length },
@@ -96,19 +96,20 @@ export default {
       this.isShowLables[groupId - 1][classId - 1] =
         !this.isShowLables[groupId - 1][classId - 1]
     },
-  },
-  mounted() {
-    fetch("/try_classifier.json")
-      .then((response) => response.json())
-      .then((data) => {
-        this.classifierData = data
+    async fetchClassifier() {
+      try {
+        const response = await axios.get("/try_classifier.json")
+        this.classifierData = response.data
         this.groups = this.classifierData.groups
         this.classes = this.classifierData.classes
         this.lables = this.classifierData.lables
-      })
-      .catch((error) => {
-        console.log(error)
-      })
+      } catch (error) {
+        alert(error.message)
+      }
+    },
+  },
+  mounted() {
+    this.fetchClassifier()
   },
 }
 </script>

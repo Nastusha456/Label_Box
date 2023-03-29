@@ -9,7 +9,7 @@
         <i class="bx bxs-droplet-half"></i>
         <p>Colour</p>
       </li>
-      <li>
+      <li @click="Delet_btn">
         <i class="bx bxs-trash"></i>
         <p>Trash</p>
       </li>
@@ -18,7 +18,13 @@
 </template>
 
 <script>
-export default {}
+export default {
+  methods: {
+    Delet_btn() {
+      this.$emit("delet")
+    },
+  },
+}
 </script>
 
 <style>
