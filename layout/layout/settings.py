@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'lablebox',
     'classificator',
     'rest_framework',
+    'vueapp',
 ]
 
 MIDDLEWARE = [
