@@ -117,9 +117,11 @@ export default {
 <style scoped>
 .classifier {
   display: block;
-  width: 50%;
+  max-height: 50vh;
+  width: 25%;
   color: rgba(255, 255, 255, 0.5);
   margin-top: 10px;
+  overflow-y: scroll;
 }
 li {
   margin-top: 10px;

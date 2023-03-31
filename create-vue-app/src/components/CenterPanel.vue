@@ -15,8 +15,8 @@
           <p>choose Image from folder</p>
         </div>
       </div>
-      <canvas id="image_canvas"></canvas>
       <div class="image_holder" v-if="imageUrl">
+        <canvas ref="canvas" @mousedown="startDraw" @mouseup="endDraw"></canvas>
         <img
           :src="imageUrl"
           alt="img"
@@ -50,6 +50,9 @@ export default {
       imageHeigth: null,
       imageSize: null,
       imageName: null,
+      startCoords: { x: null, y: null },
+      endCoords: { x: null, y: null },
+      rectangles: [],
       // Edited: false,
     }
   },
@@ -103,8 +106,47 @@ export default {
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)
+
       }
       // }
+    },
+    startDraw(event) {
+      console.log(this.ctx)
+      // Получаем координаты мыши относительно канваса
+      const canvas = this.$refs.canvas;
+      const rect = canvas.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+
+      // Сохраняем координаты маркера в свойство
+      this.startCoords = { x, y };
+      console.log(this.startCoords);
+    },
+    endDraw(event) {
+      const canvas = this.$refs.canvas;
+      const rect = canvas.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+      this.endCoords = { x, y };
+      console.log(this.endCoords);
+      this.drawRectangle();
+    },
+    drawRectangle() {
+      const canvas = this.$refs.canvas;
+      const ctx = canvas.getContext('2d');
+      ctx.canvas.width = ctx.canvas.clientWidth;
+      ctx.canvas.height = ctx.canvas.clientHeight;
+      const width = this.endCoords.x - this.startCoords.x;
+      const height = this.endCoords.y - this.startCoords.y;
+      const x = this.startCoords.x
+      const y = this.startCoords.y
+      this.rectangles.push({ x, y, width, height });
+      for (let i = 0; i < this.rectangles.length; i++) {
+        const rect = this.rectangles[i];
+        ctx.beginPath();
+        ctx.rect(rect.x, rect.y, rect.width, rect.height);
+        ctx.stroke();
+      };
     },
   },
   mounted() {
@@ -116,6 +158,13 @@ export default {
         image.style.height = `${image.naturalHeight}px`
       }
     }
+    const canvas = this.$refs.canvas
+    console.log(canvas)
+    if (this.canvas) {
+      this.canvas.width = canvas.clientWidth
+      this.canvas.height = canvas.clientHeight
+    }
+    
   },
 }
 </script>
@@ -126,7 +175,7 @@ export default {
   border: 3px solid white; /* **************** */
 
   position: relative;
-  width: 90%;
+  width: 60%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -136,7 +185,7 @@ export default {
 .content #projectName {
   position: absolute;
   align-items: center;
-  top: 10px;
+  top: 5px;
   letter-spacing: 3px;
   font-family: "Staatliches", cursive;
   color: rgba(255, 255, 255, 0.5);
@@ -158,13 +207,13 @@ export default {
   width: 70%;
   height: 200px;
   position: absolute;
-  top: 50%;
+  top: 55%;
   left: 50%;
   transform: translate(-50%, -50%);
 }
 
 .upload_img_box {
-  margin: 15px;
+  /* margin: 15px; */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -201,18 +250,14 @@ export default {
   display: none;
 }
 
-/*canvas */
-#image_canvas {
-  display: none;
-}
-
 /*image holder part*/
 
 .image_holder {
   position: relative;
   display: block;
   width: 100%;
-  height: 80%;
+  height: 90%;
+  top: 40px;
 }
 
 .image_holder img {
@@ -220,6 +265,14 @@ export default {
   height: 100%;
   object-fit: cover;
   border-radius: 15px;
+}
+
+.image_holder canvas {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 15px;
+  position: absolute;
 }
 
 .image_holder button {
