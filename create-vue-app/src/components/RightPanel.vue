@@ -31,7 +31,7 @@ export default {
 /*Tools part*/
 .Tools {
   height: 100%;
-  width: 10%;
+  width: 5%;
   box-shadow: 0.1px 4px 8px 5px rgba(0, 0, 0, 0.1);
   background: rgba(255, 255, 255, 0.05);
 }
