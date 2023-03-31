@@ -47,6 +47,7 @@
 
 <script>
 import { Form, Field, ErrorMessage } from "vee-validate"
+import axios from "axios"
 
 export default {
   components: {
@@ -56,13 +57,23 @@ export default {
   },
   data() {
     return {
-      minPasswordLength: 7,
+      minPasswordLength: 3,
       password: "",
     }
   },
   methods: {
     registration(values) {
       console.log(values)
+
+      const path = "http://localhost:5000/items"
+      axios
+        .post(path, values)
+        .then(() => {
+          console.log("Data sent!")
+        })
+        .catch((error) => {
+          console.log(error)
+        })
     },
     isRequired(value) {
       if (value && value.trim()) {

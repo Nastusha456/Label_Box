@@ -29,10 +29,12 @@
     <ErrorMessage name="password" class="error" />
     <input type="submit" value="Login" />
   </Form>
+  <button @click="GetData">Get</button>
 </template>
 
 <script>
 import { Form, Field, ErrorMessage } from "vee-validate"
+import axios from "axios"
 
 export default {
   components: {
@@ -42,14 +44,39 @@ export default {
   },
   data() {
     return {
-      currentPassword: "currentPassword",
+      currentPassword: "password",
       userName: "name",
-      min: 7,
+      message: {},
     }
   },
   methods: {
+    GetData() {
+      const path = "http://localhost:5000/items"
+      axios
+        .get(path)
+        .then((response) => {
+          console.log("You received:")
+          console.log(response.data)
+          console.log(response.data.items)
+        })
+        .catch((error) => {
+          console.error(error)
+        })
+    },
     signIn(values) {
       console.log(values)
+
+      const path = "http://localhost:5000/items"
+      axios
+        .post(path, values)
+        .then(() => {
+          console.log("Data sent!")
+        })
+        .catch((error) => {
+          console.log(error)
+        })
+
+      this.GetData()
     },
     validateUserName(value) {
       if (value && value.trim()) {

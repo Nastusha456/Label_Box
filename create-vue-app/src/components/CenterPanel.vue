@@ -110,7 +110,6 @@ export default {
   mounted() {
     // установка высоты и ширины изображения в натуральный размер
     const image = this.$refs.Image
-    console.log(image)
     if (image) {
       image.onload = () => {
         image.style.width = `${image.naturalWidth}px`
