@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'classificator',
     'rest_framework',
     'vueapp',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -52,9 +53,16 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'layout.urls'
+
+CORS_ALLOWED_ORIGINS = [
+    "http://10.17.17.112:5000",
+    "http://127.0.0.1:5000",
+    "http://localhost:8080",
+    ]
 
 TEMPLATES = [
     {

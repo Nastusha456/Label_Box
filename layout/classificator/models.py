@@ -13,7 +13,7 @@ class APIGroups(models.Model):
 
 
 class APIClasses(models.Model):
-    # parent = models.ForeignKey(APILables, on_delete=models.PROTECT, blank=True)
+    #parent = models.ForeignKey("APILables", on_delete=models.PROTECT, blank=True)
     title = models.CharField(max_length=256)
     code = models.CharField(max_length=256)
     lables = models.ManyToManyField("APILables", blank=True)
