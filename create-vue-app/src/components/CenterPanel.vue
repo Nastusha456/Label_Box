@@ -126,7 +126,29 @@ export default {
 
       // Сохраняем координаты маркера в свойство
       this.startCoords = { x, y }
-      console.log(this.startCoords)
+      this.isDrowing = true
+    },
+    draw(event) {
+      if (this.isDrowing) {
+        const canvas = this.$refs.canvas
+        const ctx = canvas.getContext('2d')
+        ctx.canvas.width = ctx.canvas.clientWidth
+        ctx.canvas.height = ctx.canvas.clientHeight
+        const rect = canvas.getBoundingClientRect()
+        const x = event.clientX - rect.left
+        const y = event.clientY - rect.top
+        const width = x - this.startCoords.x
+        const height = y - this.startCoords.y
+        ctx.beginPath()
+        ctx.rect(this.startCoords.x, this.startCoords.y, width, height)
+        ctx.stroke()
+        for (let i = 0; i < this.rectangles.length; i++) {
+          const rect = this.rectangles[i]
+          ctx.beginPath()
+          ctx.rect(rect.x, rect.y, rect.width, rect.height)
+          ctx.stroke()
+        }
+      }
     },
     endDraw(event) {
       const canvas = this.$refs.canvas
@@ -134,8 +156,8 @@ export default {
       const x = event.clientX - rect.left
       const y = event.clientY - rect.top
       this.endCoords = { x, y }
-      console.log(this.endCoords)
       this.drawRectangle()
+      this.isDrowing = false;
     },
     drawRectangle() {
       const canvas = this.$refs.canvas
