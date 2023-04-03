@@ -16,7 +16,12 @@
         </div>
       </div>
       <div class="image_holder" v-if="imageUrl">
-        <canvas ref="canvas" @mousedown="startDraw" @mouseup="endDraw"></canvas>
+        <canvas
+          ref="canvas"
+          @mousedown="startDraw"
+          @mouseup="endDraw"
+          @mousemove="draw"
+        ></canvas>
         <img
           :src="imageUrl"
           alt="img"
@@ -53,6 +58,7 @@ export default {
       startCoords: { x: null, y: null },
       endCoords: { x: null, y: null },
       rectangles: [],
+      isDrowing: false,
       // Edited: false,
     }
   },
@@ -80,6 +86,8 @@ export default {
       this.imageHeigth = null
       this.imageSize = null
       this.imageName = null
+      this.rectangles = []
+      this.isDrowing = false
     },
     Download_btn() {
       // const image = this.$refs.image
@@ -110,7 +118,6 @@ export default {
       // }
     },
     startDraw(event) {
-      console.log(this.ctx)
       // Получаем координаты мыши относительно канваса
       const canvas = this.$refs.canvas
       const rect = canvas.getBoundingClientRect()
@@ -172,7 +179,8 @@ export default {
   border: 3px solid white; /* **************** */
 
   position: relative;
-  width: 60%;
+  height: 100%;
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -202,7 +210,7 @@ export default {
 
 .choose_image {
   width: 70%;
-  height: 200px;
+  height: 170px;
   position: absolute;
   top: 55%;
   left: 50%;

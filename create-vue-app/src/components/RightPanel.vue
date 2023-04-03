@@ -1,9 +1,9 @@
 <template>
   <div class="Tools">
     <ul>
-      <li>
+      <li @click="beginAnnotation">
         <i class="bx bx-search-alt"></i>
-        <p>Search</p>
+        <p>Creating markup</p>
       </li>
       <li>
         <i class="bx bxs-droplet-half"></i>
@@ -22,6 +22,9 @@ export default {
   methods: {
     Delet_btn() {
       this.$emit("delet")
+    },
+    beginAnnotation() {
+      this.$emit("beginAnnotation")
     },
   },
 }
