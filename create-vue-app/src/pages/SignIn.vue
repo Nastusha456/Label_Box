@@ -36,6 +36,8 @@
 import { Form, Field, ErrorMessage } from "vee-validate"
 import axios from "axios"
 
+const path = "http://10.17.17.112:5000/api/v1/classificator?format=json"
+
 export default {
   components: {
     Form,
@@ -51,13 +53,12 @@ export default {
   },
   methods: {
     GetData() {
-      const path = "http://localhost:5000/items"
       axios
         .get(path)
         .then((response) => {
           console.log("You received:")
-          console.log(response.data)
-          console.log(response.data.items)
+          console.log(response)
+          // console.log(response.data.items)
         })
         .catch((error) => {
           console.error(error)
@@ -66,7 +67,6 @@ export default {
     signIn(values) {
       console.log(values)
 
-      const path = "http://localhost:5000/items"
       axios
         .post(path, values)
         .then(() => {

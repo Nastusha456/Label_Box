@@ -26,9 +26,11 @@
               {{
                 `${element.title} ${
                   element.lables
-                    ? this.isShowLables[group.id - 1][element.id - 1]
-                      ? "\u{025B7}"
-                      : "\u{025BD}"
+                    ? element.lables.length != 0
+                      ? this.isShowLables[group.id - 1][element.id - 1]
+                        ? "\u{025B7}"
+                        : "\u{025BD}"
+                      : ""
                     : ""
                 }`
               }}
@@ -58,6 +60,9 @@
 
 <script>
 import axios from "axios"
+
+// const path = "http://10.17.17.112:5000/api/v1/classificator?format=json"
+const path = "/try_classifier.json"
 
 export default {
   data() {
@@ -98,7 +103,7 @@ export default {
     },
     async fetchClassifier() {
       try {
-        const response = await axios.get("/try_classifier.json")
+        const response = await axios.get(path)
         this.classifierData = response.data
         this.groups = this.classifierData.groups
         this.classes = this.classifierData.classes

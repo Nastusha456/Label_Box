@@ -106,47 +106,46 @@ export default {
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)
-
       }
       // }
     },
     startDraw(event) {
       console.log(this.ctx)
       // Получаем координаты мыши относительно канваса
-      const canvas = this.$refs.canvas;
-      const rect = canvas.getBoundingClientRect();
-      const x = event.clientX - rect.left;
-      const y = event.clientY - rect.top;
+      const canvas = this.$refs.canvas
+      const rect = canvas.getBoundingClientRect()
+      const x = event.clientX - rect.left
+      const y = event.clientY - rect.top
 
       // Сохраняем координаты маркера в свойство
-      this.startCoords = { x, y };
-      console.log(this.startCoords);
+      this.startCoords = { x, y }
+      console.log(this.startCoords)
     },
     endDraw(event) {
-      const canvas = this.$refs.canvas;
-      const rect = canvas.getBoundingClientRect();
-      const x = event.clientX - rect.left;
-      const y = event.clientY - rect.top;
-      this.endCoords = { x, y };
-      console.log(this.endCoords);
-      this.drawRectangle();
+      const canvas = this.$refs.canvas
+      const rect = canvas.getBoundingClientRect()
+      const x = event.clientX - rect.left
+      const y = event.clientY - rect.top
+      this.endCoords = { x, y }
+      console.log(this.endCoords)
+      this.drawRectangle()
     },
     drawRectangle() {
-      const canvas = this.$refs.canvas;
-      const ctx = canvas.getContext('2d');
-      ctx.canvas.width = ctx.canvas.clientWidth;
-      ctx.canvas.height = ctx.canvas.clientHeight;
-      const width = this.endCoords.x - this.startCoords.x;
-      const height = this.endCoords.y - this.startCoords.y;
+      const canvas = this.$refs.canvas
+      const ctx = canvas.getContext("2d")
+      ctx.canvas.width = ctx.canvas.clientWidth
+      ctx.canvas.height = ctx.canvas.clientHeight
+      const width = this.endCoords.x - this.startCoords.x
+      const height = this.endCoords.y - this.startCoords.y
       const x = this.startCoords.x
       const y = this.startCoords.y
-      this.rectangles.push({ x, y, width, height });
+      this.rectangles.push({ x, y, width, height })
       for (let i = 0; i < this.rectangles.length; i++) {
-        const rect = this.rectangles[i];
-        ctx.beginPath();
-        ctx.rect(rect.x, rect.y, rect.width, rect.height);
-        ctx.stroke();
-      };
+        const rect = this.rectangles[i]
+        ctx.beginPath()
+        ctx.rect(rect.x, rect.y, rect.width, rect.height)
+        ctx.stroke()
+      }
     },
   },
   mounted() {
@@ -159,12 +158,10 @@ export default {
       }
     }
     const canvas = this.$refs.canvas
-    console.log(canvas)
     if (this.canvas) {
       this.canvas.width = canvas.clientWidth
       this.canvas.height = canvas.clientHeight
     }
-    
   },
 }
 </script>
