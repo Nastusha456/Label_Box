@@ -61,8 +61,8 @@
 <script>
 import axios from "axios"
 
-// const path = "http://10.17.17.112:5000/api/v1/classificator?format=json"
-const path = "/try_classifier.json"
+const path = "http://10.17.17.112:5000/api/v1/classificator?format=json"
+// const path = "/try_classifier.json"
 
 export default {
   data() {
