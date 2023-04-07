@@ -5,8 +5,8 @@
       <left-panel @download="download" @showClassifier="showClassifier" />
       <classifier v-if="isShowClassifier" />
       <div class="centerBlock" >
-        <annotation-panel v-if="isShowAnnotationPanel" />
-        <center-panel ref="CenterPanel" />
+        <annotation-panel v-if="isShowAnnotationPanel" @slider-change="sliderChange" />
+        <center-panel ref="CenterPanel" :scale="parseFloat(scale)" />
       </div>
       <right-panel @delet="delet" @beginAnnotation="beginAnnotation" />
     </div>
@@ -27,6 +27,7 @@ export default {
     return {
       isShowClassifier: false,
       isShowAnnotationPanel: false,
+      scale : 1,
     }
   },
   methods: {
@@ -45,6 +46,11 @@ export default {
     beginAnnotation() {
       this.isShowAnnotationPanel = !this.isShowAnnotationPanel
     },
+    sliderChange(newScale) {
+      this.scale = newScale
+      console.log(this.scale)
+      // this.$refs.CenterPanel.scaleChange()
+    }
   },
 }
 </script>
@@ -60,7 +66,7 @@ export default {
   margin-top: 150px;
 
   padding: 10px;
-  /* min-height: 100vh; */
+  /* max-height: 100vh; */
   width: 100%;
   display: flex;
   align-items: center;

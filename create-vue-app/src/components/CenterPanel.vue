@@ -1,7 +1,7 @@
 <template>
   <div class="content">
     <p id="projectName">*** {{ projectName }} ***</p>
-    <div>
+    <div class="image_container">
       <div class="choose_image">
         <div v-if="!imageUrl" class="upload_img_box" @click="SelectFile">
           <i class="bx bxs-image-add"></i><br />
@@ -59,7 +59,27 @@ export default {
       endCoords: { x: null, y: null },
       rectangles: [],
       isDrowing: false,
+      
       // Edited: false,
+    }
+  },
+  props: {
+    scale: { // Определение пропса scale
+      type: Number,
+      required: true,
+    },
+  },
+  watch: {
+    scale(newVal, oldVal) {
+      // Обработка изменений значения prop "scale"
+      console.log('Значение prop "scale" изменилось:', newVal);
+      // Вызов функции или выполнение другой логики
+      const image = this.$refs.Image
+      if (image) {
+        image.style.width = `${image.naturalWidth*this.scale}px`
+        image.style.height = `${image.naturalHeight*this.scale}px`
+        this.drawRectangle()
+      }
     }
   },
   methods: {
@@ -121,8 +141,8 @@ export default {
       // Получаем координаты мыши относительно канваса
       const canvas = this.$refs.canvas
       const rect = canvas.getBoundingClientRect()
-      const x = event.clientX - rect.left
-      const y = event.clientY - rect.top
+      const x = (event.clientX - rect.left)/this.scale
+      const y = (event.clientY - rect.top)/this.scale
 
       // Сохраняем координаты маркера в свойство
       this.startCoords = { x, y }
@@ -135,17 +155,17 @@ export default {
         ctx.canvas.width = ctx.canvas.clientWidth
         ctx.canvas.height = ctx.canvas.clientHeight
         const rect = canvas.getBoundingClientRect()
-        const x = event.clientX - rect.left
-        const y = event.clientY - rect.top
-        const width = x - this.startCoords.x
-        const height = y - this.startCoords.y
+        const x = (event.clientX - rect.left)
+        const y = (event.clientY - rect.top)
+        const width = (x - this.startCoords.x*this.scale)
+        const height = (y - this.startCoords.y*this.scale)
         ctx.beginPath()
-        ctx.rect(this.startCoords.x, this.startCoords.y, width, height)
+        ctx.rect(this.startCoords.x*this.scale, this.startCoords.y*this.scale, width, height)
         ctx.stroke()
         for (let i = 0; i < this.rectangles.length; i++) {
           const rect = this.rectangles[i]
           ctx.beginPath()
-          ctx.rect(rect.x, rect.y, rect.width, rect.height)
+          ctx.rect(rect.x*this.scale, rect.y*this.scale, rect.width*this.scale, rect.height*this.scale)
           ctx.stroke()
         }
       }
@@ -153,8 +173,8 @@ export default {
     endDraw(event) {
       const canvas = this.$refs.canvas
       const rect = canvas.getBoundingClientRect()
-      const x = event.clientX - rect.left
-      const y = event.clientY - rect.top
+      const x = (event.clientX - rect.left)/this.scale
+      const y = (event.clientY - rect.top)/this.scale
       this.endCoords = { x, y }
       this.drawRectangle()
       this.isDrowing = false;
@@ -169,28 +189,29 @@ export default {
       const x = this.startCoords.x
       const y = this.startCoords.y
       this.rectangles.push({ x, y, width, height })
+      console.log({ x, y, width, height })
       for (let i = 0; i < this.rectangles.length; i++) {
         const rect = this.rectangles[i]
         ctx.beginPath()
-        ctx.rect(rect.x, rect.y, rect.width, rect.height)
+        ctx.rect(rect.x*this.scale, rect.y*this.scale, rect.width*this.scale, rect.height*this.scale)
         ctx.stroke()
       }
     },
   },
-  mounted() {
+  updated() {
     // установка высоты и ширины изображения в натуральный размер
     const image = this.$refs.Image
     if (image) {
       image.onload = () => {
-        image.style.width = `${image.naturalWidth}px`
-        image.style.height = `${image.naturalHeight}px`
+        image.style.width = `${image.naturalWidth*this.scale}px`
+        image.style.height = `${image.naturalHeight*this.scale}px`
       }
     }
-    const canvas = this.$refs.canvas
-    if (this.canvas) {
-      this.canvas.width = canvas.clientWidth
-      this.canvas.height = canvas.clientHeight
-    }
+    // const canvas = this.$refs.canvas
+    // if (this.canvas) {
+    //   this.canvas.width = canvas.clientWidth
+    //   this.canvas.height = canvas.clientHeight
+    // }
   },
 }
 </script>
@@ -207,6 +228,7 @@ export default {
   align-items: center;
   justify-content: center;
   flex-direction: column;
+  overflow: hidden
 }
 
 .content #projectName {
@@ -283,8 +305,10 @@ export default {
   position: relative;
   display: block;
   width: 100%;
-  height: 90%;
-  top: 40px;
+  /* height: 90%; */
+  max-height: 100vh;
+  padding-top: 40px; /* отступ сверху */
+  padding-bottom: 40px; /* отступ снизу */
 }
 
 .image_holder img {
