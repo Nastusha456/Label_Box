@@ -1,7 +1,7 @@
 <template>
-  <div class="content">
+  <div class="content" ref="content">
     <p id="projectName">*** {{ projectName }} ***</p>
-    <div class="image_container">
+    <div class="image_container" ref="image_container">
       <div class="choose_image">
         <div v-if="!imageUrl" class="upload_img_box" @click="SelectFile">
           <i class="bx bxs-image-add"></i><br />
@@ -15,12 +15,12 @@
           <p>choose Image from folder</p>
         </div>
       </div>
-      <div class="image_holder" v-if="imageUrl">
+      <div class="image_holder" ref="image_holder" v-if="imageUrl">
         <canvas
           ref="canvas"
-          @mousedown="startDraw"
-          @mouseup="endDraw"
-          @mousemove="draw"
+          @mousedown="mouseDown"
+          @mouseup="mouseUp"
+          @mousemove="mouseMove"
         ></canvas>
         <img
           :src="imageUrl"
@@ -59,6 +59,11 @@ export default {
       endCoords: { x: null, y: null },
       rectangles: [],
       isDrowing: false,
+      isDragging: false,
+      startMouseX: 0,
+      startMouseY: 0,
+      startImageX: 0,
+      startImageY: 0
       
       // Edited: false,
     }
@@ -68,16 +73,17 @@ export default {
       type: Number,
       required: true,
     },
+    selectedMode: String
   },
   watch: {
     scale(newVal, oldVal) {
-      // Обработка изменений значения prop "scale"
-      console.log('Значение prop "scale" изменилось:', newVal);
-      // Вызов функции или выполнение другой логики
       const image = this.$refs.Image
+      const canvas = this.$refs.canvas
       if (image) {
         image.style.width = `${image.naturalWidth*this.scale}px`
         image.style.height = `${image.naturalHeight*this.scale}px`
+        canvas.style.width = `${image.naturalWidth*this.scale}px`
+        canvas.style.height = `${image.naturalHeight*this.scale}px`
         this.drawRectangle()
       }
     }
@@ -137,19 +143,27 @@ export default {
       }
       // }
     },
-    startDraw(event) {
-      // Получаем координаты мыши относительно канваса
-      const canvas = this.$refs.canvas
-      const rect = canvas.getBoundingClientRect()
-      const x = (event.clientX - rect.left)/this.scale
-      const y = (event.clientY - rect.top)/this.scale
+    mouseDown(event) {
+      if (this.selectedMode === 'markup') { //Начало рисования
+        // Получаем координаты мыши относительно канваса
+        const canvas = this.$refs.canvas
+        const rect = canvas.getBoundingClientRect()
+        const x = (event.clientX - rect.left)/this.scale
+        const y = (event.clientY - rect.top)/this.scale
 
-      // Сохраняем координаты маркера в свойство
-      this.startCoords = { x, y }
-      this.isDrowing = true
+        // Сохраняем координаты маркера в свойство
+        this.startCoords = { x, y }
+        this.isDrowing = true
+      } else {
+        this.isDragging = true
+        this.startMouseX = event.clientX;
+        this.startMouseY = event.clientY;
+        this.startImageX = parseInt(this.$refs.image_holder.style.left) || 0;
+        this.startImageY = parseInt(this.$refs.image_holder.style.top) || 0;
+      }
     },
-    draw(event) {
-      if (this.isDrowing) {
+    mouseMove(event) {
+      if (this.isDrowing && this.selectedMode === 'markup') { // Процесс рисования
         const canvas = this.$refs.canvas
         const ctx = canvas.getContext('2d')
         ctx.canvas.width = ctx.canvas.clientWidth
@@ -168,16 +182,40 @@ export default {
           ctx.rect(rect.x*this.scale, rect.y*this.scale, rect.width*this.scale, rect.height*this.scale)
           ctx.stroke()
         }
+      } else {
+        if (this.isDragging) {
+          const offsetX = event.clientX - this.startMouseX
+          const offsetY = event.clientY - this.startMouseY
+          this.$refs.image_holder.style.left = (this.startImageX + offsetX) + 'px'
+          this.$refs.image_holder.style.top = (this.startImageY + offsetY) + 'px'
+          // Проверка на выход курсора мыши за границу
+          const rectCont = this.$refs.content.getBoundingClientRect()
+          const mouseX = event.clientX
+          const mouseY = event.clientY
+          if (
+            mouseX <= rectCont.left ||
+            mouseX >= rectCont.left + rectCont.width ||
+            mouseY <= rectCont.top ||
+            mouseY >= rectCont.top + rectCont.height
+          ) {
+            // Курсор мыши достиг границы div
+            this.isDragging = false;
+          }
+        }
       }
     },
-    endDraw(event) {
-      const canvas = this.$refs.canvas
-      const rect = canvas.getBoundingClientRect()
-      const x = (event.clientX - rect.left)/this.scale
-      const y = (event.clientY - rect.top)/this.scale
-      this.endCoords = { x, y }
-      this.drawRectangle()
-      this.isDrowing = false;
+    mouseUp(event) {
+      if (this.selectedMode === 'markup') { // Конец рисования
+        const canvas = this.$refs.canvas
+        const rect = canvas.getBoundingClientRect()
+        const x = (event.clientX - rect.left)/this.scale
+        const y = (event.clientY - rect.top)/this.scale
+        this.endCoords = { x, y }
+        this.drawRectangle()
+        this.isDrowing = false;
+      } else {
+        this.isDragging = false;
+      }
     },
     drawRectangle() {
       const canvas = this.$refs.canvas
@@ -189,7 +227,6 @@ export default {
       const x = this.startCoords.x
       const y = this.startCoords.y
       this.rectangles.push({ x, y, width, height })
-      console.log({ x, y, width, height })
       for (let i = 0; i < this.rectangles.length; i++) {
         const rect = this.rectangles[i]
         ctx.beginPath()
@@ -201,17 +238,17 @@ export default {
   updated() {
     // установка высоты и ширины изображения в натуральный размер
     const image = this.$refs.Image
+    const canvas = this.$refs.canvas
     if (image) {
       image.onload = () => {
         image.style.width = `${image.naturalWidth*this.scale}px`
         image.style.height = `${image.naturalHeight*this.scale}px`
+        canvas.style.width = `${image.naturalWidth*this.scale}px`
+        canvas.style.height = `${image.naturalHeight*this.scale}px`
       }
     }
-    // const canvas = this.$refs.canvas
-    // if (this.canvas) {
-    //   this.canvas.width = canvas.clientWidth
-    //   this.canvas.height = canvas.clientHeight
-    // }
+    
+
   },
 }
 </script>
