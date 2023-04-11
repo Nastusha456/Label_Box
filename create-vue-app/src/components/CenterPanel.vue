@@ -1,6 +1,5 @@
 <template>
   <div class="content" ref="content">
-    <p id="projectName">*** {{ projectName }} ***</p>
     <div class="image_container" ref="image_container">
       <div class="choose_image">
         <div v-if="!imageUrl" class="upload_img_box" @click="SelectFile">
@@ -31,7 +30,7 @@
         />
       </div>
     </div>
-    <div id="imgData">
+    <!-- <div id="imgData">
       <div>
         {{ this.imageName ? ` Image: ${this.imageName};` : null }}
       </div>
@@ -40,7 +39,7 @@
         {{ this.imageHeigth ? ` heigth: ${this.imageHeigth}px;` : null }}
         {{ this.imageSize ? ` size: ${this.imageSize}КБ` : null }}
       </div>
-    </div>
+    </div> -->
   </div>
 </template>
 
@@ -48,9 +47,9 @@
 export default {
   data() {
     return {
-      projectName: "Project name",
       imageUrl: null,
       selectedFile: null,
+      imageData: {},
       imageWidth: null,
       imageHeigth: null,
       imageSize: null,
@@ -63,30 +62,31 @@ export default {
       startMouseX: 0,
       startMouseY: 0,
       startImageX: 0,
-      startImageY: 0
-      
+      startImageY: 0,
+
       // Edited: false,
     }
   },
   props: {
-    scale: { // Определение пропса scale
+    scale: {
+      // Определение пропса scale
       type: Number,
       required: true,
     },
-    selectedMode: String
+    selectedMode: String,
   },
   watch: {
     scale(newVal, oldVal) {
       const image = this.$refs.Image
       const canvas = this.$refs.canvas
       if (image) {
-        image.style.width = `${image.naturalWidth*this.scale}px`
-        image.style.height = `${image.naturalHeight*this.scale}px`
-        canvas.style.width = `${image.naturalWidth*this.scale}px`
-        canvas.style.height = `${image.naturalHeight*this.scale}px`
+        image.style.width = `${image.naturalWidth * this.scale}px`
+        image.style.height = `${image.naturalHeight * this.scale}px`
+        canvas.style.width = `${image.naturalWidth * this.scale}px`
+        canvas.style.height = `${image.naturalHeight * this.scale}px`
         this.drawRectangle()
       }
-    }
+    },
   },
   methods: {
     onImageLoad() {
@@ -94,6 +94,14 @@ export default {
       this.imageHeigth = this.$refs.Image.naturalHeight
       this.imageSize = Math.ceil((this.selectedFile.size / 1024) * 10) / 10
       this.imageName = this.selectedFile.name
+
+      this.imageData = {
+        imageWidth: this.imageWidth,
+        imageHeigth: this.imageWidth,
+        imageSize: this.imageSize,
+        imageName: this.imageName,
+      }
+      this.$emit("getImgData", this.imageData)
     },
     SelectFile() {
       this.$refs.fileInput.click()
@@ -114,6 +122,14 @@ export default {
       this.imageName = null
       this.rectangles = []
       this.isDrowing = false
+
+      this.imageData = {
+        imageWidth: this.imageWidth,
+        imageHeigth: this.imageWidth,
+        imageSize: this.imageSize,
+        imageName: this.imageName,
+      }
+      this.$emit("getImgData", this.imageData)
     },
     Download_btn() {
       // const image = this.$refs.image
@@ -144,50 +160,62 @@ export default {
       // }
     },
     mouseDown(event) {
-      if (this.selectedMode === 'markup') { //Начало рисования
+      if (this.selectedMode === "markup") {
+        //Начало рисования
         // Получаем координаты мыши относительно канваса
         const canvas = this.$refs.canvas
         const rect = canvas.getBoundingClientRect()
-        const x = (event.clientX - rect.left)/this.scale
-        const y = (event.clientY - rect.top)/this.scale
+        const x = (event.clientX - rect.left) / this.scale
+        const y = (event.clientY - rect.top) / this.scale
 
         // Сохраняем координаты маркера в свойство
         this.startCoords = { x, y }
         this.isDrowing = true
       } else {
         this.isDragging = true
-        this.startMouseX = event.clientX;
-        this.startMouseY = event.clientY;
-        this.startImageX = parseInt(this.$refs.image_holder.style.left) || 0;
-        this.startImageY = parseInt(this.$refs.image_holder.style.top) || 0;
+        this.startMouseX = event.clientX
+        this.startMouseY = event.clientY
+        this.startImageX = parseInt(this.$refs.image_holder.style.left) || 0
+        this.startImageY = parseInt(this.$refs.image_holder.style.top) || 0
       }
     },
     mouseMove(event) {
-      if (this.isDrowing && this.selectedMode === 'markup') { // Процесс рисования
+      if (this.isDrowing && this.selectedMode === "markup") {
+        // Процесс рисования
         const canvas = this.$refs.canvas
-        const ctx = canvas.getContext('2d')
+        const ctx = canvas.getContext("2d")
         ctx.canvas.width = ctx.canvas.clientWidth
         ctx.canvas.height = ctx.canvas.clientHeight
         const rect = canvas.getBoundingClientRect()
-        const x = (event.clientX - rect.left)
-        const y = (event.clientY - rect.top)
-        const width = (x - this.startCoords.x*this.scale)
-        const height = (y - this.startCoords.y*this.scale)
+        const x = event.clientX - rect.left
+        const y = event.clientY - rect.top
+        const width = x - this.startCoords.x * this.scale
+        const height = y - this.startCoords.y * this.scale
         ctx.beginPath()
-        ctx.rect(this.startCoords.x*this.scale, this.startCoords.y*this.scale, width, height)
+        ctx.rect(
+          this.startCoords.x * this.scale,
+          this.startCoords.y * this.scale,
+          width,
+          height
+        )
         ctx.stroke()
         for (let i = 0; i < this.rectangles.length; i++) {
           const rect = this.rectangles[i]
           ctx.beginPath()
-          ctx.rect(rect.x*this.scale, rect.y*this.scale, rect.width*this.scale, rect.height*this.scale)
+          ctx.rect(
+            rect.x * this.scale,
+            rect.y * this.scale,
+            rect.width * this.scale,
+            rect.height * this.scale
+          )
           ctx.stroke()
         }
       } else {
         if (this.isDragging) {
           const offsetX = event.clientX - this.startMouseX
           const offsetY = event.clientY - this.startMouseY
-          this.$refs.image_holder.style.left = (this.startImageX + offsetX) + 'px'
-          this.$refs.image_holder.style.top = (this.startImageY + offsetY) + 'px'
+          this.$refs.image_holder.style.left = this.startImageX + offsetX + "px"
+          this.$refs.image_holder.style.top = this.startImageY + offsetY + "px"
           // Проверка на выход курсора мыши за границу
           const rectCont = this.$refs.content.getBoundingClientRect()
           const mouseX = event.clientX
@@ -199,22 +227,23 @@ export default {
             mouseY >= rectCont.top + rectCont.height
           ) {
             // Курсор мыши достиг границы div
-            this.isDragging = false;
+            this.isDragging = false
           }
         }
       }
     },
     mouseUp(event) {
-      if (this.selectedMode === 'markup') { // Конец рисования
+      if (this.selectedMode === "markup") {
+        // Конец рисования
         const canvas = this.$refs.canvas
         const rect = canvas.getBoundingClientRect()
-        const x = (event.clientX - rect.left)/this.scale
-        const y = (event.clientY - rect.top)/this.scale
+        const x = (event.clientX - rect.left) / this.scale
+        const y = (event.clientY - rect.top) / this.scale
         this.endCoords = { x, y }
         this.drawRectangle()
-        this.isDrowing = false;
+        this.isDrowing = false
       } else {
-        this.isDragging = false;
+        this.isDragging = false
       }
     },
     drawRectangle() {
@@ -230,7 +259,12 @@ export default {
       for (let i = 0; i < this.rectangles.length; i++) {
         const rect = this.rectangles[i]
         ctx.beginPath()
-        ctx.rect(rect.x*this.scale, rect.y*this.scale, rect.width*this.scale, rect.height*this.scale)
+        ctx.rect(
+          rect.x * this.scale,
+          rect.y * this.scale,
+          rect.width * this.scale,
+          rect.height * this.scale
+        )
         ctx.stroke()
       }
     },
@@ -241,14 +275,12 @@ export default {
     const canvas = this.$refs.canvas
     if (image) {
       image.onload = () => {
-        image.style.width = `${image.naturalWidth*this.scale}px`
-        image.style.height = `${image.naturalHeight*this.scale}px`
-        canvas.style.width = `${image.naturalWidth*this.scale}px`
-        canvas.style.height = `${image.naturalHeight*this.scale}px`
+        image.style.width = `${image.naturalWidth * this.scale}px`
+        image.style.height = `${image.naturalHeight * this.scale}px`
+        canvas.style.width = `${image.naturalWidth * this.scale}px`
+        canvas.style.height = `${image.naturalHeight * this.scale}px`
       }
     }
-    
-
   },
 }
 </script>
@@ -265,16 +297,7 @@ export default {
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  overflow: hidden
-}
-
-.content #projectName {
-  position: absolute;
-  align-items: center;
-  top: 5px;
-  letter-spacing: 3px;
-  font-family: "Staatliches", cursive;
-  color: rgba(255, 255, 255, 0.5);
+  overflow: hidden;
 }
 
 .content #imgData {

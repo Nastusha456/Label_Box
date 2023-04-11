@@ -2,6 +2,7 @@
   <div class="app">
     <router-view></router-view>
     <button @click="$router.push('/main')">MAIN</button>
+    <button @click="$router.push('/work')">WORK</button>
   </div>
 </template>
 

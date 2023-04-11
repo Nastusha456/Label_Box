@@ -10,11 +10,14 @@
           @slider-change="sliderChange"
           @mode-change="modeChange"
         />
+        <p id="projectName">*** {{ projectName }} ***</p>
         <center-panel
+          @getImgData="getImgData"
           ref="CenterPanel"
           :scale="parseFloat(scale)"
           :selectedMode="selectedMode"
         />
+        <image-data :imageData="imageData" />
       </div>
       <right-panel @delet="delet" @beginAnnotation="beginAnnotation" />
     </div>
@@ -28,6 +31,7 @@ import RightPanel from "@/components/RightPanel.vue"
 import CenterPanel from "@/components/CenterPanel.vue"
 import Classifier from "@/components/Classifier.vue"
 import AnnotationPanel from "@/components/AnnotationPanel.vue"
+import ImageData from "@/components/ImageData.vue"
 
 export default {
   components: {
@@ -37,13 +41,16 @@ export default {
     CenterPanel,
     Classifier,
     AnnotationPanel,
+    ImageData,
   },
   data() {
     return {
+      projectName: "Project name",
       isShowClassifier: false,
       isShowAnnotationPanel: false,
       scale: 1,
       selectedMode: "",
+      imageData: {},
     }
   },
   methods: {
@@ -67,6 +74,9 @@ export default {
     },
     modeChange(newMode) {
       this.selectedMode = newMode
+    },
+    getImgData(value) {
+      this.imageData = value
     },
   },
 }
@@ -111,5 +121,14 @@ export default {
   align-items: center;
   justify-content: center;
   flex-direction: column;
+}
+
+#projectName {
+  position: relative;
+  align-items: center;
+  margin: 5px;
+  letter-spacing: 3px;
+  font-family: "Staatliches", cursive;
+  color: rgba(255, 255, 255, 0.5);
 }
 </style>
