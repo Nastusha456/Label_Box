@@ -30,16 +30,6 @@
         />
       </div>
     </div>
-    <!-- <div id="imgData">
-      <div>
-        {{ this.imageName ? ` Image: ${this.imageName};` : null }}
-      </div>
-      <div>
-        {{ this.imageWidth ? ` width: ${this.imageWidth}px;` : null }}
-        {{ this.imageHeigth ? ` heigth: ${this.imageHeigth}px;` : null }}
-        {{ this.imageSize ? ` size: ${this.imageSize}КБ` : null }}
-      </div>
-    </div> -->
   </div>
 </template>
 
@@ -57,14 +47,13 @@ export default {
       startCoords: { x: null, y: null },
       endCoords: { x: null, y: null },
       rectangles: [],
+      dots: [],
       isDrowing: false,
       isDragging: false,
       startMouseX: 0,
       startMouseY: 0,
       startImageX: 0,
       startImageY: 0,
-
-      // Edited: false,
     }
   },
   props: {
@@ -84,7 +73,9 @@ export default {
         image.style.height = `${image.naturalHeight * this.scale}px`
         canvas.style.width = `${image.naturalWidth * this.scale}px`
         canvas.style.height = `${image.naturalHeight * this.scale}px`
-        this.drawRectangle()
+        const ctx = canvas.getContext("2d")
+        this.drawRectangle(ctx)
+        this.drawDots(ctx, 3, "red")
       }
     },
   },
@@ -109,10 +100,6 @@ export default {
     onFileSelected(event) {
       this.selectedFile = event.target.files[0]
       this.imageUrl = URL.createObjectURL(this.selectedFile)
-
-      // if (this.Edited == false) {
-      //   this.Edited = true
-      // }
     },
     remove_img_btn() {
       this.imageUrl = null
@@ -121,6 +108,8 @@ export default {
       this.imageSize = null
       this.imageName = null
       this.rectangles = []
+      this.points = []
+
       this.isDrowing = false
 
       this.imageData = {
@@ -132,23 +121,7 @@ export default {
       this.$emit("getImgData", this.imageData)
     },
     Download_btn() {
-      // const image = this.$refs.image
       if (this.imageUrl !== "") {
-        // if (this.Edited) {
-        //   const canvas = document.createElement("canvas")
-        //   canvas.width = image.naturalWidth
-        //   canvas.height = image.naturalHeight
-        //   const context = canvas.getContext("2d")
-        //   context.drawImage(image, 0, 0)
-        //   const jpegUrl = canvas.toDataURL("image/jpeg")
-        //   const link = document.createElement("a")
-        //   link.setAttribute("href", jpegUrl)
-        //   link.setAttribute("download", this.selectedFile)
-        //   link.style.display = "none"
-        //   document.body.appendChild(link)
-        //   link.click()
-        //   document.body.removeChild(link)
-        // } else {
         const link = document.createElement("a")
         link.setAttribute("href", this.imageUrl)
         link.setAttribute("download", this.selectedFile)
@@ -157,7 +130,59 @@ export default {
         link.click()
         document.body.removeChild(link)
       }
-      // }
+    },
+    drawMoovingDot(ctx, x, y, radius, color) {
+      ctx.beginPath()
+      ctx.arc(x, y, radius, 0, 2 * Math.PI)
+      ctx.fillStyle = color
+      ctx.fill()
+    },
+    drawDots(ctx, radius, color) {
+      for (const dot of this.dots) {
+        ctx.beginPath()
+        ctx.arc(dot.x, dot.y, radius, 0, 2 * Math.PI)
+        ctx.fillStyle = color
+        ctx.fill()
+      }
+    },
+    jarvis() {
+      let points = [...this.dots]
+      const hull = []
+      const leftMost = points.reduce((min, point) =>
+        point.x < min.x ? point : min
+      )
+      let p = leftMost
+      do {
+        hull.push(p)
+        let q = points[0]
+        for (let i = 1; i < points.length; i++) {
+          if (q === p || this.orientation(p, q, points[i]) > 0) {
+            q = points[i]
+          }
+        }
+        p = q
+      } while (p !== leftMost)
+
+      this.drawLabel(hull)
+    },
+
+    // Функция, проверяющая, в какую сторону повернуты три точки
+    orientation(p, q, r) {
+      return (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y)
+    },
+
+    drawLabel(points) {
+      const canvas = this.$refs.canvas
+      const ctx = canvas.getContext("2d")
+
+      ctx.fillStyle = "red"
+      ctx.beginPath()
+      ctx.moveTo(points[0].x, points[0].y)
+      for (const point of points.slice(1)) {
+        ctx.lineTo(point.x, point.y)
+      }
+      ctx.closePath()
+      ctx.stroke()
     },
     mouseDown(event) {
       if (this.selectedMode === "markup") {
@@ -171,12 +196,18 @@ export default {
         // Сохраняем координаты маркера в свойство
         this.startCoords = { x, y }
         this.isDrowing = true
-      } else {
+      } else if (this.selectedMode === "mooving") {
         this.isDragging = true
         this.startMouseX = event.clientX
         this.startMouseY = event.clientY
         this.startImageX = parseInt(this.$refs.image_holder.style.left) || 0
         this.startImageY = parseInt(this.$refs.image_holder.style.top) || 0
+      } else if (this.selectedMode === "point") {
+        const canvas = this.$refs.canvas
+        const rect = canvas.getBoundingClientRect()
+        const x = event.clientX - rect.left
+        const y = event.clientY - rect.top
+        this.dots.push({ x, y })
       }
     },
     mouseMove(event) {
@@ -199,65 +230,66 @@ export default {
           height
         )
         ctx.stroke()
-        for (let i = 0; i < this.rectangles.length; i++) {
-          const rect = this.rectangles[i]
-          ctx.beginPath()
-          ctx.rect(
-            rect.x * this.scale,
-            rect.y * this.scale,
-            rect.width * this.scale,
-            rect.height * this.scale
-          )
-          ctx.stroke()
+        this.drawRectangle(ctx)
+        this.drawDots(ctx, 3, "red")
+      } else if (this.isDragging) {
+        const offsetX = event.clientX - this.startMouseX
+        const offsetY = event.clientY - this.startMouseY
+        this.$refs.image_holder.style.left = this.startImageX + offsetX + "px"
+        this.$refs.image_holder.style.top = this.startImageY + offsetY + "px"
+        // Проверка на выход курсора мыши за границу
+        const rectCont = this.$refs.content.getBoundingClientRect()
+        const mouseX = event.clientX
+        const mouseY = event.clientY
+        if (
+          mouseX <= rectCont.left ||
+          mouseX >= rectCont.left + rectCont.width ||
+          mouseY <= rectCont.top ||
+          mouseY >= rectCont.top + rectCont.height
+        ) {
+          // Курсор мыши достиг границы div
+          this.isDragging = false
         }
-      } else {
-        if (this.isDragging) {
-          const offsetX = event.clientX - this.startMouseX
-          const offsetY = event.clientY - this.startMouseY
-          this.$refs.image_holder.style.left = this.startImageX + offsetX + "px"
-          this.$refs.image_holder.style.top = this.startImageY + offsetY + "px"
-          // Проверка на выход курсора мыши за границу
-          const rectCont = this.$refs.content.getBoundingClientRect()
-          const mouseX = event.clientX
-          const mouseY = event.clientY
-          if (
-            mouseX <= rectCont.left ||
-            mouseX >= rectCont.left + rectCont.width ||
-            mouseY <= rectCont.top ||
-            mouseY >= rectCont.top + rectCont.height
-          ) {
-            // Курсор мыши достиг границы div
-            this.isDragging = false
-          }
-        }
+      } else if (this.selectedMode === "point") {
+        const canvas = this.$refs.canvas
+        const ctx = canvas.getContext("2d")
+        ctx.canvas.width = ctx.canvas.clientWidth
+        ctx.canvas.height = ctx.canvas.clientHeight
+        const rect = canvas.getBoundingClientRect()
+        const x = event.clientX - rect.left
+        const y = event.clientY - rect.top
+        this.drawRectangle(ctx)
+        this.drawDots(ctx, 3, "red")
+        this.drawMoovingDot(ctx, x, y, 3, "red")
       }
     },
     mouseUp(event) {
       if (this.selectedMode === "markup") {
         // Конец рисования
         const canvas = this.$refs.canvas
+        const ctx = canvas.getContext("2d")
         const rect = canvas.getBoundingClientRect()
-        const x = (event.clientX - rect.left) / this.scale
-        const y = (event.clientY - rect.top) / this.scale
+        let x = (event.clientX - rect.left) / this.scale
+        let y = (event.clientY - rect.top) / this.scale
         this.endCoords = { x, y }
-        this.drawRectangle()
+        const width = this.endCoords.x - this.startCoords.x
+        const height = this.endCoords.y - this.startCoords.y
+        x = this.startCoords.x
+        y = this.startCoords.y
+        this.rectangles.push({ x, y, width, height })
+        this.drawRectangle(ctx)
+        this.drawDots(ctx, 3, "red")
         this.isDrowing = false
       } else {
         this.isDragging = false
       }
     },
-    drawRectangle() {
-      const canvas = this.$refs.canvas
-      const ctx = canvas.getContext("2d")
-      ctx.canvas.width = ctx.canvas.clientWidth
-      ctx.canvas.height = ctx.canvas.clientHeight
-      const width = this.endCoords.x - this.startCoords.x
-      const height = this.endCoords.y - this.startCoords.y
-      const x = this.startCoords.x
-      const y = this.startCoords.y
-      this.rectangles.push({ x, y, width, height })
-      for (let i = 0; i < this.rectangles.length; i++) {
-        const rect = this.rectangles[i]
+    drawRectangle(ctx) {
+      // const canvas = this.$refs.canvas
+      // const ctx = canvas.getContext("2d")
+      // ctx.canvas.width = ctx.canvas.clientWidth
+      // ctx.canvas.height = ctx.canvas.clientHeight
+      for (const rect of this.rectangles) {
         ctx.beginPath()
         ctx.rect(
           rect.x * this.scale,
@@ -288,8 +320,6 @@ export default {
 <style>
 /*content part */
 .content {
-  border: 3px solid white; /* **************** */
-
   position: relative;
   height: 100%;
   width: 100%;

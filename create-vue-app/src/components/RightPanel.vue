@@ -30,7 +30,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 /*Tools part*/
 .Tools {
   height: 100%;

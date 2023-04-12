@@ -9,6 +9,7 @@
           v-if="isShowAnnotationPanel"
           @slider-change="sliderChange"
           @mode-change="modeChange"
+          @createPolygon="CreatePolygon"
         />
         <p id="projectName">*** {{ projectName }} ***</p>
         <center-panel
@@ -22,6 +23,7 @@
       <right-panel @delet="delet" @beginAnnotation="beginAnnotation" />
     </div>
   </div>
+  <test-component />
 </template>
 
 <script>
@@ -49,11 +51,14 @@ export default {
       isShowClassifier: false,
       isShowAnnotationPanel: false,
       scale: 1,
-      selectedMode: "",
+      selectedMode: "mooving",
       imageData: {},
     }
   },
   methods: {
+    CreatePolygon() {
+      this.$refs.CenterPanel.jarvis()
+    },
     download() {
       this.$refs.CenterPanel.Download_btn()
     },
@@ -88,7 +93,6 @@ export default {
 }
 
 .main {
-  border: 3px solid red; /* ********** */
   height: 100%;
   margin-top: 150px;
 
@@ -113,10 +117,8 @@ export default {
 }
 
 .centerBlock {
-  border: 3px solid rgb(43, 18, 185); /* **************** */
-
   position: relative;
-  width: 60%;
+  width: 95%;
   display: flex;
   align-items: center;
   justify-content: center;
