@@ -1,8 +1,5 @@
 <template>
   <div style="display: flex; flex-direction: row; margin: 3px">
-    <label for="markup" style="color: rgba(255, 255, 255, 0.5); margin-top: 5px"
-      >Markup</label
-    >
     <input
       type="radio"
       id="markup"
@@ -10,17 +7,29 @@
       value="markup"
       @input="onModeChange"
     />
-    <label for="point" style="color: rgba(255, 255, 255, 0.5); margin-top: 5px"
-      >Point</label
-    >
+    <div class="label-editor" @click="ModeChange('markup')">
+      <i class="bx bx-selection"></i>
+      <p>Markup</p>
+    </div>
     <input
       type="radio"
-      id="point"
+      id="dot"
       name="workSettings"
-      value="point"
+      value="dot"
       @input="onModeChange"
     />
-    <div class="label-editor">
+    <div class="label-editor" @click="ModeChange('dot')">
+      <i class="bx bx-message-square-edit"></i>
+      <p>Dot</p>
+    </div>
+    <input
+      type="radio"
+      id="eraser"
+      name="workSettings"
+      value="eraser"
+      @input="onModeChange"
+    />
+    <div class="label-editor" @click="ModeChange('eraser')">
       <i class="bx bxs-eraser"></i>
       <p>Eraser</p>
     </div>
@@ -28,14 +37,25 @@
       <i class="bx bx-shape-polygon"></i>
       <p>Create Polygon</p>
     </div>
+    <color-palette v-if="isShowPalette" @changeColor="changeColor" />
+    <div class="label-editor" @click="ShowPalette()">
+      <i class="bx bxs-palette"></i>
+      <p>Palette</p>
+    </div>
   </div>
 </template>
 
-<script>
+<script scoped>
+import ColorPalette from "@/components/ColorPalette.vue"
+
 export default {
+  components: {
+    ColorPalette,
+  },
   data() {
     return {
       selectedMode: "mooving",
+      isShowPalette: false,
     }
   },
   methods: {
@@ -43,8 +63,19 @@ export default {
       this.selectedMode = event.target.value
       this.$emit("mode-change", this.selectedMode)
     },
+    ModeChange(value) {
+      this.selectedMode = value
+      document.getElementById(value).checked = true
+      this.$emit("mode-change", this.selectedMode)
+    },
     CreatePolygon() {
       this.$emit("createPolygon")
+    },
+    ShowPalette() {
+      this.isShowPalette = !this.isShowPalette
+    },
+    changeColor(color) {
+      this.$emit("changeColor", color)
     },
   },
 }

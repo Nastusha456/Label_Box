@@ -48,6 +48,7 @@ export default {
       endCoords: { x: null, y: null },
       rectangles: [],
       dots: [],
+      labels: [],
       isDrowing: false,
       isDragging: false,
       startMouseX: 0,
@@ -63,6 +64,7 @@ export default {
       required: true,
     },
     selectedMode: String,
+    color: String,
   },
   watch: {
     scale(newVal, oldVal) {
@@ -74,8 +76,9 @@ export default {
         canvas.style.width = `${image.naturalWidth * this.scale}px`
         canvas.style.height = `${image.naturalHeight * this.scale}px`
         const ctx = canvas.getContext("2d")
-        this.drawRectangle(ctx)
-        this.drawDots(ctx, 3, "red")
+        this.drawRectangles(ctx)
+        this.drawAllLabels(ctx)
+        this.drawDots(ctx, this.dots, 3, this.color)
       }
     },
   },
@@ -108,7 +111,7 @@ export default {
       this.imageSize = null
       this.imageName = null
       this.rectangles = []
-      this.points = []
+      this.dots = []
 
       this.isDrowing = false
 
@@ -119,6 +122,10 @@ export default {
         imageName: this.imageName,
       }
       this.$emit("getImgData", this.imageData)
+      this.imageWidth = null
+      this.imageWidth = null
+      this.imageSize = null
+      this.imageName = null
     },
     Download_btn() {
       if (this.imageUrl !== "") {
@@ -131,22 +138,27 @@ export default {
         document.body.removeChild(link)
       }
     },
+
     drawMoovingDot(ctx, x, y, radius, color) {
       ctx.beginPath()
       ctx.arc(x, y, radius, 0, 2 * Math.PI)
       ctx.fillStyle = color
       ctx.fill()
     },
-    drawDots(ctx, radius, color) {
-      for (const dot of this.dots) {
+    drawDots(ctx, dots, radius, color) {
+      for (const dot of dots) {
         ctx.beginPath()
         ctx.arc(dot.x, dot.y, radius, 0, 2 * Math.PI)
         ctx.fillStyle = color
         ctx.fill()
       }
     },
-    jarvis() {
-      let points = [...this.dots]
+
+    jarvis(dots) {
+      let points = [...dots]
+      if (points.length < 1) {
+        return points
+      }
       const hull = []
       const leftMost = points.reduce((min, point) =>
         point.x < min.x ? point : min
@@ -163,27 +175,137 @@ export default {
         p = q
       } while (p !== leftMost)
 
-      this.drawLabel(hull)
+      return hull
     },
-
     // Функция, проверяющая, в какую сторону повернуты три точки
     orientation(p, q, r) {
       return (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y)
     },
 
-    drawLabel(points) {
+    contour(points) {
+      const leftMost = points.reduce((min, point) =>
+        point.x < min.x ? point : min
+      )
+      const rightMost = points.reduce((max, point) =>
+        point.x > max.x ? point : max
+      )
+      const topMost = points.reduce((min, point) =>
+        point.y < min.y ? point : min
+      )
+      const bottomMost = points.reduce((max, point) =>
+        point.y > max.y ? point : max
+      )
+      const contour = {
+        left: leftMost.x,
+        right: rightMost.x,
+        top: topMost.y,
+        bottom: bottomMost.y,
+      }
+
+      return contour
+    },
+    CreatePolygon() {
+      if (this.dots.length === 0) {
+        return
+      }
+      const coordinates = this.jarvis(this.dots)
+      const contour = this.contour(coordinates)
+      const color = this.color
+      this.dots = []
+      const label = { coordinates, contour, color }
+      this.labels.push(label)
+
       const canvas = this.$refs.canvas
       const ctx = canvas.getContext("2d")
+      ctx.canvas.width = ctx.canvas.clientWidth
+      ctx.canvas.height = ctx.canvas.clientHeight
+      this.drawAllLabels(ctx)
+    },
 
-      ctx.fillStyle = "red"
+    drawLabel(ctx, points, color, fill) {
+      if (points.length === 0) {
+        return
+      }
+      ctx.fillStyle = fill
+      ctx.strokeStyle = color
       ctx.beginPath()
       ctx.moveTo(points[0].x, points[0].y)
       for (const point of points.slice(1)) {
         ctx.lineTo(point.x, point.y)
       }
       ctx.closePath()
+      ctx.fill()
       ctx.stroke()
     },
+    drawAllLabels(ctx) {
+      for (const label of this.labels) {
+        const points = label.coordinates
+        const color = label.color ? label.color : "black"
+        this.drawLabel(ctx, points, color, "transparent")
+      }
+    },
+    findLabel(offsetX, offsetY) {
+      const labels = this.labels
+      let minSquare = Infinity
+      let foundLabel = null
+      for (const label of labels) {
+        let square =
+          (label.contour.right - label.contour.left) *
+          (label.contour.bottom - label.contour.top)
+        if (
+          label.contour.left <= offsetX &&
+          offsetX <= label.contour.right &&
+          label.contour.top <= offsetY &&
+          offsetY <= label.contour.bottom &&
+          square <= minSquare
+        ) {
+          minSquare = square
+          foundLabel = label
+        }
+      }
+      return foundLabel
+    },
+    findDot(offsetX, offsetY, label) {
+      if (label) {
+        for (const dot of label.coordinates) {
+          const distance = (offsetX - dot.x) ** 2 + (offsetY - dot.y) ** 2
+          if (distance <= 45) {
+            return dot
+          }
+        }
+      } else {
+        for (const dot of this.dots) {
+          const distance = (offsetX - dot.x) ** 2 + (offsetY - dot.y) ** 2
+          if (distance <= 45) {
+            return dot
+          }
+        }
+      }
+      return null
+    },
+    deleteDot(ctx, label, dot) {
+      if (label) {
+        const label_index = this.labels.indexOf(label)
+        const dot_index = label.coordinates.indexOf(dot)
+        const color = label.color
+        if (dot_index !== -1) {
+          label.coordinates.splice(dot_index, 1)
+          this.dots = this.dots.concat(label.coordinates)
+        }
+        if (label_index !== -1) {
+          this.labels.splice(label_index, 1)
+        }
+        this.drawDots(ctx, this.dots, 3, color)
+      } else if (dot) {
+        const dot_index = this.dots.indexOf(dot)
+        const color = this.color
+        if (dot_index !== -1) {
+          this.dots.splice(dot_index, 1)
+        }
+        this.drawDots(ctx, this.dots, 3, color)
+      }
+    },
+
     mouseDown(event) {
       if (this.selectedMode === "markup") {
         //Начало рисования
@@ -202,17 +324,13 @@ export default {
         this.startMouseY = event.clientY
         this.startImageX = parseInt(this.$refs.image_holder.style.left) || 0
         this.startImageY = parseInt(this.$refs.image_holder.style.top) || 0
-      } else if (this.selectedMode === "point") {
+      } else if (this.selectedMode === "dot") {
         const canvas = this.$refs.canvas
         const rect = canvas.getBoundingClientRect()
         const x = event.clientX - rect.left
         const y = event.clientY - rect.top
         this.dots.push({ x, y })
-      }
-    },
-    mouseMove(event) {
-      if (this.isDrowing && this.selectedMode === "markup") {
-        // Процесс рисования
+      } else if (this.selectedMode === "eraser") {
         const canvas = this.$refs.canvas
         const ctx = canvas.getContext("2d")
         ctx.canvas.width = ctx.canvas.clientWidth
@@ -220,18 +338,42 @@ export default {
         const rect = canvas.getBoundingClientRect()
         const x = event.clientX - rect.left
         const y = event.clientY - rect.top
+
+        const label = this.findLabel(x, y)
+        const dot = this.findDot(x, y, label)
+        this.deleteDot(ctx, label, dot)
+
+        this.drawRectangles(ctx)
+        this.drawAllLabels(ctx)
+      }
+    },
+    mouseMove(event) {
+      // Процесс рисования
+      const canvas = this.$refs.canvas
+      const ctx = canvas.getContext("2d")
+      ctx.canvas.width = ctx.canvas.clientWidth
+      ctx.canvas.height = ctx.canvas.clientHeight
+      const rect = canvas.getBoundingClientRect()
+      const x = event.clientX - rect.left
+      const y = event.clientY - rect.top
+
+      this.drawRectangles(ctx)
+      this.drawAllLabels(ctx)
+
+      const label = this.findLabel(x, y)
+      if (label) {
+        const color = label.color ? label.color : "black"
+        this.drawLabel(ctx, label.coordinates, color, "rgba(255, 0, 0, 0.3)")
+        this.drawDots(ctx, label.coordinates, 3, color)
+      }
+
+      if (this.isDrowing && this.selectedMode === "markup") {
+        // Процесс рисования
         const width = x - this.startCoords.x * this.scale
         const height = y - this.startCoords.y * this.scale
-        ctx.beginPath()
-        ctx.rect(
-          this.startCoords.x * this.scale,
-          this.startCoords.y * this.scale,
-          width,
-          height
-        )
-        ctx.stroke()
-        this.drawRectangle(ctx)
-        this.drawDots(ctx, 3, "red")
+
+        this.drawRect(ctx, width, height)
+        this.drawDots(ctx, this.dots, 3, this.color)
       } else if (this.isDragging) {
         const offsetX = event.clientX - this.startMouseX
         const offsetY = event.clientY - this.startMouseY
@@ -250,17 +392,12 @@ export default {
           // Курсор мыши достиг границы div
           this.isDragging = false
         }
-      } else if (this.selectedMode === "point") {
-        const canvas = this.$refs.canvas
-        const ctx = canvas.getContext("2d")
-        ctx.canvas.width = ctx.canvas.clientWidth
-        ctx.canvas.height = ctx.canvas.clientHeight
-        const rect = canvas.getBoundingClientRect()
-        const x = event.clientX - rect.left
-        const y = event.clientY - rect.top
-        this.drawRectangle(ctx)
-        this.drawDots(ctx, 3, "red")
-        this.drawMoovingDot(ctx, x, y, 3, "red")
+      } else if (this.selectedMode === "dot") {
+        this.drawDots(ctx, this.dots, 3, this.color)
+        this.drawMoovingDot(ctx, x, y, 3, this.color)
+      } else if (this.selectedMode === "eraser") {
+        this.drawMoovingDot(ctx, x, y, 3, "black")
+        this.drawDots(ctx, this.dots, 3, this.color)
       }
     },
     mouseUp(event) {
@@ -277,18 +414,25 @@ export default {
         x = this.startCoords.x
         y = this.startCoords.y
         this.rectangles.push({ x, y, width, height })
-        this.drawRectangle(ctx)
-        this.drawDots(ctx, 3, "red")
+        this.drawRectangles(ctx)
+        this.drawAllLabels(ctx)
+        this.drawDots(ctx, this.dots, 3, this.color)
         this.isDrowing = false
       } else {
         this.isDragging = false
       }
     },
-    drawRectangle(ctx) {
-      // const canvas = this.$refs.canvas
-      // const ctx = canvas.getContext("2d")
-      // ctx.canvas.width = ctx.canvas.clientWidth
-      // ctx.canvas.height = ctx.canvas.clientHeight
+    drawRect(ctx, width, height) {
+      ctx.beginPath()
+      ctx.rect(
+        this.startCoords.x * this.scale,
+        this.startCoords.y * this.scale,
+        width,
+        height
+      )
+      ctx.stroke()
+    },
+    drawRectangles(ctx) {
       for (const rect of this.rectangles) {
         ctx.beginPath()
         ctx.rect(
@@ -352,7 +496,6 @@ export default {
 }
 
 .upload_img_box {
-  /* margin: 15px; */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -394,8 +537,7 @@ export default {
 .image_holder {
   position: relative;
   display: block;
-  width: 100%;
-  /* height: 90%; */
+  width: 1000%;
   max-height: 100vh;
   padding-top: 40px; /* отступ сверху */
   padding-bottom: 40px; /* отступ снизу */

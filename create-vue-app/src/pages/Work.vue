@@ -10,6 +10,7 @@
           @slider-change="sliderChange"
           @mode-change="modeChange"
           @createPolygon="CreatePolygon"
+          @changeColor="changeColor"
         />
         <p id="projectName">*** {{ projectName }} ***</p>
         <center-panel
@@ -17,6 +18,7 @@
           ref="CenterPanel"
           :scale="parseFloat(scale)"
           :selectedMode="selectedMode"
+          :color="color"
         />
         <image-data :imageData="imageData" />
       </div>
@@ -53,11 +55,12 @@ export default {
       scale: 1,
       selectedMode: "mooving",
       imageData: {},
+      color: "red",
     }
   },
   methods: {
     CreatePolygon() {
-      this.$refs.CenterPanel.jarvis()
+      this.$refs.CenterPanel.CreatePolygon()
     },
     download() {
       this.$refs.CenterPanel.Download_btn()
@@ -82,6 +85,9 @@ export default {
     },
     getImgData(value) {
       this.imageData = value
+    },
+    changeColor(color) {
+      this.color = color
     },
   },
 }

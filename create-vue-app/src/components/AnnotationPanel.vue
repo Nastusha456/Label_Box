@@ -22,7 +22,6 @@
       v-model="scale"
       @input="onSliderChange"
     />
-    <label for="mooving" style="color: rgba(255, 255, 255, 0.5)">Mooving</label>
     <input
       type="radio"
       id="mooving"
@@ -31,10 +30,15 @@
       @input="onModeChange"
       checked
     />
+    <div class="label-editor" @click="ModeChange('mooving')">
+      <i class="bx bx-move"></i>
+      <p>Move</p>
+    </div>
     <label-editor
       v-if="isLabelEditorShow"
-      @mode-change="ModeChange"
+      @mode-change="mode_change"
       @createPolygon="CreatePolygon"
+      @changeColor="changeColor"
     />
     <div class="label-editor" @click="ShowLabelEditor">
       <i class="bx bxs-edit"></i>
@@ -63,13 +67,13 @@ export default {
   methods: {
     ZoomOut() {
       if (this.scale > this.minScale) {
-        this.scale -= this.step
+        this.scale = Math.floor((Number(this.scale) - this.step) * 10) / 10
         this.$emit("slider-change", this.scale)
       }
     },
     ZoomIn() {
       if (this.scale < this.maxScale) {
-        this.scale += this.step
+        this.scale = Math.ceil((Number(this.scale) + this.step) * 10) / 10
         this.$emit("slider-change", this.scale)
       }
     },
@@ -86,10 +90,18 @@ export default {
     },
     ModeChange(value) {
       this.selectedMode = value
+      document.getElementById(value).checked = true
+      this.$emit("mode-change", this.selectedMode)
+    },
+    mode_change(value) {
+      this.selectedMode = value
       this.$emit("mode-change", this.selectedMode)
     },
     ShowLabelEditor() {
       this.isLabelEditorShow = !this.isLabelEditorShow
+    },
+    changeColor(color) {
+      this.$emit("changeColor", color)
     },
   },
 }
@@ -111,7 +123,7 @@ export default {
   width: 30px;
   height: 30px;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   cursor: pointer;
   transition: 0.5s;
 }
@@ -135,5 +147,12 @@ export default {
 
 .label-editor p {
   opacity: 0;
+}
+
+input[type="number"] {
+  width: 40px;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.5);
 }
 </style>
