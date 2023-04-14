@@ -6,7 +6,6 @@
       <classifier v-if="isShowClassifier" />
       <div class="centerBlock">
         <annotation-panel
-          v-if="isShowAnnotationPanel"
           @slider-change="sliderChange"
           @mode-change="modeChange"
           @createPolygon="CreatePolygon"
@@ -22,7 +21,11 @@
         />
         <image-data :imageData="imageData" />
       </div>
-      <right-panel @delet="delet" @beginAnnotation="beginAnnotation" />
+      <markup
+        ref="Markup"
+        :isShowMarkupPanel="isShowMarkupPanel" 
+      />
+      <right-panel @delet="delet" @beginAnnotation="beginAnnotation" @showMarkupTree="showMarkupTree" />
     </div>
   </div>
   <test-component />
@@ -36,6 +39,7 @@ import CenterPanel from "@/components/CenterPanel.vue"
 import Classifier from "@/components/Classifier.vue"
 import AnnotationPanel from "@/components/AnnotationPanel.vue"
 import ImageData from "@/components/ImageData.vue"
+import Markup from "@/components/Markup.vue"
 
 export default {
   components: {
@@ -46,12 +50,13 @@ export default {
     Classifier,
     AnnotationPanel,
     ImageData,
+    Markup,
   },
   data() {
     return {
       projectName: "Project name",
       isShowClassifier: false,
-      isShowAnnotationPanel: false,
+      isShowMarkupPanel: false,
       scale: 1,
       selectedMode: "mooving",
       imageData: {},
@@ -75,7 +80,10 @@ export default {
       this.$refs.CenterPanel.remove_img_btn()
     },
     beginAnnotation() {
-      this.isShowAnnotationPanel = !this.isShowAnnotationPanel
+      this.isShowMarkupPanel = !this.isShowMarkupPanel
+    },
+    showMarkupTree() {
+      this.$refs.Markup.showMarkupTree()
     },
     sliderChange(newScale) {
       this.scale = newScale
@@ -101,7 +109,6 @@ export default {
 .main {
   height: 100%;
   margin-top: 150px;
-
   padding: 10px;
   /* max-height: 100vh; */
   width: 100%;
@@ -120,11 +127,12 @@ export default {
   background: rgba(255, 255, 255, 0.05);
   overflow: hidden;
   box-shadow: 0.1px 4px 8px 5px rgba(0, 0, 0, 0.1);
+  justify-content: center;
 }
 
 .centerBlock {
   position: relative;
-  width: 95%;
+  width: 60%;
   display: flex;
   align-items: center;
   justify-content: center;

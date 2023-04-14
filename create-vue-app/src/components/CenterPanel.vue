@@ -76,7 +76,8 @@ export default {
         canvas.style.width = `${image.naturalWidth * this.scale}px`
         canvas.style.height = `${image.naturalHeight * this.scale}px`
         const ctx = canvas.getContext("2d")
-        this.drawRectangles(ctx)
+        ctx.canvas.width = ctx.canvas.clientWidth
+        ctx.canvas.height = ctx.canvas.clientHeight
         this.drawAllLabels(ctx)
         this.drawDots(ctx, this.dots, 3, this.color)
       }
@@ -112,6 +113,7 @@ export default {
       this.imageName = null
       this.rectangles = []
       this.dots = []
+      this.labels = [],
 
       this.isDrowing = false
 
@@ -141,14 +143,14 @@ export default {
 
     drawMoovingDot(ctx, x, y, radius, color) {
       ctx.beginPath()
-      ctx.arc(x, y, radius, 0, 2 * Math.PI)
+      ctx.arc(x*this.scale, y*this.scale, radius, 0, 2 * Math.PI)
       ctx.fillStyle = color
       ctx.fill()
     },
     drawDots(ctx, dots, radius, color) {
       for (const dot of dots) {
         ctx.beginPath()
-        ctx.arc(dot.x, dot.y, radius, 0, 2 * Math.PI)
+        ctx.arc(dot.x*this.scale, dot.y*this.scale, radius, 0, 2 * Math.PI)
         ctx.fillStyle = color
         ctx.fill()
       }
@@ -214,7 +216,6 @@ export default {
       this.dots = []
       const label = { coordinates, contour, color }
       this.labels.push(label)
-
       const canvas = this.$refs.canvas
       const ctx = canvas.getContext("2d")
       ctx.canvas.width = ctx.canvas.clientWidth
@@ -229,9 +230,9 @@ export default {
       ctx.fillStyle = fill
       ctx.strokeStyle = color
       ctx.beginPath()
-      ctx.moveTo(points[0].x, points[0].y)
+      ctx.moveTo(points[0].x * this.scale, points[0].y * this.scale)
       for (const point of points.slice(1)) {
-        ctx.lineTo(point.x, point.y)
+        ctx.lineTo(point.x * this.scale, point.y * this.scale)
       }
       ctx.closePath()
       ctx.fill()
@@ -327,8 +328,8 @@ export default {
       } else if (this.selectedMode === "dot") {
         const canvas = this.$refs.canvas
         const rect = canvas.getBoundingClientRect()
-        const x = event.clientX - rect.left
-        const y = event.clientY - rect.top
+        const x = (event.clientX - rect.left) / this.scale
+        const y = (event.clientY - rect.top) / this.scale
         this.dots.push({ x, y })
       } else if (this.selectedMode === "eraser") {
         const canvas = this.$refs.canvas
@@ -336,14 +337,11 @@ export default {
         ctx.canvas.width = ctx.canvas.clientWidth
         ctx.canvas.height = ctx.canvas.clientHeight
         const rect = canvas.getBoundingClientRect()
-        const x = event.clientX - rect.left
-        const y = event.clientY - rect.top
-
+        const x = (event.clientX - rect.left) / this.scale
+        const y = (event.clientY - rect.top) / this.scale
         const label = this.findLabel(x, y)
         const dot = this.findDot(x, y, label)
         this.deleteDot(ctx, label, dot)
-
-        this.drawRectangles(ctx)
         this.drawAllLabels(ctx)
       }
     },
@@ -354,10 +352,9 @@ export default {
       ctx.canvas.width = ctx.canvas.clientWidth
       ctx.canvas.height = ctx.canvas.clientHeight
       const rect = canvas.getBoundingClientRect()
-      const x = event.clientX - rect.left
-      const y = event.clientY - rect.top
+      const x = (event.clientX - rect.left) / this.scale
+      const y = (event.clientY - rect.top) / this.scale
 
-      this.drawRectangles(ctx)
       this.drawAllLabels(ctx)
 
       const label = this.findLabel(x, y)
@@ -413,8 +410,16 @@ export default {
         const height = this.endCoords.y - this.startCoords.y
         x = this.startCoords.x
         y = this.startCoords.y
-        this.rectangles.push({ x, y, width, height })
-        this.drawRectangles(ctx)
+        const coordinates = [{x:x, y:y}, {x:x, y:y + height}, {x:x + width, y:y + height}, {x:x + width, y:y}]
+        const contour = {
+          left: x,
+          right: x + width,
+          top: y,
+          bottom: y + height,
+        }
+        const color = this.color
+        const label = { coordinates, contour, color }
+        this.labels.push(label)
         this.drawAllLabels(ctx)
         this.drawDots(ctx, this.dots, 3, this.color)
         this.isDrowing = false
@@ -431,18 +436,6 @@ export default {
         height
       )
       ctx.stroke()
-    },
-    drawRectangles(ctx) {
-      for (const rect of this.rectangles) {
-        ctx.beginPath()
-        ctx.rect(
-          rect.x * this.scale,
-          rect.y * this.scale,
-          rect.width * this.scale,
-          rect.height * this.scale
-        )
-        ctx.stroke()
-      }
     },
   },
   updated() {
@@ -490,7 +483,7 @@ export default {
   width: 70%;
   height: 170px;
   position: absolute;
-  top: 55%;
+  top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
 }

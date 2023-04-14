@@ -5,7 +5,7 @@
         <i class="bx bx-search-alt"></i>
         <p>Creating markup</p>
       </li>
-      <li>
+      <li @click="showMarkupTree">
         <i class="bx bxs-droplet-half"></i>
         <p>Colour</p>
       </li>
@@ -26,6 +26,9 @@ export default {
     beginAnnotation() {
       this.$emit("beginAnnotation")
     },
+    showMarkupTree() {
+      this.$emit("showMarkupTree")
+    }
   },
 }
 </script>

@@ -123,7 +123,7 @@ export default {
 .classifier {
   display: block;
   max-height: 50vh;
-  width: 25%;
+  width: 15%;
   color: rgba(255, 255, 255, 0.5);
   margin-top: 10px;
   overflow-y: scroll;
