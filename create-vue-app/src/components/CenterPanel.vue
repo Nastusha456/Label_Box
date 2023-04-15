@@ -82,6 +82,14 @@ export default {
         this.drawDots(ctx, this.dots, 3, this.color)
       }
     },
+    labels: {
+      handler(newVal, oldVal) {
+        // Обработка изменений в массиве
+        this.$emit("update-labels", this.labels)
+        // console.log(this.labels)
+      },
+      deep: true
+    },
   },
   methods: {
     onImageLoad() {
@@ -213,8 +221,12 @@ export default {
       const coordinates = this.jarvis(this.dots)
       const contour = this.contour(coordinates)
       const color = this.color
+      let labelId = 1
+      if (this.labels.length != 0) {
+        labelId = this.labels[this.labels.length - 1].labelId + 1
+      } 
       this.dots = []
-      const label = { coordinates, contour, color }
+      const label = { coordinates, contour, color, labelId }
       this.labels.push(label)
       const canvas = this.$refs.canvas
       const ctx = canvas.getContext("2d")
@@ -410,15 +422,22 @@ export default {
         const height = this.endCoords.y - this.startCoords.y
         x = this.startCoords.x
         y = this.startCoords.y
-        const coordinates = [{x:x, y:y}, {x:x, y:y + height}, {x:x + width, y:y + height}, {x:x + width, y:y}]
-        const contour = {
-          left: x,
-          right: x + width,
-          top: y,
-          bottom: y + height,
-        }
+        // const coordinates = [{x:x, y:y}, {x:x, y:y + height}, {x:x + width, y:y + height}, {x:x + width, y:y}]
+        const dots = [{x:x, y:y}, {x:x, y:y + height}, {x:x + width, y:y + height}, {x:x + width, y:y}]
+        const coordinates = this.jarvis(dots)
+        const contour = this.contour(coordinates)
+        // const contour = {
+        //   left: x,
+        //   right: x + width,
+        //   top: y,
+        //   bottom: y + height,
+        // }
         const color = this.color
-        const label = { coordinates, contour, color }
+        let labelId = 1
+        if (this.labels.length != 0) {
+          labelId = this.labels[this.labels.length - 1].labelId + 1
+        } 
+        const label = { coordinates, contour, color, labelId }
         this.labels.push(label)
         this.drawAllLabels(ctx)
         this.drawDots(ctx, this.dots, 3, this.color)

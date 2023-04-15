@@ -99,6 +99,7 @@ export default {
     },
     ShowLabelEditor() {
       this.isLabelEditorShow = !this.isLabelEditorShow
+      this.$emit("show-label-editor")
     },
     changeColor(color) {
       this.$emit("changeColor", color)

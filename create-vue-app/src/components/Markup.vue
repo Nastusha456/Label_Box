@@ -1,10 +1,10 @@
 <template>
-    <div class="markup" >
-        <div class="create_markup" v-if="isShowMarkupPanel">
+    <div class="markup">
+        <div class="create_markup" v-if="isShowLabelEditor">
             <label for="class">Class</label>
-            <input type="radio" id="class" name="workSettings" value="class" @input="modeChange">
+            <input type="radio" id="class" name="markupSettings" value="class" @input="markupModeChange">
             <label for="markup">Label</label>
-            <input type="radio" id="label" name="workSettings" value="label" @input="modeChange" checked>
+            <input type="radio" id="label" name="markupSettings" value="label" @input="markupModeChange" checked>
             <div class="search_class">
                 <label for="search_class">Class</label>
                 <input type="text" id="search_class" v-model="searchClass" @input="filterGroups" class="search_input" placeholder="Search...">
@@ -19,17 +19,31 @@
                     <li v-for="option in filteredClasses" @click="selectClass(option)" class="option_item" :key="option.id">{{ option.title }}</li>
                 </ul>
             </div>
-            <div class="search_label" v-if="this.selectedMode === 'label'">
+            <div class="search_label" v-if="this.selectedMarkupMode === 'label'">
                 <label for="search_label">Label</label>
                 <input type="text" id="search_label" v-model="searchLabel" @input="filterLables" class="search_input" placeholder="Search...">
                 <ul v-if="showLables" class="options_list">
                     <li v-for="option in filteredLables" @click="selectLabel(option)" class="option_item" :key="option.id">{{ option.title }}</li>
                 </ul>
             </div>
-            <button>Save</button>
+            <button @click="saveLabel()">Save</button>
         </div>
         <div class="markup_tree" v-if="isShowMarkupTree">
-
+            <ul>
+                <li v-for="group in labelGroups" style="padding-left: 10px" :key="group.id">
+                    <div>{{ group.groupName }}</div>
+                    <ul>
+                        <li v-for="label in labelNames" style="padding-left: 10px" :key="label.labelId">
+                            <div v-if="label.ClassName === group.groupName">{{ label.PageName }}</div>
+                            <ul>
+                                <li v-for="cls in labelClasses" style="padding-left: 10px" :key="cls.id">
+                                    <div v-if="cls.className === label.PageName">{{ label.LabelName }}</div>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
         </div>
     </div>
 </template>
@@ -44,7 +58,9 @@ export default {
         classifierData: {},
         groups: {},
         classes: {},
-        lables: {},
+        labelNames: [],
+        labelGroups: [],
+        labelClasses: [],
         searchClass: '',
         searchPage: '',
         searchLabel: '',
@@ -52,13 +68,27 @@ export default {
         showGroups: false,
         showClasses: false,
         showLables: false,
-        selectedMode: 'label',
+        selectedMarkupMode: 'label',
         labelId : NaN,
+        labelOnWork : false,
     }
   },
   props: {
     isShowMarkupPanel: String,
+    isShowLabelEditor: String,
+    labels: Array,
   },
+  watch: {
+        labels: {
+        handler(newVal, oldVal) {
+            // Обработка изменений в массиве
+            // oldLen = this.labels.length
+            this.labelOnWork = true
+            this.labelId = newVal[newVal.length-1].labelId
+        },
+        deep: true
+      },
+    },
   computed: {
     filteredGroups() {
       // Фильтрация вариантов на основе текущего ввода поиска
@@ -117,11 +147,29 @@ export default {
       }
       this.showLables = false; // Скрытие выпадающего списка
     },
-    modeChange(event){
-        this.selectedMode = event.target.value
+    markupModeChange(event){
+        this.selectedMarkupMode = event.target.value
         this.searchClass = ''
         this.searchPage = ''
         this.searchLabel = ''
+    },
+    saveLabel(){
+        if (this.labelOnWork) {
+            let newLabel = {
+                LabelName : this.searchLabel,
+                PageName : this.searchPage, 
+                ClassName : this.searchClass,  
+                labelId : this.labelId
+            }
+            if (!this.labelGroups.some(group => group.groupName === this.searchClass)) {
+                this.labelGroups.push({groupName: this.searchClass, id: this.labelId})
+            }
+            if (!this.labelClasses.some(cls => cls.className === this.searchPage)) {
+                this.labelClasses.push({className: this.searchPage, id: this.labelId})
+            }
+            this.labelNames.push(newLabel)
+            this.labelOnWork = false
+        }
     },
     async fetchClassifier() {
       try {
@@ -173,5 +221,10 @@ export default {
 
 .option_item:hover {
   background-color: #f0f0f0;
+}
+
+.markup_tree {
+  margin-top: 30px;
+  overflow-y: scroll;
 }
 </style>

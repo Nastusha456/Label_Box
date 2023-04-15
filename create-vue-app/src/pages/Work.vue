@@ -10,10 +10,12 @@
           @mode-change="modeChange"
           @createPolygon="CreatePolygon"
           @changeColor="changeColor"
+          @show-label-editor="ShowLabelEditor"
         />
         <p id="projectName">*** {{ projectName }} ***</p>
         <center-panel
           @getImgData="getImgData"
+          @update-labels="updateLabels"
           ref="CenterPanel"
           :scale="parseFloat(scale)"
           :selectedMode="selectedMode"
@@ -24,6 +26,8 @@
       <markup
         ref="Markup"
         :isShowMarkupPanel="isShowMarkupPanel" 
+        :isShowLabelEditor="isShowLabelEditor"
+        :labels="labels"
       />
       <right-panel @delet="delet" @beginAnnotation="beginAnnotation" @showMarkupTree="showMarkupTree" />
     </div>
@@ -57,10 +61,12 @@ export default {
       projectName: "Project name",
       isShowClassifier: false,
       isShowMarkupPanel: false,
+      isShowLabelEditor: false,
       scale: 1,
       selectedMode: "mooving",
       imageData: {},
       color: "red",
+      labels : [],
     }
   },
   methods: {
@@ -97,6 +103,12 @@ export default {
     changeColor(color) {
       this.color = color
     },
+    ShowLabelEditor() {
+      this.isShowLabelEditor = !this.isShowLabelEditor
+    },
+    updateLabels(labels) {
+      this.labels = labels
+    }
   },
 }
 </script>
