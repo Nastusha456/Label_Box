@@ -39,6 +39,7 @@
       @mode-change="mode_change"
       @createPolygon="CreatePolygon"
       @changeColor="changeColor"
+      @changeCursor="changeCursor"
     />
     <div class="label-editor" @click="ShowLabelEditor">
       <i class="bx bxs-edit"></i>
@@ -92,6 +93,7 @@ export default {
       this.selectedMode = value
       document.getElementById(value).checked = true
       this.$emit("mode-change", this.selectedMode)
+      this.changeCursor("move")
     },
     mode_change(value) {
       this.selectedMode = value
@@ -103,6 +105,9 @@ export default {
     },
     changeColor(color) {
       this.$emit("changeColor", color)
+    },
+    changeCursor(value) {
+      this.$emit("changeCursor", value)
     },
   },
 }

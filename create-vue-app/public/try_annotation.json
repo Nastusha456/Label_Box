@@ -1,0 +1,83 @@
+{
+  "user": 3,
+  "Weight": { "id": 2, "weight": "124" },
+  "groups": [
+    {
+      "id": 1,
+      "title": "Animals",
+      "code": "animals_code"
+    },
+    {
+      "id": 2,
+      "title": "People",
+      "code": "people_code"
+    }
+  ],
+  "classes": [
+    {
+      "id": 1,
+      "title": "Cat",
+      "code": "animal_cat",
+      "groups": [1]
+    },
+    {
+      "id": 2,
+      "title": "Cat's head",
+      "code": "animal_cat",
+      "lables": [1, 2, 3, 4],
+      "groups": [1]
+    },
+    {
+      "id": 3,
+      "title": "Cat's body",
+      "code": "animal_cat",
+      "lables": [5],
+      "groups": [1]
+    },
+    {
+      "id": 4,
+      "title": "St.enot",
+      "code": "human_man",
+      "lables": [6],
+      "groups": [2]
+    }
+  ],
+  "lables": [
+    {
+      "id": 1,
+      "title": "Left eye",
+      "code": "bodyPart",
+      "type": "string"
+    },
+    {
+      "id": 2,
+      "title": "Right eye",
+      "code": "bodyPart",
+      "type": "string"
+    },
+    {
+      "id": 3,
+      "title": "Nose",
+      "code": "bodyPart",
+      "type": "string"
+    },
+    {
+      "id": 4,
+      "title": "Mouse",
+      "code": "bodyPart",
+      "type": "string"
+    },
+    {
+      "id": 5,
+      "title": "Stomach",
+      "code": "bodyPart",
+      "type": "string"
+    },
+    {
+      "id": 6,
+      "title": "Photo 3x4",
+      "code": "bodyPart",
+      "type": "string"
+    }
+  ]
+}

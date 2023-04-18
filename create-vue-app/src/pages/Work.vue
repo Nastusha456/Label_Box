@@ -11,6 +11,7 @@
           @createPolygon="CreatePolygon"
           @changeColor="changeColor"
           @show-label-editor="ShowLabelEditor"
+          @changeCursor="changeCursor"
         />
         <p id="projectName">*** {{ projectName }} ***</p>
         <center-panel
@@ -20,19 +21,23 @@
           :scale="parseFloat(scale)"
           :selectedMode="selectedMode"
           :color="color"
+          :selectedCursor="selectedCursor"
         />
         <image-data :imageData="imageData" />
       </div>
       <markup
         ref="Markup"
-        :isShowMarkupPanel="isShowMarkupPanel" 
+        :isShowMarkupPanel="isShowMarkupPanel"
         :isShowLabelEditor="isShowLabelEditor"
         :labels="labels"
       />
-      <right-panel @delet="delet" @beginAnnotation="beginAnnotation" @showMarkupTree="showMarkupTree" />
+      <right-panel
+        @delet="delet"
+        @beginAnnotation="beginAnnotation"
+        @showMarkupTree="showMarkupTree"
+      />
     </div>
   </div>
-  <test-component />
 </template>
 
 <script>
@@ -65,8 +70,9 @@ export default {
       scale: 1,
       selectedMode: "mooving",
       imageData: {},
-      color: "red",
-      labels : [],
+      color: "#ff0000",
+      selectedCursor: "move",
+      labels: [],
     }
   },
   methods: {
@@ -108,7 +114,10 @@ export default {
     },
     updateLabels(labels) {
       this.labels = labels
-    }
+    },
+    changeCursor(cursor) {
+      this.selectedCursor = cursor
+    },
   },
 }
 </script>

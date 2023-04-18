@@ -37,7 +37,14 @@
       <i class="bx bx-shape-polygon"></i>
       <p>Create Polygon</p>
     </div>
-    <color-palette v-if="isShowPalette" @changeColor="changeColor" />
+    <input
+      v-if="isShowPalette"
+      type="color"
+      id="color"
+      name="palette"
+      value="#ff0000"
+      @input="changeColor"
+    />
     <div class="label-editor" @click="ShowPalette()">
       <i class="bx bxs-palette"></i>
       <p>Palette</p>
@@ -62,11 +69,13 @@ export default {
     onModeChange(event) {
       this.selectedMode = event.target.value
       this.$emit("mode-change", this.selectedMode)
+      this.$emit("changeCursor", "crosshair")
     },
     ModeChange(value) {
       this.selectedMode = value
       document.getElementById(value).checked = true
       this.$emit("mode-change", this.selectedMode)
+      this.$emit("changeCursor", "crosshair")
     },
     CreatePolygon() {
       this.$emit("createPolygon")
@@ -74,8 +83,8 @@ export default {
     ShowPalette() {
       this.isShowPalette = !this.isShowPalette
     },
-    changeColor(color) {
-      this.$emit("changeColor", color)
+    changeColor(event) {
+      this.$emit("changeColor", event.target.value)
     },
   },
 }
@@ -111,5 +120,11 @@ export default {
 
 .label-editor p {
   opacity: 0;
+}
+
+input[type="color"] {
+  width: 30px;
+  background: rgba(255, 255, 255, 0.1);
+  margin-top: 3px;
 }
 </style>

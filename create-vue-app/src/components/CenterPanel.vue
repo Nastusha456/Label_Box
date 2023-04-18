@@ -16,6 +16,7 @@
       </div>
       <div class="image_holder" ref="image_holder" v-if="imageUrl">
         <canvas
+          :style="{ cursor: canvasCursor }"
           ref="canvas"
           @mousedown="mouseDown"
           @mouseup="mouseUp"
@@ -65,6 +66,7 @@ export default {
     },
     selectedMode: String,
     color: String,
+    selectedCursor: String,
   },
   watch: {
     scale(newVal, oldVal) {
@@ -88,7 +90,7 @@ export default {
         this.$emit("update-labels", this.labels)
         // console.log(this.labels)
       },
-      deep: true
+      deep: true,
     },
   },
   methods: {
@@ -121,9 +123,7 @@ export default {
       this.imageName = null
       this.rectangles = []
       this.dots = []
-      this.labels = [],
-
-      this.isDrowing = false
+      ;(this.labels = []), (this.isDrowing = false)
 
       this.imageData = {
         imageWidth: this.imageWidth,
@@ -149,16 +149,10 @@ export default {
       }
     },
 
-    drawMoovingDot(ctx, x, y, radius, color) {
-      ctx.beginPath()
-      ctx.arc(x*this.scale, y*this.scale, radius, 0, 2 * Math.PI)
-      ctx.fillStyle = color
-      ctx.fill()
-    },
     drawDots(ctx, dots, radius, color) {
       for (const dot of dots) {
         ctx.beginPath()
-        ctx.arc(dot.x*this.scale, dot.y*this.scale, radius, 0, 2 * Math.PI)
+        ctx.arc(dot.x * this.scale, dot.y * this.scale, radius, 0, 2 * Math.PI)
         ctx.fillStyle = color
         ctx.fill()
       }
@@ -224,7 +218,7 @@ export default {
       let labelId = 1
       if (this.labels.length != 0) {
         labelId = this.labels[this.labels.length - 1].labelId + 1
-      } 
+      }
       this.dots = []
       const label = { coordinates, contour, color, labelId }
       this.labels.push(label)
@@ -371,8 +365,9 @@ export default {
 
       const label = this.findLabel(x, y)
       if (label) {
-        const color = label.color ? label.color : "black"
-        this.drawLabel(ctx, label.coordinates, color, "rgba(255, 0, 0, 0.3)")
+        const color = label.color ? label.color : "#000000"
+        const fill = this.hexToRgbA(color, 0.3)
+        this.drawLabel(ctx, label.coordinates, color, fill)
         this.drawDots(ctx, label.coordinates, 3, color)
       }
 
@@ -403,9 +398,7 @@ export default {
         }
       } else if (this.selectedMode === "dot") {
         this.drawDots(ctx, this.dots, 3, this.color)
-        this.drawMoovingDot(ctx, x, y, 3, this.color)
       } else if (this.selectedMode === "eraser") {
-        this.drawMoovingDot(ctx, x, y, 3, "black")
         this.drawDots(ctx, this.dots, 3, this.color)
       }
     },
@@ -423,7 +416,12 @@ export default {
         x = this.startCoords.x
         y = this.startCoords.y
         // const coordinates = [{x:x, y:y}, {x:x, y:y + height}, {x:x + width, y:y + height}, {x:x + width, y:y}]
-        const dots = [{x:x, y:y}, {x:x, y:y + height}, {x:x + width, y:y + height}, {x:x + width, y:y}]
+        const dots = [
+          { x: x, y: y },
+          { x: x, y: y + height },
+          { x: x + width, y: y + height },
+          { x: x + width, y: y },
+        ]
         const coordinates = this.jarvis(dots)
         const contour = this.contour(coordinates)
         // const contour = {
@@ -436,7 +434,7 @@ export default {
         let labelId = 1
         if (this.labels.length != 0) {
           labelId = this.labels[this.labels.length - 1].labelId + 1
-        } 
+        }
         const label = { coordinates, contour, color, labelId }
         this.labels.push(label)
         this.drawAllLabels(ctx)
@@ -456,6 +454,13 @@ export default {
       )
       ctx.stroke()
     },
+    hexToRgbA(hex, alpha) {
+      let r = parseInt(hex.slice(1, 3), 16)
+      let g = parseInt(hex.slice(3, 5), 16)
+      let b = parseInt(hex.slice(5, 7), 16)
+
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`
+    },
   },
   updated() {
     // установка высоты и ширины изображения в натуральный размер
@@ -469,6 +474,11 @@ export default {
         canvas.style.height = `${image.naturalHeight * this.scale}px`
       }
     }
+  },
+  computed: {
+    canvasCursor() {
+      return this.selectedCursor
+    },
   },
 }
 </script>
