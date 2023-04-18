@@ -272,7 +272,7 @@ export default {
       }
       return foundLabel
     },
-    findDot(offsetX, offsetY, label) {
+    findDotIntoLabel(offsetX, offsetY, label) {
       if (label) {
         for (const dot of label.coordinates) {
           const distance = (offsetX - dot.x) ** 2 + (offsetY - dot.y) ** 2
@@ -280,7 +280,11 @@ export default {
             return dot
           }
         }
-      } else {
+      }
+      return null
+    },
+    findDotFromDots(offsetX, offsetY) {
+      if (this.dots.length !== 0) {
         for (const dot of this.dots) {
           const distance = (offsetX - dot.x) ** 2 + (offsetY - dot.y) ** 2
           if (distance <= 45) {
@@ -345,10 +349,18 @@ export default {
         const rect = canvas.getBoundingClientRect()
         const x = (event.clientX - rect.left) / this.scale
         const y = (event.clientY - rect.top) / this.scale
-        const label = this.findLabel(x, y)
-        const dot = this.findDot(x, y, label)
-        this.deleteDot(ctx, label, dot)
+
+        // Удаление точки внутри метки
+        const dotFromDots = this.findDotFromDots(x, y)
+        if (dotFromDots) {
+          this.deleteDot(ctx, null, dotFromDots)
+        } else {
+          const label = this.findLabel(x, y)
+          const dot = this.findDotIntoLabel(x, y, label)
+          this.deleteDot(ctx, label, dot)
+        }
         this.drawAllLabels(ctx)
+        this.drawDots(ctx, this.dots, 3, this.color)
       }
     },
     mouseMove(event) {
@@ -362,6 +374,7 @@ export default {
       const y = (event.clientY - rect.top) / this.scale
 
       this.drawAllLabels(ctx)
+      this.drawDots(ctx, this.dots, 3, this.color)
 
       const label = this.findLabel(x, y)
       if (label) {
@@ -376,7 +389,7 @@ export default {
         const width = x - this.startCoords.x * this.scale
         const height = y - this.startCoords.y * this.scale
 
-        this.drawRect(ctx, width, height)
+        this.drawRect(ctx, width, height, this.color)
         this.drawDots(ctx, this.dots, 3, this.color)
       } else if (this.isDragging) {
         const offsetX = event.clientX - this.startMouseX
@@ -396,10 +409,6 @@ export default {
           // Курсор мыши достиг границы div
           this.isDragging = false
         }
-      } else if (this.selectedMode === "dot") {
-        this.drawDots(ctx, this.dots, 3, this.color)
-      } else if (this.selectedMode === "eraser") {
-        this.drawDots(ctx, this.dots, 3, this.color)
       }
     },
     mouseUp(event) {
@@ -444,8 +453,9 @@ export default {
         this.isDragging = false
       }
     },
-    drawRect(ctx, width, height) {
+    drawRect(ctx, width, height, color) {
       ctx.beginPath()
+      ctx.strokeStyle = color
       ctx.rect(
         this.startCoords.x * this.scale,
         this.startCoords.y * this.scale,
@@ -483,7 +493,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 /*content part */
 .content {
   position: relative;
