@@ -35,7 +35,7 @@
             class="option_item"
             :key="option.id"
           >
-            {{ option.title }}
+            {{ option.groupName }}
           </li>
         </ul>
       </div>
@@ -56,7 +56,7 @@
             class="option_item"
             :key="option.id"
           >
-            {{ option.title }}
+            {{ option.className }}
           </li>
         </ul>
       </div>
@@ -66,112 +66,84 @@
           type="text"
           id="search_label"
           v-model="searchLabel"
-          @input="filterLables"
+          @input="filterLabels"
           class="search_input"
           placeholder="Search..."
         />
-        <ul v-if="showLables" class="options_list">
+        <ul v-if="showLabels" class="options_list">
           <li
-            v-for="option in filteredLables"
+            v-for="option in filteredLabels"
             @click="selectLabel(option)"
             class="option_item"
             :key="option.id"
           >
-            {{ option.title }}
+            {{ option.labelName }}
           </li>
         </ul>
       </div>
       <button @click="saveLabel()">Save</button>
     </div>
     <div class="markup_tree" v-if="isShowMarkupTree">
-      <ul>
-        <li
-          v-for="group in labelGroups"
-          style="padding-left: 10px"
-          :key="group.id"
-        >
-          <div>{{ group.groupName }}</div>
-          <ul>
-            <li
-              v-for="label in labelNames"
-              style="padding-left: 10px"
-              :key="label.labelId"
-            >
-              <div v-if="label.ClassName === group.groupName">
-                {{ label.PageName }}
-              </div>
-              <ul>
-                <li
-                  v-for="cls in labelClasses"
-                  style="padding-left: 10px"
-                  :key="cls.id"
-                >
-                  <div v-if="cls.className === label.PageName">
-                    {{ label.LabelName }}
-                  </div>
-                </li>
-              </ul>
-            </li>
-          </ul>
-        </li>
-      </ul>
-    </div>
-
-    <!-- Для аннотации ***************************************** -->
-    <button @click="showAnnotation">Show Annotation</button>
-    <div class="Annotation" v-if="isAnnotationShow">
       <span @click="showGroup"
-        ><strong>Annotation</strong>
+        ><strong>Markup</strong>
         {{ `${this.isShowGroups ? "\u{025B7}" : "\u{025BD}"}` }}</span
       >
       <ul v-if="isShowGroups">
         <li
-          v-for="group in annotationGroups"
+          v-for="group in labelGroups"
           style="padding-left: 30px"
           :key="group.id"
         >
-          <div @click="showClass(group.id)">
+          <div @click="showClass(labelGroups.indexOf(group))">
             {{
-              `${group.title} ${
-                this.isShowClasses[group.id - 1] ? "\u{025B7}" : "\u{025BD}"
+              `${group.groupName} ${
+                this.isShowClasses[labelGroups.indexOf(group)] ? "\u{025B7}" : "\u{025BD}"
               }`
             }}
           </div>
-          <ul v-if="isShowClasses[group.id - 1]">
+          <ul v-if="isShowClasses[labelGroups.indexOf(group)]">
             <li
-              v-for="element in annotationClasses"
+              v-for="element in labelClasses"
               style="padding-left: 30px"
               :key="element.id"
             >
-              <div
-                v-if="element.groups.includes(group.id)"
-                @click="showLabel(element.id, group.id)"
-              >
-                {{
-                  `${element.title} ${
-                    element.lables
-                      ? element.lables.length != 0
-                        ? this.isShowLables[group.id - 1][element.id - 1]
-                          ? "\u{025B7}"
-                          : "\u{025BD}"
+              <div v-if="element.groups.includes(group.groupName)" class="label_tools">
+                <div
+                    @click="showLabel(labelClasses.indexOf(element), labelGroups.indexOf(group))"
+                >
+                    {{
+                    `${element.className} ${
+                        element.labels
+                        ? element.labels.length != 0
+                            ? this.isShowLabels[labelGroups.indexOf(group)][labelClasses.indexOf(element)]
+                            ? "\u{025B7}"
+                            : "\u{025BD}"
+                            : ""
                         : ""
-                      : ""
-                  }`
-                }}
+                    }`
+                    }}
+                </div>
+              <div @click="toShowLabel()" class="label_tools"><i class='bx bx-show'></i></div>
+              <div @click="toColorLabel()" class="label_tools"><i class="bx bxs-droplet-half"></i></div>
+              <div @click="toDeleteLabel()" class="label_tools"><i class="bx bxs-trash"></i></div>
               </div>
-              <ul v-if="isShowLables[group.id - 1][element.id - 1]">
+              <ul v-if="isShowLabels[labelGroups.indexOf(group)][labelClasses.indexOf(element)]">
                 <li
-                  v-for="label in annotationLables"
+                  v-for="label in labelLabels"
                   style="padding-left: 30px"
                   :key="label.id"
-                >
-                  <div
-                    v-if="
-                      element.lables != undefined &&
-                      element.lables.includes(label.id)
-                    "
-                  >
-                    {{ label.title }}
+                >  
+                  <div v-if="
+                        element.labels != undefined &&
+                        element.labels.includes(label.labelName)
+                        "
+                        class="label_tools">
+                    <div>
+                        {{ label.labelName }}
+                    </div>
+                    <div @click="toShowLabel()"><i class='bx bx-show'></i></div>
+                    <div @click="toColorLabel()"><i class="bx bxs-droplet-half"></i></div>
+                    <div @click="toDeleteLabel()"><i class="bx bxs-trash"></i></div>
                   </div>
                 </li>
               </ul>
@@ -185,40 +157,37 @@
 
 <script>
 import axios from "axios"
-const path = "/try_classifier.json"
+// const path = "/try_classifier.json"
 
-// Для аннотации ************************************************
 const annotationPath = "/try_annotation.json"
 
 export default {
   data() {
     return {
       classifierData: {},
-      groups: {},
-      classes: {},
       labelNames: [],
       labelGroups: [],
       labelClasses: [],
+      labelLabels: [],
       searchClass: "",
       searchPage: "",
       searchLabel: "",
       isShowMarkupTree: false,
       showGroups: false,
       showClasses: false,
-      showLables: false,
+      showLabels: false,
       selectedMarkupMode: "label",
       labelId: NaN,
       labelOnWork: false,
+      isShowGroups: false,
+      isShowClasses: [],
+      isShowLabels: [],
 
-      // Для аннотации ************************************************
-      isAnnotationShow: false,
       annotationData: {},
       annotationGroups: {},
       annotationClasses: {},
-      annotationLables: {},
-      isShowGroups: false,
-      isShowClasses: [],
-      isShowLables: [],
+      annotationLabels: {},
+      
     }
   },
   props: {
@@ -230,33 +199,49 @@ export default {
     labels: {
       handler(newVal, oldVal) {
         // Обработка изменений в массиве
-        // oldLen = this.labels.length
         this.labelOnWork = true
-        this.labelId = newVal[newVal.length - 1].labelId
+        if (newVal[newVal.length - 1]) {
+            this.labelId = newVal[newVal.length - 1].labelId
+        }
       },
       deep: true,
     },
+    labelNames: {
+        handler() {
+            this.isShowClasses = Array.from(
+                Object.keys(this.labelGroups).length
+            ).fill(false)
+            this.isShowLabels = Array.from(
+                { length: Object.keys(this.labelGroups).length },
+                () => Array.from(
+                    Object.keys(this.labelClasses).length
+                    ).fill(false)
+            )
+        },
+        deep: true,
+    }
   },
   computed: {
     filteredGroups() {
       // Фильтрация вариантов на основе текущего ввода поиска
-      return this.groups.filter((option) =>
-        option.title.toLowerCase().includes(this.searchClass.toLowerCase())
+      return this.labelGroups.filter((option) =>
+        option.groupName.toLowerCase().includes(this.searchClass.toLowerCase())
       )
     },
     filteredClasses() {
       // Фильтрация вариантов на основе текущего ввода поиска
-      return this.classes.filter(
+      return this.labelClasses.filter(
         (option) =>
-          option.title.toLowerCase().includes(this.searchPage.toLowerCase()) &&
-          option.lables &&
-          option.lables.includes(this.labelId)
+          option.className.toLowerCase().includes(this.searchPage.toLowerCase()) //&&
+        //   option.labels &&
+        //   option.groups
+        //   option.labels.includes(this.searchLabel)
       )
     },
-    filteredLables() {
+    filteredLabels() {
       // Фильтрация вариантов на основе текущего ввода поиска
-      return this.lables.filter((option) =>
-        option.title.toLowerCase().includes(this.searchLabel.toLowerCase())
+      return this.labelLabels.filter((option) =>
+        option.labelName.toLowerCase().includes(this.searchLabel.toLowerCase())
       )
     },
   },
@@ -272,37 +257,37 @@ export default {
       // Показать или скрыть выпадающий список на основе наличия вариантов после фильтрации
       this.showClasses = this.filteredClasses.length > 0
     },
-    filterLables() {
+    filterLabels() {
       // Показать или скрыть выпадающий список на основе наличия вариантов после фильтрации
-      this.showLables = this.filteredLables.length > 0
+      this.showLabels = this.filteredLabels.length > 0
     },
     selectGroup(option) {
       // Обработка выбора опции
-      this.searchClass = option.title
+      this.searchClass = option.groupName
       this.showGroups = false // Скрытие выпадающего списка
     },
     selectClass(option) {
       // Обработка выбора опции
-      this.searchPage = option.title
+      this.searchPage = option.className
       this.showClasses = false // Скрытие выпадающего списка
     },
     selectLabel(option) {
       // Обработка выбора опции
-      this.searchLabel = option.title
+      this.searchLabel = option.labelName
       this.labelId = option.id
-      for (const page of this.classes) {
-        if (page.lables && page.lables.includes(this.labelId)) {
-          this.searchPage = page.title
-          for (const group of this.groups) {
-            if (page.groups && page.groups.includes(group.id)) {
-              this.searchClass = group.title
+      for (const page of this.labelClasses) {
+        if (page.labels && page.labels.includes(option.labelName)) {
+          this.searchPage = page.className
+          for (const group of this.labelGroups) {
+            if (page.groups && page.groups.includes(group.groupName)) {
+              this.searchClass = group.groupName
               break
             }
           }
           break
         }
       }
-      this.showLables = false // Скрытие выпадающего списка
+      this.showLabels = false // Скрытие выпадающего списка
     },
     markupModeChange(event) {
       this.selectedMarkupMode = event.target.value
@@ -328,11 +313,30 @@ export default {
             id: this.labelId,
           })
         }
+        let foundClass = this.labelClasses.find((cls) => cls.className === this.searchPage)
         if (
-          !this.labelClasses.some((cls) => cls.className === this.searchPage)
+          !foundClass
         ) {
-          this.labelClasses.push({
-            className: this.searchPage,
+            let newLabelClass = {
+                className: this.searchPage,
+                id: this.labelId,
+                groups: [this.searchClass],
+                labels: [this.searchLabel],
+            }
+          this.labelClasses.push(newLabelClass)
+        } else {
+            if (!foundClass.groups.includes(this.searchClass)) {
+                foundClass.groups.push(this.searchClass)
+            }
+            if (!foundClass.labels.includes(this.searchLabel)) {
+                foundClass.labels.push(this.searchLabel)  
+            } 
+        }
+        if (
+          !this.labelLabels.some((label) => label.labelName === this.searchLabel)
+        ) {
+          this.labelLabels.push({
+            labelName: this.searchLabel,
             id: this.labelId,
           })
         }
@@ -340,62 +344,100 @@ export default {
         this.labelOnWork = false
       }
     },
-    async fetchClassifier() {
-      try {
-        const response = await axios.get(path)
-        this.classifierData = response.data
-        this.groups = this.classifierData.groups
-        this.classes = this.classifierData.classes
-        this.lables = this.classifierData.lables
-      } catch (error) {
-        alert(error.message)
-      }
-    },
+    // async fetchClassifier() {
+    //   try {
+    //     const response = await axios.get(path)
+    //     this.classifierData = response.data
+    //     this.groups = this.classifierData.groups
+    //     this.classes = this.classifierData.classes
+    //     this.lables = this.classifierData.lables
+    //   } catch (error) {
+    //     alert(error.message)
+    //   }
+    // },
 
-    // Для аннотации ************************************************
-    showAnnotation() {
-      this.isAnnotationShow = !this.isAnnotationShow
-    },
     async fetchAnnotation() {
       try {
         const response = await axios.get(annotationPath)
         this.annotationData = response.data
         this.annotationGroups = this.annotationData.groups
         this.annotationClasses = this.annotationData.classes
-        this.annotationLables = this.annotationData.lables
+        this.annotationLabels = this.annotationData.labels
+
+        for (const annotationGroup of this.annotationGroups) {
+            this.labelGroups.push({
+            groupName: annotationGroup.title,
+            id: annotationGroup.id,
+          })
+        }
+        for (const annotationClass of this.annotationClasses) {
+            let newLabelClass = {
+                className: annotationClass.title,
+                id: annotationClass.id,
+                groups: [],
+                labels: [],
+            }
+            for (const group of this.annotationGroups) { 
+                if (annotationClass.groups && annotationClass.groups.includes(group.id)) {
+                    newLabelClass.groups.push(group.title)
+                }
+            }
+            for (const label of this.annotationLabels) { 
+                if (annotationClass.labels && annotationClass.labels.includes(label.id)) {
+                    newLabelClass.labels.push(label.title)
+                }
+            }
+            this.labelClasses.push(newLabelClass)
+        }
+        for (const annotationLabel of this.annotationLabels) {
+            this.labelLabels.push({
+                labelName: annotationLabel.title,
+                id: annotationLabel.id,
+            })
+            let newLabel = {
+                LabelName: annotationLabel.title,
+                PageName: '',
+                ClassName: '',
+                labelId: annotationLabel.id,
+            }
+            for (const annotationClass of this.annotationClasses) {
+                if (annotationClass.labels && annotationClass.labels.includes(annotationLabel.id)) {
+                    newLabel.PageName = annotationClass.title
+                    for (const group of this.annotationGroups) {
+                        newLabel.ClassName = group.title
+                        this.labelNames.push(newLabel)
+                    }
+                }
+            }
+
+        }
       } catch (error) {
         alert(error.message)
       }
     },
     showGroup() {
       this.isShowGroups = !this.isShowGroups
-      this.isShowClasses = Array.from(
-        Object.keys(this.annotationData.groups).length
-      ).fill(false)
     },
     showClass(groupId) {
-      this.isShowClasses[groupId - 1] = !this.isShowClasses[groupId - 1]
-      if (this.isShowLables.length === 0) {
-        this.isShowLables = Array.from(
-          { length: Object.keys(this.annotationData.groups).length },
-          () => []
-        )
-        for (let i = 0; i < this.isShowLables.length; i++) {
-          this.isShowLables[i] = Array.from(
-            Object.keys(this.annotationData.classes).length
-          ).fill(false)
-        }
-      }
+      this.isShowClasses[groupId] = !this.isShowClasses[groupId]
     },
     showLabel(classId, groupId) {
-      this.isShowLables[groupId - 1][classId - 1] =
-        !this.isShowLables[groupId - 1][classId - 1]
+      this.isShowLabels[groupId][classId] =
+        !this.isShowLabels[groupId][classId]
     },
+    toShowLabel() {
+
+    },
+    toColorLabel() {
+
+    },
+    toDeleteLabel() {
+        
+    }
   },
   mounted() {
-    this.fetchClassifier()
+    // this.fetchClassifier()
 
-    // Для аннотации ************************************************
     this.fetchAnnotation()
   },
 }
@@ -439,7 +481,11 @@ export default {
 }
 
 .markup_tree {
-  margin-top: 30px;
+  display: block;
+  max-height: 300px;
+  width: 200px;
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 10px;
   overflow-y: scroll;
 }
 
@@ -460,17 +506,10 @@ button:hover {
   color: #17202a;
 }
 
-/* Для аннотации ************************************************ */
-.Annotation {
-  display: block;
-  max-height: 300px;
-  width: 200px;
-  color: rgba(255, 255, 255, 0.5);
-  margin-top: 10px;
-  overflow-y: scroll;
+.label_tools {
+  display: flex;
+  flex-direction: row;
 }
 
-.Annotation li {
-  margin-top: 10px;
-}
+
 </style>

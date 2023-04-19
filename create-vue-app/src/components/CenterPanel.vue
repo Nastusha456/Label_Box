@@ -412,7 +412,7 @@ export default {
       }
     },
     mouseUp(event) {
-      if (this.selectedMode === "markup") {
+      if (this.isDrowing && this.selectedMode === "markup") {
         // Конец рисования
         const canvas = this.$refs.canvas
         const ctx = canvas.getContext("2d")
