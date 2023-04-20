@@ -8,7 +8,7 @@
       @input="onModeChange"
     />
     <div class="label-editor" @click="ModeChange('markup')">
-      <i class="bx bx-selection"></i>
+      <i class="bx bx-selection bx-spin-hover"></i>
       <p>Markup</p>
     </div>
     <input
@@ -19,7 +19,7 @@
       @input="onModeChange"
     />
     <div class="label-editor" @click="ModeChange('dot')">
-      <i class="bx bx-message-square-edit"></i>
+      <i class="bx bx-message-square-edit bx-tada-hover"></i>
       <p>Dot</p>
     </div>
     <input
@@ -30,11 +30,11 @@
       @input="onModeChange"
     />
     <div class="label-editor" @click="ModeChange('eraser')">
-      <i class="bx bxs-eraser"></i>
+      <i class="bx bxs-eraser bx-tada-hover"></i>
       <p>Eraser</p>
     </div>
     <div class="label-editor" @click="CreatePolygon">
-      <i class="bx bx-shape-polygon"></i>
+      <i class="bx bx-shape-polygon bx-spin-hover"></i>
       <p>Create Polygon</p>
     </div>
     <input
@@ -46,7 +46,7 @@
       @input="changeColor"
     />
     <div class="label-editor" @click="ShowPalette()">
-      <i class="bx bxs-palette"></i>
+      <i class="bx bxs-palette bx-fade-right-hover"></i>
       <p>Palette</p>
     </div>
   </div>

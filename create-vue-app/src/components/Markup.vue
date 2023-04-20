@@ -97,7 +97,9 @@
           <div @click="showClass(labelGroups.indexOf(group))">
             {{
               `${group.groupName} ${
-                this.isShowClasses[labelGroups.indexOf(group)] ? "\u{025B7}" : "\u{025BD}"
+                this.isShowClasses[labelGroups.indexOf(group)]
+                  ? "\u{025B7}"
+                  : "\u{025BD}"
               }`
             }}
           </div>
@@ -107,43 +109,85 @@
               style="padding-left: 30px"
               :key="element.id"
             >
-              <div v-if="element.groups.includes(group.groupName)" class="label_tools">
+              <div
+                v-if="element.groups.includes(group.groupName)"
+                class="label_tools"
+              >
                 <div
-                    @click="showLabel(labelClasses.indexOf(element), labelGroups.indexOf(group))"
+                  @click="
+                    showLabel(
+                      labelClasses.indexOf(element),
+                      labelGroups.indexOf(group)
+                    )
+                  "
                 >
-                    {{
+                  {{
                     `${element.className} ${
-                        element.labels
+                      element.labels
                         ? element.labels.length != 0
-                            ? this.isShowLabels[labelGroups.indexOf(group)][labelClasses.indexOf(element)]
+                          ? this.isShowLabels[labelGroups.indexOf(group)][
+                              labelClasses.indexOf(element)
+                            ]
                             ? "\u{025B7}"
                             : "\u{025BD}"
-                            : ""
+                          : ""
                         : ""
                     }`
-                    }}
+                  }}
                 </div>
-              <div @click="toShowLabel()" class="label_tools"><i class='bx bx-show'></i></div>
-              <div @click="toColorLabel()" class="label_tools"><i class="bx bxs-droplet-half"></i></div>
-              <div @click="toDeleteLabel()" class="label_tools"><i class="bx bxs-trash"></i></div>
+                <div @click="toShowLabel(element.id)" class="label-editor">
+                  <i class="bx bx-low-vision bx-xs bx-flashing-hover"></i>
+                  <p>Vision</p>
+                </div>
+                <div @click="toColorLabel(element.id)" class="label-editor">
+                  <i
+                    class="bx bxs-droplet-half bx-xs bx-burst-hover"
+                    :style="{ color: element.color }"
+                  ></i>
+                  <p>Color</p>
+                </div>
+                <div @click="toDeleteLabel(element.id)" class="label-editor">
+                  <i class="bx bxs-trash bx-xs bx-tada-hover"></i>
+                  <p>Trash</p>
+                </div>
               </div>
-              <ul v-if="isShowLabels[labelGroups.indexOf(group)][labelClasses.indexOf(element)]">
+              <ul
+                v-if="
+                  isShowLabels[labelGroups.indexOf(group)][
+                    labelClasses.indexOf(element)
+                  ]
+                "
+              >
                 <li
                   v-for="label in labelLabels"
                   style="padding-left: 30px"
                   :key="label.id"
-                >  
-                  <div v-if="
-                        element.labels != undefined &&
-                        element.labels.includes(label.labelName)
-                        "
-                        class="label_tools">
+                >
+                  <div
+                    v-if="
+                      element.labels != undefined &&
+                      element.labels.includes(label.labelName)
+                    "
+                    class="label_tools"
+                  >
                     <div>
-                        {{ label.labelName }}
+                      {{ label.labelName }}
                     </div>
-                    <div @click="toShowLabel()"><i class='bx bx-show'></i></div>
-                    <div @click="toColorLabel()"><i class="bx bxs-droplet-half"></i></div>
-                    <div @click="toDeleteLabel()"><i class="bx bxs-trash"></i></div>
+                    <div @click="toShowLabel(label.id)" class="label-editor">
+                      <i class="bx bx-low-vision bx-xs bx-flashing-hover"></i>
+                      <p>Vision</p>
+                    </div>
+                    <div @click="toColorLabel(label.id)" class="label-editor">
+                      <i
+                        class="bx bxs-droplet-half bx-xs bx-burst-hover"
+                        :style="{ color: label.color }"
+                      ></i>
+                      <p>Color</p>
+                    </div>
+                    <div @click="toDeleteLabel(label.id)" class="label-editor">
+                      <i class="bx bxs-trash bx-xs bx-tada-hover"></i>
+                      <p>Trash</p>
+                    </div>
                   </div>
                 </li>
               </ul>
@@ -187,7 +231,6 @@ export default {
       annotationGroups: {},
       annotationClasses: {},
       annotationLabels: {},
-      
     }
   },
   props: {
@@ -201,25 +244,23 @@ export default {
         // Обработка изменений в массиве
         this.labelOnWork = true
         if (newVal[newVal.length - 1]) {
-            this.labelId = newVal[newVal.length - 1].labelId
+          this.labelId = newVal[newVal.length - 1].labelId
         }
       },
       deep: true,
     },
     labelNames: {
-        handler() {
-            this.isShowClasses = Array.from(
-                Object.keys(this.labelGroups).length
-            ).fill(false)
-            this.isShowLabels = Array.from(
-                { length: Object.keys(this.labelGroups).length },
-                () => Array.from(
-                    Object.keys(this.labelClasses).length
-                    ).fill(false)
-            )
-        },
-        deep: true,
-    }
+      handler() {
+        this.isShowClasses = Array.from(
+          Object.keys(this.labelGroups).length
+        ).fill(false)
+        this.isShowLabels = Array.from(
+          { length: Object.keys(this.labelGroups).length },
+          () => Array.from(Object.keys(this.labelClasses).length).fill(false)
+        )
+      },
+      deep: true,
+    },
   },
   computed: {
     filteredGroups() {
@@ -313,27 +354,29 @@ export default {
             id: this.labelId,
           })
         }
-        let foundClass = this.labelClasses.find((cls) => cls.className === this.searchPage)
-        if (
-          !foundClass
-        ) {
-            let newLabelClass = {
-                className: this.searchPage,
-                id: this.labelId,
-                groups: [this.searchClass],
-                labels: [this.searchLabel],
-            }
+        let foundClass = this.labelClasses.find(
+          (cls) => cls.className === this.searchPage
+        )
+        if (!foundClass) {
+          let newLabelClass = {
+            className: this.searchPage,
+            id: this.labelId,
+            groups: [this.searchClass],
+            labels: [this.searchLabel],
+          }
           this.labelClasses.push(newLabelClass)
         } else {
-            if (!foundClass.groups.includes(this.searchClass)) {
-                foundClass.groups.push(this.searchClass)
-            }
-            if (!foundClass.labels.includes(this.searchLabel)) {
-                foundClass.labels.push(this.searchLabel)  
-            } 
+          if (!foundClass.groups.includes(this.searchClass)) {
+            foundClass.groups.push(this.searchClass)
+          }
+          if (!foundClass.labels.includes(this.searchLabel)) {
+            foundClass.labels.push(this.searchLabel)
+          }
         }
         if (
-          !this.labelLabels.some((label) => label.labelName === this.searchLabel)
+          !this.labelLabels.some(
+            (label) => label.labelName === this.searchLabel
+          )
         ) {
           this.labelLabels.push({
             labelName: this.searchLabel,
@@ -365,51 +408,61 @@ export default {
         this.annotationLabels = this.annotationData.labels
 
         for (const annotationGroup of this.annotationGroups) {
-            this.labelGroups.push({
+          this.labelGroups.push({
             groupName: annotationGroup.title,
             id: annotationGroup.id,
           })
         }
         for (const annotationClass of this.annotationClasses) {
-            let newLabelClass = {
-                className: annotationClass.title,
-                id: annotationClass.id,
-                groups: [],
-                labels: [],
+          let newLabelClass = {
+            className: annotationClass.title,
+            id: annotationClass.id,
+            groups: [],
+            labels: [],
+            color: annotationClass.color, // *****************************************
+          }
+          for (const group of this.annotationGroups) {
+            if (
+              annotationClass.groups &&
+              annotationClass.groups.includes(group.id)
+            ) {
+              newLabelClass.groups.push(group.title)
             }
-            for (const group of this.annotationGroups) { 
-                if (annotationClass.groups && annotationClass.groups.includes(group.id)) {
-                    newLabelClass.groups.push(group.title)
-                }
+          }
+          for (const label of this.annotationLabels) {
+            if (
+              annotationClass.labels &&
+              annotationClass.labels.includes(label.id)
+            ) {
+              newLabelClass.labels.push(label.title)
             }
-            for (const label of this.annotationLabels) { 
-                if (annotationClass.labels && annotationClass.labels.includes(label.id)) {
-                    newLabelClass.labels.push(label.title)
-                }
-            }
-            this.labelClasses.push(newLabelClass)
+          }
+          this.labelClasses.push(newLabelClass)
         }
         for (const annotationLabel of this.annotationLabels) {
-            this.labelLabels.push({
-                labelName: annotationLabel.title,
-                id: annotationLabel.id,
-            })
-            let newLabel = {
-                LabelName: annotationLabel.title,
-                PageName: '',
-                ClassName: '',
-                labelId: annotationLabel.id,
+          this.labelLabels.push({
+            labelName: annotationLabel.title,
+            id: annotationLabel.id,
+            color: annotationLabel.color, // *****************************************
+          })
+          let newLabel = {
+            LabelName: annotationLabel.title,
+            PageName: "",
+            ClassName: "",
+            labelId: annotationLabel.id,
+          }
+          for (const annotationClass of this.annotationClasses) {
+            if (
+              annotationClass.labels &&
+              annotationClass.labels.includes(annotationLabel.id)
+            ) {
+              newLabel.PageName = annotationClass.title
+              for (const group of this.annotationGroups) {
+                newLabel.ClassName = group.title
+                this.labelNames.push(newLabel)
+              }
             }
-            for (const annotationClass of this.annotationClasses) {
-                if (annotationClass.labels && annotationClass.labels.includes(annotationLabel.id)) {
-                    newLabel.PageName = annotationClass.title
-                    for (const group of this.annotationGroups) {
-                        newLabel.ClassName = group.title
-                        this.labelNames.push(newLabel)
-                    }
-                }
-            }
-
+          }
         }
       } catch (error) {
         alert(error.message)
@@ -422,18 +475,17 @@ export default {
       this.isShowClasses[groupId] = !this.isShowClasses[groupId]
     },
     showLabel(classId, groupId) {
-      this.isShowLabels[groupId][classId] =
-        !this.isShowLabels[groupId][classId]
+      this.isShowLabels[groupId][classId] = !this.isShowLabels[groupId][classId]
     },
-    toShowLabel() {
-
+    toShowLabel(id) {
+      this.$emit("visibleLabelBtn", id)
     },
-    toColorLabel() {
-
+    toColorLabel(id) {
+      this.$emit("changeLabelColorBtn", id)
     },
-    toDeleteLabel() {
-        
-    }
+    toDeleteLabel(id) {
+      this.$emit("deleteLabelBtn", id)
+    },
   },
   mounted() {
     // this.fetchClassifier()
@@ -510,6 +562,42 @@ button:hover {
   display: flex;
   flex-direction: row;
 }
+/* ********************************************************** */
+.label-editor {
+  width: 15px;
+  height: 30px;
+  margin-left: 3px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition: 0.5s;
+}
 
+.label-editor i {
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 3px;
+  font-size: 1.7em;
+}
 
+.label-editor:hover i {
+  color: #ff7043;
+}
+
+.label-editor:hover p {
+  opacity: 1;
+  margin: 3px;
+  color: #ff7043;
+  font-size: 12px;
+}
+
+.label-editor p {
+  opacity: 0;
+}
+
+input[type="color"] {
+  width: 30px;
+  background: rgba(255, 255, 255, 0.1);
+  margin-top: 3px;
+}
 </style>

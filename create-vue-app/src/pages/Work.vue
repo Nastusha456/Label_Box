@@ -30,6 +30,9 @@
         :isShowMarkupPanel="isShowMarkupPanel"
         :isShowLabelEditor="isShowLabelEditor"
         :labels="labels"
+        @visibleLabelBtn="visibleLabelBtn"
+        @changeLabelColorBtn="changeLabelColorBtn"
+        @deleteLabelBtn="deleteLabelBtn"
       />
       <right-panel
         @delet="delet"
@@ -117,6 +120,15 @@ export default {
     },
     changeCursor(cursor) {
       this.selectedCursor = cursor
+    },
+    visibleLabelBtn(id) {
+      this.$refs.CenterPanel.visibleLabelBtn(id)
+    },
+    changeLabelColorBtn(id) {
+      this.$refs.CenterPanel.changeLabelColorBtn(id)
+    },
+    deleteLabelBtn(id) {
+      this.$refs.CenterPanel.deleteLabelBtn(id)
     },
   },
 }

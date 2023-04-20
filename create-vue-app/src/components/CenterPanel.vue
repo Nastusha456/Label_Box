@@ -50,6 +50,7 @@ export default {
       rectangles: [],
       dots: [],
       labels: [],
+      visibleLabels: [],
       isDrowing: false,
       isDragging: false,
       startMouseX: 0,
@@ -222,6 +223,7 @@ export default {
       this.dots = []
       const label = { coordinates, contour, color, labelId }
       this.labels.push(label)
+      this.visibleLabels.push(label)
       const canvas = this.$refs.canvas
       const ctx = canvas.getContext("2d")
       ctx.canvas.width = ctx.canvas.clientWidth
@@ -245,14 +247,13 @@ export default {
       ctx.stroke()
     },
     drawAllLabels(ctx) {
-      for (const label of this.labels) {
+      for (const label of this.visibleLabels) {
         const points = label.coordinates
         const color = label.color ? label.color : "black"
         this.drawLabel(ctx, points, color, "transparent")
       }
     },
-    findLabel(offsetX, offsetY) {
-      const labels = this.labels
+    findLabel(offsetX, offsetY, labels) {
       let minSquare = Infinity
       let foundLabel = null
       for (const label of labels) {
@@ -271,6 +272,24 @@ export default {
         }
       }
       return foundLabel
+    },
+    findAllLabels(offsetX, offsetY, labels) {
+      const filteredLabels = labels.filter(
+        (label) =>
+          label.contour.left <= offsetX &&
+          offsetX <= label.contour.right &&
+          label.contour.top <= offsetY &&
+          offsetY <= label.contour.bottom
+      )
+      const sortedLabels = filteredLabels.sort(
+        (label1, label2) =>
+          (label2.contour.right - label2.contour.left) *
+            (label2.contour.bottom - label2.contour.top) -
+          (label1.contour.right - label1.contour.left) *
+            (label1.contour.bottom - label1.contour.top)
+      )
+
+      return sortedLabels
     },
     findDotIntoLabel(offsetX, offsetY, label) {
       if (label) {
@@ -297,6 +316,7 @@ export default {
     deleteDot(ctx, label, dot) {
       if (label) {
         const label_index = this.labels.indexOf(label)
+        const visibleLabel_index = this.visibleLabels.indexOf(label)
         const dot_index = label.coordinates.indexOf(dot)
         const color = label.color
         if (dot_index !== -1) {
@@ -305,6 +325,9 @@ export default {
         }
         if (label_index !== -1) {
           this.labels.splice(label_index, 1)
+        }
+        if (visibleLabel_index !== -1) {
+          this.visibleLabels.splice(visibleLabel_index, 1)
         }
         this.drawDots(ctx, this.dots, 3, color)
       } else if (dot) {
@@ -315,6 +338,107 @@ export default {
         }
         this.drawDots(ctx, this.dots, 3, color)
       }
+    },
+    findLabelById(id, labels) {
+      for (const label of labels) {
+        if (label.labelId == id) {
+          return label
+        }
+      }
+      return null
+    },
+    deleteLabelFromLabels(label, labels) {
+      const label_index = labels.indexOf(label)
+      if (label_index !== -1) {
+        labels.splice(label_index, 1)
+      }
+    },
+    deleteLabelBtn(id) {
+      const visibleLabel = this.findLabelById(id, this.visibleLabels)
+      if (visibleLabel) {
+        this.deleteLabelFromLabels(visibleLabel, this.visibleLabels)
+      }
+
+      const label = this.findLabelById(id, this.labels)
+      if (label) {
+        this.deleteLabelFromLabels(label, this.labels)
+      }
+
+      // Процесс рисования
+      const canvas = this.$refs.canvas
+      const ctx = canvas.getContext("2d")
+      ctx.canvas.width = ctx.canvas.clientWidth
+      ctx.canvas.height = ctx.canvas.clientHeight
+
+      this.drawAllLabels(ctx)
+      this.drawDots(ctx, this.dots, 3, this.color)
+    },
+    changeLabelColorBtn(id) {
+      const newColor = this.color
+      const visibleLabel = this.findLabelById(id, this.visibleLabels)
+      if (visibleLabel) {
+        const visibleLabel_index = this.visibleLabels.indexOf(visibleLabel)
+        if (visibleLabel_index !== -1) {
+          this.visibleLabels[visibleLabel_index].color = newColor
+        }
+      }
+      const label = this.findLabelById(id, this.labels)
+      if (label) {
+        const label_index = this.labels.indexOf(label)
+        if (label_index !== -1) {
+          this.labels[label_index].color = newColor
+        }
+      }
+
+      // Процесс рисования
+      const canvas = this.$refs.canvas
+      const ctx = canvas.getContext("2d")
+      ctx.canvas.width = ctx.canvas.clientWidth
+      ctx.canvas.height = ctx.canvas.clientHeight
+
+      this.drawAllLabels(ctx)
+      this.drawDots(ctx, this.dots, 3, this.color)
+    },
+    visibleLabelBtn(id) {
+      const visibleLabel = this.findLabelById(id, this.visibleLabels)
+      if (visibleLabel) {
+        this.deleteLabelFromLabels(visibleLabel, this.visibleLabels)
+      } else {
+        const label = this.findLabelById(id, this.labels)
+        if (label) {
+          this.visibleLabels.push(label)
+        }
+      }
+
+      // Процесс рисования
+      const canvas = this.$refs.canvas
+      const ctx = canvas.getContext("2d")
+      ctx.canvas.width = ctx.canvas.clientWidth
+      ctx.canvas.height = ctx.canvas.clientHeight
+
+      this.drawAllLabels(ctx)
+      this.drawDots(ctx, this.dots, 3, this.color)
+    },
+    AddNewLabels(labels) {
+      for (const label of labels) {
+        if (!label.coordinates) {
+          label.contour = this.contour(label.coordinates)
+          if (!label.color) {
+            label.color = this.color
+          }
+          this.labels.push(label)
+          this.visibleLabels.push(label)
+        }
+      }
+
+      // Процесс рисования
+      const canvas = this.$refs.canvas
+      const ctx = canvas.getContext("2d")
+      ctx.canvas.width = ctx.canvas.clientWidth
+      ctx.canvas.height = ctx.canvas.clientHeight
+
+      this.drawAllLabels(ctx)
+      this.drawDots(ctx, this.dots, 3, this.color)
     },
 
     mouseDown(event) {
@@ -355,7 +479,7 @@ export default {
         if (dotFromDots) {
           this.deleteDot(ctx, null, dotFromDots)
         } else {
-          const label = this.findLabel(x, y)
+          const label = this.findLabel(x, y, this.visibleLabels)
           const dot = this.findDotIntoLabel(x, y, label)
           this.deleteDot(ctx, label, dot)
         }
@@ -376,7 +500,7 @@ export default {
       this.drawAllLabels(ctx)
       this.drawDots(ctx, this.dots, 3, this.color)
 
-      const label = this.findLabel(x, y)
+      const label = this.findLabel(x, y, this.visibleLabels)
       if (label) {
         const color = label.color ? label.color : "#000000"
         const fill = this.hexToRgbA(color, 0.3)
@@ -446,6 +570,7 @@ export default {
         }
         const label = { coordinates, contour, color, labelId }
         this.labels.push(label)
+        this.visibleLabels.push(label)
         this.drawAllLabels(ctx)
         this.drawDots(ctx, this.dots, 3, this.color)
         this.isDrowing = false

@@ -38,7 +38,7 @@
       "code": "animal_cat",
       "labels": [1, 2, 3, 4],
       "groups": [1],
-      "color": "#000000",
+      "color": "#ff0000",
       "coordinates": [
         { "x": 153, "y": 63 },
         { "x": 56, "y": 114 },
@@ -62,7 +62,7 @@
       "code": "animal_cat",
       "labels": [5],
       "groups": [1],
-      "color": "#000000",
+      "color": "#0400ff",
       "coordinates": [
         { "x": 64, "y": 313 },
         { "x": 496, "y": 313 },

@@ -31,7 +31,7 @@
       checked
     />
     <div class="label-editor" @click="ModeChange('mooving')">
-      <i class="bx bx-move"></i>
+      <i class="bx bx-move bx-burst-hover"></i>
       <p>Move</p>
     </div>
     <label-editor
@@ -42,7 +42,7 @@
       @changeCursor="changeCursor"
     />
     <div class="label-editor" @click="ShowLabelEditor">
-      <i class="bx bxs-edit"></i>
+      <i class="bx bxs-edit bx-fade-right-hover"></i>
       <p>label editor</p>
     </div>
   </div>
