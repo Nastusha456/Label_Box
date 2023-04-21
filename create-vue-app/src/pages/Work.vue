@@ -30,6 +30,7 @@
         :isShowMarkupPanel="isShowMarkupPanel"
         :isShowLabelEditor="isShowLabelEditor"
         :labels="labels"
+        :color="color"
         @visibleLabelBtn="visibleLabelBtn"
         @changeLabelColorBtn="changeLabelColorBtn"
         @deleteLabelBtn="deleteLabelBtn"
@@ -93,6 +94,7 @@ export default {
     },
     delet() {
       this.$refs.CenterPanel.remove_img_btn()
+      this.$refs.Markup.remove_img_btn()
     },
     beginAnnotation() {
       this.isShowMarkupPanel = !this.isShowMarkupPanel

@@ -74,7 +74,6 @@
       "id": 4,
       "title": "St.enot",
       "code": "human_man",
-      "labels": [6],
       "groups": [2]
     }
   ],
@@ -165,12 +164,6 @@
         { "x": 273, "y": 401 },
         { "x": 172, "y": 400 }
       ]
-    },
-    {
-      "id": 6,
-      "title": "Photo 3x4",
-      "code": "bodyPart",
-      "type": "string"
     }
   ]
 }

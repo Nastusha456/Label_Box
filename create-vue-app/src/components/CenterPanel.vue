@@ -35,6 +35,10 @@
 </template>
 
 <script>
+import axios from "axios"
+
+const annotationPath = "/try_annotation.json"
+
 export default {
   data() {
     return {
@@ -57,6 +61,11 @@ export default {
       startMouseY: 0,
       startImageX: 0,
       startImageY: 0,
+
+      annotationData: {},
+      annotationGroups: {},
+      annotationClasses: {},
+      annotationLabels: {},
     }
   },
   props: {
@@ -137,6 +146,7 @@ export default {
       this.imageWidth = null
       this.imageSize = null
       this.imageName = null
+      this.visibleLabels = []
     },
     Download_btn() {
       if (this.imageUrl !== "") {
@@ -216,10 +226,11 @@ export default {
       const coordinates = this.jarvis(this.dots)
       const contour = this.contour(coordinates)
       const color = this.color
-      let labelId = 1
-      if (this.labels.length != 0) {
-        labelId = this.labels[this.labels.length - 1].labelId + 1
+      let Id = 1
+      while (this.labels.some((label) => label.labelId === Id)) {
+          Id = Id + 1
       }
+      const labelId = Id
       this.dots = []
       const label = { coordinates, contour, color, labelId }
       this.labels.push(label)
@@ -564,10 +575,11 @@ export default {
         //   bottom: y + height,
         // }
         const color = this.color
-        let labelId = 1
-        if (this.labels.length != 0) {
-          labelId = this.labels[this.labels.length - 1].labelId + 1
+        let Id = 1
+        while (this.labels.some((label) => label.labelId === Id)) {
+            Id = Id + 1
         }
+        const labelId = Id
         const label = { coordinates, contour, color, labelId }
         this.labels.push(label)
         this.visibleLabels.push(label)
@@ -596,6 +608,130 @@ export default {
 
       return `rgba(${r}, ${g}, ${b}, ${alpha})`
     },
+    async fetchAnnotation() {
+      try {
+        const response = await axios.get(annotationPath)
+        this.annotationData = response.data
+        this.annotationGroups = this.annotationData.groups
+        this.annotationClasses = this.annotationData.classes
+        this.annotationLabels = this.annotationData.labels
+        
+        for (const annotationGroup of this.annotationGroups) {
+          if (annotationGroup.coordinates && annotationGroup.color) {
+            const dots = annotationGroup.coordinates
+            const coordinates = this.jarvis(dots)
+            const contour = this.contour(coordinates)
+            const color = annotationGroup.color
+            let Id = 1
+            while (this.labels.some((label) => label.labelId === Id)) {
+                Id = Id + 1
+            }
+            const labelId = Id
+            const label = { coordinates, contour, color, labelId }
+            this.labels.push(label)
+          }
+        }
+        for (const annotationClass of this.annotationClasses) {
+          if (annotationClass.coordinates && annotationClass.color) {
+            const dots = annotationClass.coordinates
+            const coordinates = this.jarvis(dots)
+            const contour = this.contour(coordinates)
+            const color = annotationClass.color
+            let Id = 1
+            while (this.labels.some((label) => label.labelId === Id)) {
+                Id = Id + 1
+            }
+            const labelId = Id
+            const label = { coordinates, contour, color, labelId }
+            this.labels.push(label)
+          }
+        }
+        for (const annotationLabel of this.annotationLabels) {
+          if (annotationLabel.coordinates && annotationLabel.color) {
+            const dots = annotationLabel.coordinates
+            const coordinates = this.jarvis(dots)
+            const contour = this.contour(coordinates)
+            const color = annotationLabel.color
+            let Id = 1
+            while (this.labels.some((label) => label.labelId === Id)) {
+                Id = Id + 1
+            }
+            const labelId = Id
+            const label = { coordinates, contour, color, labelId }
+            this.labels.push(label)
+          }
+        }
+        
+        
+        // for (const annotationGroup of this.annotationGroups) {
+        //   this.labelGroups.push({
+        //     groupName: annotationGroup.title,
+        //     id: annotationGroup.id,
+        //   })
+        // }
+        // for (const annotationClass of this.annotationClasses) {
+        //   let newLabelClass = {
+        //     className: annotationClass.title,
+        //     id: annotationClass.id,
+        //     groups: [],
+        //     labels: [],
+        //     // color: annotationClass.color, // *****************************************
+        //   }
+        //   for (const group of this.annotationGroups) {
+        //     if (
+        //       annotationClass.groups &&
+        //       annotationClass.groups.includes(group.id)
+        //     ) {
+        //       newLabelClass.groups.push(group.title)
+        //     }
+        //   }
+        //   for (const label of this.annotationLabels) {
+        //     if (
+        //       annotationClass.labels &&
+        //       annotationClass.labels.includes(label.id)
+        //     ) {
+        //       newLabelClass.labels.push(label.title)
+        //     }
+        //   }
+        //   this.labelClasses.push(newLabelClass)
+        // }
+        // for (const annotationLabel of this.annotationLabels) {
+        //   this.labelLabels.push({
+        //     labelName: annotationLabel.title,
+        //     id: annotationLabel.id,
+        //     color: annotationLabel.color, // *****************************************
+        //   })
+        //   let Id = 1
+        //   while(this.labelNames.some((name) => name.labelId === Id)) {
+        //     Id = Id + 1
+        //   }
+        //   let newLabel = {
+        //     LabelName: annotationLabel.title,
+        //     PageName: "",
+        //     ClassName: "",
+        //     labelId: Id,
+        //   }
+        //   for (const annotationClass of this.annotationClasses) {
+        //     if (
+        //       annotationClass.labels &&
+        //       annotationClass.labels.includes(annotationLabel.id) &&
+        //       !this.labelNames.some((name) => name.labelId === Id)
+        //     ) {
+        //       newLabel.PageName = annotationClass.title
+        //       for (const group of this.annotationGroups) {
+        //         if (annotationClass.groups.includes(group.id)) {
+        //             newLabel.ClassName = group.title
+        //             this.labelNames.push(newLabel)
+        //         }
+                
+        //       }
+        //     }
+        //   }
+        // }
+      } catch (error) {
+        alert(error.message)
+      }
+    },
   },
   updated() {
     // установка высоты и ширины изображения в натуральный размер
@@ -614,6 +750,9 @@ export default {
     canvasCursor() {
       return this.selectedCursor
     },
+  },
+  mounted() {
+    this.fetchAnnotation()
   },
 }
 </script>
