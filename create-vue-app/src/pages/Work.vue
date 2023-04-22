@@ -17,6 +17,7 @@
         <center-panel
           @getImgData="getImgData"
           @update-labels="updateLabels"
+          @selectedLabelInsideTree="selectedLabel"
           ref="CenterPanel"
           :scale="parseFloat(scale)"
           :selectedMode="selectedMode"
@@ -131,6 +132,9 @@ export default {
     },
     deleteLabelBtn(id) {
       this.$refs.CenterPanel.deleteLabelBtn(id)
+    },
+    selectedLabel(id) {
+      this.$refs.Markup.selectedLabelInsideTree(id)
     },
   },
 }

@@ -93,34 +93,46 @@
           v-for="group in labelGroups"
           style="padding-left: 30px"
           :key="group.id"
-        > 
+        >
           <div class="label_tools">
             <div @click="showClass(labelGroups.indexOf(group))">
-                {{
+              {{
                 `${group.groupName} ${
-                    this.isShowClasses[labelGroups.indexOf(group)]
+                  this.isShowClasses[labelGroups.indexOf(group)]
                     ? "\u{025B7}"
                     : "\u{025BD}"
                 }`
-                }}
+              }}
             </div>
-            <div v-if="group.key !== ''" @click="toShowLabel(group.key)" class="label-editor">
-                <i class="bx bx-low-vision bx-xs bx-flashing-hover"></i>
-                <p>Vision</p>
+            <div
+              v-if="group.key !== ''"
+              @click="toShowLabel(group.key)"
+              class="label-editor"
+            >
+              <i class="bx bx-low-vision bx-xs bx-flashing-hover"></i>
+              <p>Vision</p>
             </div>
-            <div v-if="group.key !== ''" @click="toColorClass(group.key)" class="label-editor">
-                <i
+            <div
+              v-if="group.key !== ''"
+              @click="toColorClass(group.key)"
+              class="label-editor"
+            >
+              <i
                 class="bx bxs-droplet-half bx-xs bx-burst-hover"
                 :style="{ color: group.color }"
-                ></i>
-                <p>Color</p>
+              ></i>
+              <p>Color</p>
             </div>
-            <div v-if="group.key !== ''" @click="toDeleteLabel(group.key)" class="label-editor">
-                <i class="bx bxs-trash bx-xs bx-tada-hover"></i>
-                <p>Trash</p>
+            <div
+              v-if="group.key !== ''"
+              @click="toDeleteLabel(group.key)"
+              class="label-editor"
+            >
+              <i class="bx bxs-trash bx-xs bx-tada-hover"></i>
+              <p>Trash</p>
             </div>
           </div>
-          
+
           <ul v-if="isShowClasses[labelGroups.indexOf(group)]">
             <li
               v-for="element in labelClasses"
@@ -153,18 +165,30 @@
                     }`
                   }}
                 </div>
-                <div v-if="element.key !== ''" @click="toShowLabel(element.key)" class="label-editor">
+                <div
+                  v-if="element.key !== ''"
+                  @click="toShowLabel(element.key)"
+                  class="label-editor"
+                >
                   <i class="bx bx-low-vision bx-xs bx-flashing-hover"></i>
                   <p>Vision</p>
                 </div>
-                <div v-if="element.key !== ''" @click="toColorPage(element.key)" class="label-editor">
+                <div
+                  v-if="element.key !== ''"
+                  @click="toColorPage(element.key)"
+                  class="label-editor"
+                >
                   <i
                     class="bx bxs-droplet-half bx-xs bx-burst-hover"
                     :style="{ color: element.color }"
                   ></i>
                   <p>Color</p>
                 </div>
-                <div v-if="element.key !== ''" @click="toDeleteLabel(element.key)" class="label-editor">
+                <div
+                  v-if="element.key !== ''"
+                  @click="toDeleteLabel(element.key)"
+                  class="label-editor"
+                >
                   <i class="bx bxs-trash bx-xs bx-tada-hover"></i>
                   <p>Trash</p>
                 </div>
@@ -191,9 +215,7 @@
                     <div>
                       {{ label.labelName }}
                     </div>
-                    <div>
-                        
-                    </div>
+                    <div></div>
                     <div @click="toShowLabel(label.key)" class="label-editor">
                       <i class="bx bx-low-vision bx-xs bx-flashing-hover"></i>
                       <p>Vision</p>
@@ -313,42 +335,42 @@ export default {
       this.isShowMarkupTree = !this.isShowMarkupTree
     },
     remove_img_btn() {
-        this.labelNames = []
-        this.labelGroups = []
-        this.labelClasses = []
-        this.labelLabels = []
-        this.searchClass = ""
-        this.searchPage = ""
-        this.searchLabel = ""
-        this.isShowMarkupTree = false
-        this.showGroups = false
-        this.showClasses = false
-        this.showLabels = false
-        this.selectedMarkupMode = "label"
-        this.labelId = NaN
-        this.labelOnWork = false
-        this.isShowGroups = false
-        this.isShowClasses = []
-        this.isShowLabels = []
+      this.labelNames = []
+      this.labelGroups = []
+      this.labelClasses = []
+      this.labelLabels = []
+      this.searchClass = ""
+      this.searchPage = ""
+      this.searchLabel = ""
+      this.isShowMarkupTree = false
+      this.showGroups = false
+      this.showClasses = false
+      this.showLabels = false
+      this.selectedMarkupMode = "label"
+      this.labelId = NaN
+      this.labelOnWork = false
+      this.isShowGroups = false
+      this.isShowClasses = []
+      this.isShowLabels = []
     },
     filterGroups(event) {
       // Показать или скрыть выпадающий список на основе наличия вариантов после фильтрации
       this.showGroups = this.filteredGroups.length > 0
-      if (event.target.value === '') {
+      if (event.target.value === "") {
         this.showGroups = false
       }
     },
     filterClasses(event) {
       // Показать или скрыть выпадающий список на основе наличия вариантов после фильтрации
       this.showClasses = this.filteredClasses.length > 0
-      if (event.target.value === '') {
+      if (event.target.value === "") {
         this.showClasses = false
       }
     },
     filterLabels(event) {
       // Показать или скрыть выпадающий список на основе наличия вариантов после фильтрации
       this.showLabels = this.filteredLabels.length > 0
-      if (event.target.value === '') {
+      if (event.target.value === "") {
         this.showLabels = false
       }
     },
@@ -382,155 +404,162 @@ export default {
     },
     markupModeChange(event) {
       this.selectedMarkupMode = event.target.value
-    //   this.searchClass = ""
+      //   this.searchClass = ""
       this.searchPage = ""
       this.searchLabel = ""
     },
     saveLabel() {
       if (this.labelOnWork) {
-        if (this.selectedMarkupMode === 'label') {
-            let newLabel = {
-                LabelName: this.searchLabel,
-                PageName: this.searchPage,
-                ClassName: this.searchClass,
-                labelId: this.labelId,
-            }
-            if (
+        if (this.selectedMarkupMode === "label") {
+          let newLabel = {
+            LabelName: this.searchLabel,
+            PageName: this.searchPage,
+            ClassName: this.searchClass,
+            labelId: this.labelId,
+          }
+          if (
             !this.labelGroups.some(
-                (group) => group.groupName === this.searchClass
+              (group) => group.groupName === this.searchClass
             )
-            ) {
+          ) {
             let Id = 1
             while (this.labelGroups.some((group) => group.id === Id)) {
-                Id = Id + 1
+              Id = Id + 1
             }
             this.labelGroups.push({
-                groupName: this.searchClass,
-                id: Id,
-                key: ''
+              groupName: this.searchClass,
+              id: Id,
+              key: "",
             })
-            }
-            let foundClass = this.labelClasses.find(
+          }
+          let foundClass = this.labelClasses.find(
             (cls) => cls.className === this.searchPage
-            )
-            if (!foundClass) {
+          )
+          if (!foundClass) {
             let Id = 1
             while (this.labelClasses.some((cls) => cls.id === Id)) {
-                Id = Id + 1
+              Id = Id + 1
             }
             let newLabelClass = {
-                className: this.searchPage,
-                id: Id,
-                key: '',
-                groups: [this.searchClass],
-                labels: [this.searchLabel],
+              className: this.searchPage,
+              id: Id,
+              key: "",
+              groups: [this.searchClass],
+              labels: [this.searchLabel],
             }
             this.labelClasses.push(newLabelClass)
-            } else {
+          } else {
             if (!foundClass.groups.includes(this.searchClass)) {
-                foundClass.groups.push(this.searchClass)
-            }
-            if (!foundClass.labels || !foundClass.labels.includes(this.searchLabel)) {
-                foundClass.labels.push(this.searchLabel)
-            }
+              foundClass.groups.push(this.searchClass)
             }
             if (
-            !this.labelLabels.some(
-                (label) => label.labelName === this.searchLabel
-            )
+              !foundClass.labels ||
+              !foundClass.labels.includes(this.searchLabel)
             ) {
-                let Id = 1
-                while (this.labelLabels.some((label) => label.id === Id)) {
-                    Id = Id + 1
-                }
-                this.labelLabels.push({
-                    labelName: this.searchLabel,
-                    id: Id,
-                    color: this.color,
-                    key: this.labelId
-                })
+              foundClass.labels.push(this.searchLabel)
             }
-            this.labelNames.push(newLabel)
-            this.labelOnWork = false
-        }  else {      // Если выбран режим class
-            let newLabel = {
-                LabelName: '',
-                PageName: '',
-                ClassName: this.searchClass,
-                labelId: this.labelId,
+          }
+          if (
+            !this.labelLabels.some(
+              (label) => label.labelName === this.searchLabel
+            )
+          ) {
+            let Id = 1
+            while (this.labelLabels.some((label) => label.id === Id)) {
+              Id = Id + 1
             }
-            if (this.searchPage !== '') {
-                newLabel.PageName = this.searchPage
+            this.labelLabels.push({
+              labelName: this.searchLabel,
+              id: Id,
+              color: this.color,
+              key: this.labelId,
+            })
+          }
+          this.labelNames.push(newLabel)
+          this.labelOnWork = false
+        } else {
+          // Если выбран режим class
+          let newLabel = {
+            LabelName: "",
+            PageName: "",
+            ClassName: this.searchClass,
+            labelId: this.labelId,
+          }
+          if (this.searchPage !== "") {
+            newLabel.PageName = this.searchPage
 
-                let foundClass = this.labelClasses.find(
-                    (cls) => cls.className === this.searchPage
-                )
-                if (!foundClass) {
-                    let Id = 1
-                    while (this.labelClasses.some((cls) => cls.id === Id)) {
-                        Id = Id + 1
-                    }
-                    let newLabelClass = {
-                        className: this.searchPage,
-                        id: Id,
-                        key: this.labelId,
-                        groups: [this.searchClass],
-                        labels: [],
-                        color: this.color,
-                    }
-                    this.labelClasses.push(newLabelClass)
-                } else {
-                    if (!foundClass.groups.includes(this.searchClass)) {
-                        foundClass.groups.push(this.searchClass)
-                    }
-                }
-                if (
-                    !this.labelGroups.some(
-                        (group) => group.groupName === this.searchClass
-                    )
-                    ) {
-                        let Id = 1
-                        while (this.labelGroups.some((group) => group.id === Id)) {
-                            Id = Id + 1
-                        }
-                        let newGroup = {
-                            groupName: this.searchClass,
-                            id: Id,
-                            key: '',
-                            color: this.color,
-                        }
-                        this.labelGroups.push(newGroup)
-                    } 
+            let foundClass = this.labelClasses.find(
+              (cls) => cls.className === this.searchPage
+            )
+            if (!foundClass) {
+              let Id = 1
+              while (this.labelClasses.some((cls) => cls.id === Id)) {
+                Id = Id + 1
+              }
+              let newLabelClass = {
+                className: this.searchPage,
+                id: Id,
+                key: this.labelId,
+                groups: [this.searchClass],
+                labels: [],
+                color: this.color,
+              }
+              this.labelClasses.push(newLabelClass)
             } else {
-                if (
-                    !this.labelGroups.some(
-                        (group) => group.groupName === this.searchClass
-                    )
-                    ){
-                    let Id = 1
-                    while (this.labelGroups.some((group) => group.id === Id)) {
-                        Id = Id + 1
-                    }
-                    let newGroup = {
-                        groupName: this.searchClass,
-                        id: Id,
-                        key: this.labelId,
-                        color: this.color,
-                    }
-                    this.labelGroups.push(newGroup)
-                } else {
-                    if (this.labelGroups.find((group) => group.groupName === this.searchClass).key = '') {
-                        this.labelGroups.find((group) => group.groupName === this.searchClass).key = this.labelId 
-                    }
-                    
-                }
-                
+              if (!foundClass.groups.includes(this.searchClass)) {
+                foundClass.groups.push(this.searchClass)
+              }
             }
-            this.labelNames.push(newLabel)
-            this.labelOnWork = false
+            if (
+              !this.labelGroups.some(
+                (group) => group.groupName === this.searchClass
+              )
+            ) {
+              let Id = 1
+              while (this.labelGroups.some((group) => group.id === Id)) {
+                Id = Id + 1
+              }
+              let newGroup = {
+                groupName: this.searchClass,
+                id: Id,
+                key: "",
+                color: this.color,
+              }
+              this.labelGroups.push(newGroup)
+            }
+          } else {
+            if (
+              !this.labelGroups.some(
+                (group) => group.groupName === this.searchClass
+              )
+            ) {
+              let Id = 1
+              while (this.labelGroups.some((group) => group.id === Id)) {
+                Id = Id + 1
+              }
+              let newGroup = {
+                groupName: this.searchClass,
+                id: Id,
+                key: this.labelId,
+                color: this.color,
+              }
+              this.labelGroups.push(newGroup)
+            } else {
+              if (
+                (this.labelGroups.find(
+                  (group) => group.groupName === this.searchClass
+                ).key = "")
+              ) {
+                this.labelGroups.find(
+                  (group) => group.groupName === this.searchClass
+                ).key = this.labelId
+              }
+            }
+          }
+          this.labelNames.push(newLabel)
+          this.labelOnWork = false
         }
       }
-        
     },
     // async fetchClassifier() {
     //   try {
@@ -554,27 +583,27 @@ export default {
 
         for (const annotationGroup of this.annotationGroups) {
           let Id = 1
-          while(this.labelNames.some((name) => name.labelId === Id)) {
+          while (this.labelNames.some((name) => name.labelId === Id)) {
             Id = Id + 1
-          }  
+          }
           let newGroup = {
             groupName: annotationGroup.title,
             id: annotationGroup.id,
-            key: '',
-            color: ''
-          }  
-          if ('coordinates' in annotationGroup) {
-            newGroup.key = Id  
+            key: "",
+            color: "",
           }
-          
+          if ("coordinates" in annotationGroup) {
+            newGroup.key = Id
+          }
+
           if (annotationGroup.color) {
             newGroup.color = annotationGroup.color
           }
           this.labelGroups.push(newGroup)
-          
+
           let newLabel = {
-            LabelName: '',
-            PageName: '',
+            LabelName: "",
+            PageName: "",
             ClassName: annotationGroup.title,
             labelId: Id,
           }
@@ -582,28 +611,28 @@ export default {
         }
         for (const annotationClass of this.annotationClasses) {
           let Id = 1
-          while(this.labelNames.some((name) => name.labelId === Id)) {
+          while (this.labelNames.some((name) => name.labelId === Id)) {
             Id = Id + 1
-          }    
+          }
           let newLabelClass = {
             className: annotationClass.title,
             id: annotationClass.id,
-            key: '',
+            key: "",
             groups: [],
             labels: [],
-            color: '', // *****************************************
+            color: "", // *****************************************
           }
-          if ('coordinates' in annotationClass) {  
+          if ("coordinates" in annotationClass) {
             newLabelClass.key = Id
           }
-          
+
           if (annotationClass.color) {
             newLabelClass.color = annotationClass.color
           }
           let newLabel = {
-            LabelName: '',
+            LabelName: "",
             PageName: annotationClass.title,
-            ClassName: '',
+            ClassName: "",
             labelId: Id,
           }
           for (const group of this.annotationGroups) {
@@ -628,16 +657,16 @@ export default {
         }
         for (const annotationLabel of this.annotationLabels) {
           let Id = 1
-          while(this.labelNames.some((name) => name.labelId === Id)) {
+          while (this.labelNames.some((name) => name.labelId === Id)) {
             Id = Id + 1
-          }  
+          }
           this.labelLabels.push({
             labelName: annotationLabel.title,
             id: annotationLabel.id,
             key: Id,
             color: annotationLabel.color, // *****************************************
           })
-          
+
           let newLabel = {
             LabelName: annotationLabel.title,
             PageName: "",
@@ -653,15 +682,13 @@ export default {
               newLabel.PageName = annotationClass.title
               for (const group of this.annotationGroups) {
                 if (annotationClass.groups.includes(group.id)) {
-                    newLabel.ClassName = group.title
-                    this.labelNames.push(newLabel)
+                  newLabel.ClassName = group.title
+                  this.labelNames.push(newLabel)
                 }
-                
               }
             }
           }
         }
-
       } catch (error) {
         alert(error.message)
       }
@@ -680,43 +707,43 @@ export default {
     },
     toColorLabel(id) {
       this.$emit("changeLabelColorBtn", id)
-        const coloringLabel = this.findLabelById(id, this.labelLabels)
-        if (coloringLabel) {
-            const label_index = this.labelLabels.indexOf(coloringLabel)
-            if (label_index !== -1) {
-                this.labelLabels[label_index].color = this.color
-            }
+      const coloringLabel = this.findLabelById(id, this.labelLabels)
+      if (coloringLabel) {
+        const label_index = this.labelLabels.indexOf(coloringLabel)
+        if (label_index !== -1) {
+          this.labelLabels[label_index].color = this.color
         }
+      }
     },
     toColorPage(id) {
       this.$emit("changeLabelColorBtn", id)
-        const coloringPage = this.findLabelById(id, this.labelClasses)
-        if (coloringPage) {
-            const page_index = this.labelClasses.indexOf(coloringPage)
-            if (page_index !== -1) {
-                this.labelClasses[page_index].color = this.color
-            }
+      const coloringPage = this.findLabelById(id, this.labelClasses)
+      if (coloringPage) {
+        const page_index = this.labelClasses.indexOf(coloringPage)
+        if (page_index !== -1) {
+          this.labelClasses[page_index].color = this.color
         }
+      }
     },
     toColorClass(id) {
       this.$emit("changeLabelColorBtn", id)
-        const coloringClass = this.findLabelById(id, this.labelGroups)
-        if (coloringClass) {
-            const class_index = this.labelGroups.indexOf(coloringClass)
-            if (class_index !== -1) {
-                this.labelGroups[class_index].color = this.color
-            }
+      const coloringClass = this.findLabelById(id, this.labelGroups)
+      if (coloringClass) {
+        const class_index = this.labelGroups.indexOf(coloringClass)
+        if (class_index !== -1) {
+          this.labelGroups[class_index].color = this.color
         }
+      }
     },
     toDeleteLabel(id) {
       this.$emit("deleteLabelBtn", id)
-      this.labelLabels = this.labelLabels.filter(label => label.key !== id)
-      this.labelNames = this.labelNames.filter(name => name.labelId !== id)
-      if (this.labelGroups.find(group => group.key === id)) {
-        this.labelGroups.find(group => group.key === id).key = ''
+      this.labelLabels = this.labelLabels.filter((label) => label.key !== id)
+      this.labelNames = this.labelNames.filter((name) => name.labelId !== id)
+      if (this.labelGroups.find((group) => group.key === id)) {
+        this.labelGroups.find((group) => group.key === id).key = ""
       }
-      if (this.labelClasses.find(cls => cls.key === id)) {
-        this.labelClasses.find(cls => cls.key === id).key = ''
+      if (this.labelClasses.find((cls) => cls.key === id)) {
+        this.labelClasses.find((cls) => cls.key === id).key = ""
       }
     },
     findLabelById(id, labels) {
@@ -726,6 +753,12 @@ export default {
         }
       }
       return null
+    },
+
+    // ******************************************************************************************************************
+    // Функция для подсветки выбранной метки в дереве
+    selectedLabelInsideTree(id) {
+      console.log(id)
     },
   },
   mounted() {

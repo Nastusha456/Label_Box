@@ -21,6 +21,8 @@
           @mousedown="mouseDown"
           @mouseup="mouseUp"
           @mousemove="mouseMove"
+          @click="selectLabelClick"
+          @dblclick="selectLabelDblClick"
         ></canvas>
         <img
           :src="imageUrl"
@@ -51,10 +53,10 @@ export default {
       imageName: null,
       startCoords: { x: null, y: null },
       endCoords: { x: null, y: null },
-      rectangles: [],
       dots: [],
       labels: [],
       visibleLabels: [],
+      selectedLabel: null,
       isDrowing: false,
       isDragging: false,
       startMouseX: 0,
@@ -228,7 +230,7 @@ export default {
       const color = this.color
       let Id = 1
       while (this.labels.some((label) => label.labelId === Id)) {
-          Id = Id + 1
+        Id = Id + 1
       }
       const labelId = Id
       this.dots = []
@@ -263,6 +265,7 @@ export default {
         const color = label.color ? label.color : "black"
         this.drawLabel(ctx, points, color, "transparent")
       }
+      this.drawSelectedLabel(ctx)
     },
     findLabel(offsetX, offsetY, labels) {
       let minSquare = Infinity
@@ -329,26 +332,36 @@ export default {
         const label_index = this.labels.indexOf(label)
         const visibleLabel_index = this.visibleLabels.indexOf(label)
         const dot_index = label.coordinates.indexOf(dot)
-        const color = label.color
+        let newCoordinates = label.coordinates
         if (dot_index !== -1) {
           label.coordinates.splice(dot_index, 1)
-          this.dots = this.dots.concat(label.coordinates)
         }
+        const newContour = this.contour(newCoordinates)
         if (label_index !== -1) {
-          this.labels.splice(label_index, 1)
+          if (label.coordinates.length < 2) {
+            this.labels.splice(label_index, 1)
+          } else {
+            this.labels[label_index].coordinates = newCoordinates
+            this.labels[label_index].contour = newContour
+          }
         }
         if (visibleLabel_index !== -1) {
-          this.visibleLabels.splice(visibleLabel_index, 1)
+          if (label.coordinates.length < 2) {
+            this.visibleLabels.splice(visibleLabel_index, 1)
+          } else {
+            this.visibleLabels[visibleLabel_index].coordinates = newCoordinates
+            this.visibleLabels[visibleLabel_index].contour = newContour
+          }
         }
-        this.drawDots(ctx, this.dots, 3, color)
       } else if (dot) {
         const dot_index = this.dots.indexOf(dot)
-        const color = this.color
+
         if (dot_index !== -1) {
           this.dots.splice(dot_index, 1)
         }
-        this.drawDots(ctx, this.dots, 3, color)
       }
+      const color = this.color
+      this.drawDots(ctx, this.dots, 3, color)
     },
     findLabelById(id, labels) {
       for (const label of labels) {
@@ -368,6 +381,7 @@ export default {
       const visibleLabel = this.findLabelById(id, this.visibleLabels)
       if (visibleLabel) {
         this.deleteLabelFromLabels(visibleLabel, this.visibleLabels)
+        this.selectedLabel = null
       }
 
       const label = this.findLabelById(id, this.labels)
@@ -414,6 +428,7 @@ export default {
       const visibleLabel = this.findLabelById(id, this.visibleLabels)
       if (visibleLabel) {
         this.deleteLabelFromLabels(visibleLabel, this.visibleLabels)
+        this.selectedLabel = null
       } else {
         const label = this.findLabelById(id, this.labels)
         if (label) {
@@ -451,6 +466,121 @@ export default {
       this.drawAllLabels(ctx)
       this.drawDots(ctx, this.dots, 3, this.color)
     },
+    selectLabelDblClick(event) {
+      const canvas = this.$refs.canvas
+      const ctx = canvas.getContext("2d")
+      ctx.canvas.width = ctx.canvas.clientWidth
+      ctx.canvas.height = ctx.canvas.clientHeight
+      const rect = canvas.getBoundingClientRect()
+      const x = (event.clientX - rect.left) / this.scale
+      const y = (event.clientY - rect.top) / this.scale
+
+      if (this.selectedMode === "dot") {
+        this.dots.splice(-2)
+      }
+      this.selectedLabel = this.findLabel(x, y, this.visibleLabels)
+      const id = this.selectedLabel ? this.selectedLabel.labelId : null
+      this.$emit("selectedLabelInsideTree", id)
+      this.drawAllLabels(ctx)
+      this.drawDots(ctx, this.dots, 3, this.color)
+    },
+    selectLabelClick(event) {
+      const canvas = this.$refs.canvas
+      const ctx = canvas.getContext("2d")
+      ctx.canvas.width = ctx.canvas.clientWidth
+      ctx.canvas.height = ctx.canvas.clientHeight
+      const rect = canvas.getBoundingClientRect()
+      const x = (event.clientX - rect.left) / this.scale
+      const y = (event.clientY - rect.top) / this.scale
+
+      let foundLabel = null
+      if (this.selectedLabel) {
+        const label = this.selectedLabel
+
+        if (
+          label.contour.left <= x &&
+          x <= label.contour.right &&
+          label.contour.top <= y &&
+          y <= label.contour.bottom
+        ) {
+          foundLabel = true
+        }
+      }
+      if (!foundLabel) {
+        this.selectedLabel = null
+        this.$emit("selectedLabelInsideTree", null)
+      }
+
+      this.drawAllLabels(ctx)
+      this.drawDots(ctx, this.dots, 3, this.color)
+    },
+    drawSelectedLabel(ctx) {
+      const label = this.selectedLabel
+      if (label) {
+        const color = label.color ? label.color : "#000000"
+        const fill = this.hexToRgbA(color, 0.3)
+        this.drawLabel(ctx, label.coordinates, color, fill)
+        this.drawDots(ctx, label.coordinates, 3, color)
+      }
+    },
+    selectLabelById(id) {
+      const canvas = this.$refs.canvas
+      const ctx = canvas.getContext("2d")
+      ctx.canvas.width = ctx.canvas.clientWidth
+      ctx.canvas.height = ctx.canvas.clientHeight
+
+      this.selectedLabel = this.findLabelById(id, this.visibleLabels)
+      this.drawAllLabels(ctx)
+      this.drawDots(ctx, this.dots, 3, this.color)
+    },
+    insertDotIntoPolygon(polygon, newPoint) {
+      let insertIndex = polygon.length - 1
+      let minDistance = Infinity
+
+      // Find the closest point to the new point
+      for (let i = 0; i < polygon.length; i++) {
+        const point = polygon[i]
+        const distance = Math.sqrt(
+          (newPoint.x - point.x) ** 2 + (newPoint.y - point.y) ** 2
+        )
+
+        if (distance < minDistance) {
+          minDistance = distance
+          insertIndex = i
+        }
+      }
+
+      // Determine which side of the closest point to insert the new point
+      const distanceToLeft =
+        insertIndex === 0
+          ? Math.sqrt(
+              (newPoint.x - polygon[polygon.length - 1].x) ** 2 +
+                (newPoint.y - polygon[polygon.length - 1].y) ** 2
+            )
+          : Math.sqrt(
+              (newPoint.x - polygon[insertIndex - 1].x) ** 2 +
+                (newPoint.y - polygon[insertIndex - 1].y) ** 2
+            )
+
+      const distanceToRight =
+        insertIndex === polygon.length - 1
+          ? Math.sqrt(
+              (newPoint.x - polygon[0].x) ** 2 +
+                (newPoint.y - polygon[0].y) ** 2
+            )
+          : Math.sqrt(
+              (newPoint.x - polygon[insertIndex + 1].x) ** 2 +
+                (newPoint.y - polygon[insertIndex + 1].y) ** 2
+            )
+
+      if (distanceToLeft < distanceToRight) {
+        polygon.splice(insertIndex, 0, newPoint) // Insert a new point to the left of the nearest points
+      } else {
+        polygon.splice(insertIndex + 1, 0, newPoint) // Insert a new point to the right of the nearest point
+      }
+
+      return polygon
+    },
 
     mouseDown(event) {
       if (this.selectedMode === "markup") {
@@ -472,10 +602,43 @@ export default {
         this.startImageY = parseInt(this.$refs.image_holder.style.top) || 0
       } else if (this.selectedMode === "dot") {
         const canvas = this.$refs.canvas
+        const ctx = canvas.getContext("2d")
+        ctx.canvas.width = ctx.canvas.clientWidth
+        ctx.canvas.height = ctx.canvas.clientHeight
         const rect = canvas.getBoundingClientRect()
         const x = (event.clientX - rect.left) / this.scale
         const y = (event.clientY - rect.top) / this.scale
-        this.dots.push({ x, y })
+
+        const newPoint = { x, y }
+
+        if (this.selectedLabel) {
+          const label_index = this.labels.findIndex(
+            (label) => label.id === this.selectedLabel.labelId
+          )
+          const visibleLabel_index = this.visibleLabels.findIndex(
+            (label) => label.id === this.selectedLabel.labelId
+          )
+
+          const polygon = this.selectedLabel.coordinates
+          const newCoordinates = this.insertDotIntoPolygon(polygon, newPoint)
+          const newContour = this.contour(newCoordinates)
+          this.selectedLabel.coordinates = newCoordinates
+          this.selectedLabel.contour = newContour
+
+          if (label_index !== -1) {
+            this.labels[label_index].coordinates = newCoordinates
+            this.labels[label_index].contour = newContour
+          }
+          if (visibleLabel_index !== -1) {
+            this.visibleLabels[visibleLabel_index].coordinates = newCoordinates
+            this.visibleLabels[visibleLabel_index].contour = newContour
+          }
+        } else {
+          this.dots.push(newPoint)
+        }
+
+        this.drawAllLabels(ctx)
+        this.drawDots(ctx, this.dots, 3, this.color)
       } else if (this.selectedMode === "eraser") {
         const canvas = this.$refs.canvas
         const ctx = canvas.getContext("2d")
@@ -559,7 +722,7 @@ export default {
         const height = this.endCoords.y - this.startCoords.y
         x = this.startCoords.x
         y = this.startCoords.y
-        // const coordinates = [{x:x, y:y}, {x:x, y:y + height}, {x:x + width, y:y + height}, {x:x + width, y:y}]
+
         const dots = [
           { x: x, y: y },
           { x: x, y: y + height },
@@ -567,22 +730,18 @@ export default {
           { x: x + width, y: y },
         ]
         const coordinates = this.jarvis(dots)
-        const contour = this.contour(coordinates)
-        // const contour = {
-        //   left: x,
-        //   right: x + width,
-        //   top: y,
-        //   bottom: y + height,
-        // }
-        const color = this.color
-        let Id = 1
-        while (this.labels.some((label) => label.labelId === Id)) {
+        if (coordinates.length === 4) {
+          const contour = this.contour(coordinates)
+          const color = this.color
+          let Id = 1
+          while (this.labels.some((label) => label.labelId === Id)) {
             Id = Id + 1
+          }
+          const labelId = Id
+          const label = { coordinates, contour, color, labelId }
+          this.labels.push(label)
+          this.visibleLabels.push(label)
         }
-        const labelId = Id
-        const label = { coordinates, contour, color, labelId }
-        this.labels.push(label)
-        this.visibleLabels.push(label)
         this.drawAllLabels(ctx)
         this.drawDots(ctx, this.dots, 3, this.color)
         this.isDrowing = false
@@ -615,7 +774,7 @@ export default {
         this.annotationGroups = this.annotationData.groups
         this.annotationClasses = this.annotationData.classes
         this.annotationLabels = this.annotationData.labels
-        
+
         for (const annotationGroup of this.annotationGroups) {
           if (annotationGroup.coordinates && annotationGroup.color) {
             const dots = annotationGroup.coordinates
@@ -624,18 +783,18 @@ export default {
             const color = annotationGroup.color
             let Id = 1
             while (this.labels.some((label) => label.labelId === Id)) {
-                Id = Id + 1
+              Id = Id + 1
             }
             const labelId = Id
             const label = { coordinates, contour, color, labelId }
             this.labels.push(label)
-          }  else {
+          } else {
             let coordinates = false
             let contour = false
             let color = false
             let Id = 1
             while (this.labels.some((label) => label.labelId === Id)) {
-                Id = Id + 1
+              Id = Id + 1
             }
             const labelId = Id
             const label = { coordinates, contour, color, labelId }
@@ -650,18 +809,18 @@ export default {
             const color = annotationClass.color
             let Id = 1
             while (this.labels.some((label) => label.labelId === Id)) {
-                Id = Id + 1
+              Id = Id + 1
             }
             const labelId = Id
             const label = { coordinates, contour, color, labelId }
             this.labels.push(label)
-          }  else {
+          } else {
             let coordinates = false
             let contour = false
             let color = false
             let Id = 1
             while (this.labels.some((label) => label.labelId === Id)) {
-                Id = Id + 1
+              Id = Id + 1
             }
             const labelId = Id
             const label = { coordinates, contour, color, labelId }
@@ -676,7 +835,7 @@ export default {
             const color = annotationLabel.color
             let Id = 1
             while (this.labels.some((label) => label.labelId === Id)) {
-                Id = Id + 1
+              Id = Id + 1
             }
             const labelId = Id
             const label = { coordinates, contour, color, labelId }
@@ -687,14 +846,13 @@ export default {
             let color = false
             let Id = 1
             while (this.labels.some((label) => label.labelId === Id)) {
-                Id = Id + 1
+              Id = Id + 1
             }
             const labelId = Id
             const label = { coordinates, contour, color, labelId }
             this.labels.push(label)
           }
         }
-        
       } catch (error) {
         alert(error.message)
       }
