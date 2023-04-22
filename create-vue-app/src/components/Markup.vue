@@ -407,7 +407,7 @@ export default {
             this.labelGroups.push({
                 groupName: this.searchClass,
                 id: Id,
-                key: this.labelId
+                key: ''
             })
             }
             let foundClass = this.labelClasses.find(
@@ -421,7 +421,7 @@ export default {
             let newLabelClass = {
                 className: this.searchPage,
                 id: Id,
-                key: this.labelId,
+                key: '',
                 groups: [this.searchClass],
                 labels: [this.searchLabel],
             }

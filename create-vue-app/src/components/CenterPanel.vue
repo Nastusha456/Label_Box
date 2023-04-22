@@ -629,6 +629,17 @@ export default {
             const labelId = Id
             const label = { coordinates, contour, color, labelId }
             this.labels.push(label)
+          }  else {
+            let coordinates = false
+            let contour = false
+            let color = false
+            let Id = 1
+            while (this.labels.some((label) => label.labelId === Id)) {
+                Id = Id + 1
+            }
+            const labelId = Id
+            const label = { coordinates, contour, color, labelId }
+            this.labels.push(label)
           }
         }
         for (const annotationClass of this.annotationClasses) {
@@ -637,6 +648,17 @@ export default {
             const coordinates = this.jarvis(dots)
             const contour = this.contour(coordinates)
             const color = annotationClass.color
+            let Id = 1
+            while (this.labels.some((label) => label.labelId === Id)) {
+                Id = Id + 1
+            }
+            const labelId = Id
+            const label = { coordinates, contour, color, labelId }
+            this.labels.push(label)
+          }  else {
+            let coordinates = false
+            let contour = false
+            let color = false
             let Id = 1
             while (this.labels.some((label) => label.labelId === Id)) {
                 Id = Id + 1
@@ -659,75 +681,20 @@ export default {
             const labelId = Id
             const label = { coordinates, contour, color, labelId }
             this.labels.push(label)
+          } else {
+            let coordinates = false
+            let contour = false
+            let color = false
+            let Id = 1
+            while (this.labels.some((label) => label.labelId === Id)) {
+                Id = Id + 1
+            }
+            const labelId = Id
+            const label = { coordinates, contour, color, labelId }
+            this.labels.push(label)
           }
         }
         
-        
-        // for (const annotationGroup of this.annotationGroups) {
-        //   this.labelGroups.push({
-        //     groupName: annotationGroup.title,
-        //     id: annotationGroup.id,
-        //   })
-        // }
-        // for (const annotationClass of this.annotationClasses) {
-        //   let newLabelClass = {
-        //     className: annotationClass.title,
-        //     id: annotationClass.id,
-        //     groups: [],
-        //     labels: [],
-        //     // color: annotationClass.color, // *****************************************
-        //   }
-        //   for (const group of this.annotationGroups) {
-        //     if (
-        //       annotationClass.groups &&
-        //       annotationClass.groups.includes(group.id)
-        //     ) {
-        //       newLabelClass.groups.push(group.title)
-        //     }
-        //   }
-        //   for (const label of this.annotationLabels) {
-        //     if (
-        //       annotationClass.labels &&
-        //       annotationClass.labels.includes(label.id)
-        //     ) {
-        //       newLabelClass.labels.push(label.title)
-        //     }
-        //   }
-        //   this.labelClasses.push(newLabelClass)
-        // }
-        // for (const annotationLabel of this.annotationLabels) {
-        //   this.labelLabels.push({
-        //     labelName: annotationLabel.title,
-        //     id: annotationLabel.id,
-        //     color: annotationLabel.color, // *****************************************
-        //   })
-        //   let Id = 1
-        //   while(this.labelNames.some((name) => name.labelId === Id)) {
-        //     Id = Id + 1
-        //   }
-        //   let newLabel = {
-        //     LabelName: annotationLabel.title,
-        //     PageName: "",
-        //     ClassName: "",
-        //     labelId: Id,
-        //   }
-        //   for (const annotationClass of this.annotationClasses) {
-        //     if (
-        //       annotationClass.labels &&
-        //       annotationClass.labels.includes(annotationLabel.id) &&
-        //       !this.labelNames.some((name) => name.labelId === Id)
-        //     ) {
-        //       newLabel.PageName = annotationClass.title
-        //       for (const group of this.annotationGroups) {
-        //         if (annotationClass.groups.includes(group.id)) {
-        //             newLabel.ClassName = group.title
-        //             this.labelNames.push(newLabel)
-        //         }
-                
-        //       }
-        //     }
-        //   }
-        // }
       } catch (error) {
         alert(error.message)
       }
