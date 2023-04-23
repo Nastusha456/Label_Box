@@ -35,6 +35,7 @@
         @visibleLabelBtn="visibleLabelBtn"
         @changeLabelColorBtn="changeLabelColorBtn"
         @deleteLabelBtn="deleteLabelBtn"
+        @selectLabelById="selectLabelById"
       />
       <right-panel
         @delet="delet"
@@ -136,6 +137,9 @@ export default {
     selectedLabel(id) {
       this.$refs.Markup.selectedLabelInsideTree(id)
     },
+    selectLabelById(id) {
+      this.$refs.CenterPanel.selectLabelById(id)
+    }
   },
 }
 </script>

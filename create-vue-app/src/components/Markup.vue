@@ -94,8 +94,8 @@
           style="padding-left: 30px"
           :key="group.id"
         >
-          <div class="label_tools">
-            <div @click="showClass(labelGroups.indexOf(group))">
+          <div class="label_tools" @dblclick="showGroupOnCanvas(group)" :style="{ backgroundColor: group.isSelected ? 'rgba(255, 255, 255, 0.25)' : 'transparent' }">
+            <div @click="showClass(group)"  >
               {{
                 `${group.groupName} ${
                   this.isShowClasses[labelGroups.indexOf(group)]
@@ -142,12 +142,14 @@
               <div
                 v-if="element.groups.includes(group.groupName)"
                 class="label_tools"
+                @dblclick="showClassOnCanvas(element)"
+                :style="{ backgroundColor: element.isSelected ? 'rgba(255, 255, 255, 0.25)' : 'transparent' }"
               >
                 <div
                   @click="
                     showLabel(
-                      labelClasses.indexOf(element),
-                      labelGroups.indexOf(group)
+                      element,
+                      group
                     )
                   "
                 >
@@ -211,6 +213,8 @@
                       element.labels.includes(label.labelName)
                     "
                     class="label_tools"
+                    @dblclick="showLabelOnCanvas(label)"
+                    :style="{ backgroundColor: label.isSelected ? 'rgba(255, 255, 255, 0.25)' : 'transparent' }"
                   >
                     <div>
                       {{ label.labelName }}
@@ -374,6 +378,17 @@ export default {
         this.showLabels = false
       }
     },
+    clearIsSelected() {
+      this.labelGroups.forEach((grp) => {
+        grp.isSelected = false
+      })
+      this.labelClasses.forEach((cls) => {
+        cls.isSelected = false
+      })
+      this.labelLabels.forEach((lbl) => {
+        lbl.isSelected = false
+      })
+    },
     selectGroup(option) {
       // Обработка выбора опции
       this.searchClass = option.groupName
@@ -430,6 +445,8 @@ export default {
               groupName: this.searchClass,
               id: Id,
               key: "",
+              color: '',
+              isSelected: false
             })
           }
           let foundClass = this.labelClasses.find(
@@ -446,6 +463,7 @@ export default {
               key: "",
               groups: [this.searchClass],
               labels: [this.searchLabel],
+              isSelected: false
             }
             this.labelClasses.push(newLabelClass)
           } else {
@@ -473,6 +491,7 @@ export default {
               id: Id,
               color: this.color,
               key: this.labelId,
+              isSelected: false
             })
           }
           this.labelNames.push(newLabel)
@@ -503,12 +522,20 @@ export default {
                 groups: [this.searchClass],
                 labels: [],
                 color: this.color,
+                isSelected: false
               }
               this.labelClasses.push(newLabelClass)
             } else {
               if (!foundClass.groups.includes(this.searchClass)) {
                 foundClass.groups.push(this.searchClass)
               }
+              if (
+                this.labelClasses.find(
+                  (cls) => cls.className === this.searchClass
+                ).key === ""
+              ) {
+                this.labelClasses.find((cls) => cls.className === this.searchPage).key = this.labelId
+              } 
             }
             if (
               !this.labelGroups.some(
@@ -524,8 +551,17 @@ export default {
                 id: Id,
                 key: "",
                 color: this.color,
+                isSelected: false
               }
               this.labelGroups.push(newGroup)
+            } else {
+              if (
+                this.labelGroups.find(
+                  (group) => group.groupName === this.searchClass
+                ).key === ""
+              ) {
+                this.labelGroups.find((group) => group.id === Id).key = this.labelId
+              }
             }
           } else {
             if (
@@ -542,14 +578,16 @@ export default {
                 id: Id,
                 key: this.labelId,
                 color: this.color,
+                isSelected: false
               }
               this.labelGroups.push(newGroup)
             } else {
               if (
-                (this.labelGroups.find(
+                this.labelGroups.find(
                   (group) => group.groupName === this.searchClass
-                ).key = "")
+                ).key === ''
               ) {
+                
                 this.labelGroups.find(
                   (group) => group.groupName === this.searchClass
                 ).key = this.labelId
@@ -591,6 +629,7 @@ export default {
             id: annotationGroup.id,
             key: "",
             color: "",
+            isSelected: false
           }
           if ("coordinates" in annotationGroup) {
             newGroup.key = Id
@@ -620,7 +659,8 @@ export default {
             key: "",
             groups: [],
             labels: [],
-            color: "", // *****************************************
+            color: "", 
+            isSelected: false
           }
           if ("coordinates" in annotationClass) {
             newLabelClass.key = Id
@@ -664,7 +704,8 @@ export default {
             labelName: annotationLabel.title,
             id: annotationLabel.id,
             key: Id,
-            color: annotationLabel.color, // *****************************************
+            color: annotationLabel.color, 
+            isSelected: false
           })
 
           let newLabel = {
@@ -696,11 +737,38 @@ export default {
     showGroup() {
       this.isShowGroups = !this.isShowGroups
     },
-    showClass(groupId) {
-      this.isShowClasses[groupId] = !this.isShowClasses[groupId]
+    showClass(group) {
+      let groupIdx = this.labelGroups.indexOf(group)
+      this.isShowClasses[groupIdx] = !this.isShowClasses[groupIdx]
     },
-    showLabel(classId, groupId) {
+    showLabel(element, group) {
+      let classId = this.labelClasses.indexOf(element)
+      let groupId = this.labelGroups.indexOf(group)
       this.isShowLabels[groupId][classId] = !this.isShowLabels[groupId][classId]
+    },
+    showGroupOnCanvas(group) {
+      this.clearIsSelected()
+      group.isSelected = true
+      let key = group.key
+      if (key !== '') {
+        this.$emit("selectLabelById", key)
+      }
+    },
+    showClassOnCanvas(element) {
+      this.clearIsSelected()
+      element.isSelected = true
+      let key = element.key
+      if (key !== '') {
+        this.$emit("selectLabelById", key)
+      }
+    },
+    showLabelOnCanvas(label) {
+      this.clearIsSelected()
+      label.isSelected = true
+      let key = label.key
+      if (key !== '') {
+        this.$emit("selectLabelById", key)
+      }
     },
     toShowLabel(id) {
       this.$emit("visibleLabelBtn", id)
@@ -754,11 +822,43 @@ export default {
       }
       return null
     },
+    
 
-    // ******************************************************************************************************************
     // Функция для подсветки выбранной метки в дереве
     selectedLabelInsideTree(id) {
-      console.log(id)
+      if (id) {
+        this.isShowMarkupTree = true
+        let foundName = this.labelNames.find((name) => name.labelId === id)
+        if (foundName) {
+          this.isShowGroups = true
+          if (foundName.PageName) {
+            let foundGroup = this.labelGroups.find((group) => group.groupName === foundName.ClassName)
+            this.isShowClasses[this.labelGroups.indexOf(foundGroup)] = true
+            if (foundName.LabelName) {
+              let foundClass = this.labelClasses.find((cls) => cls.className === foundName.PageName)
+              this.isShowLabels[this.labelGroups.indexOf(foundGroup)][this.labelClasses.indexOf(foundClass)] = true
+              let foundLabel = this.labelLabels.find((label) => label.labelName === foundName.LabelName)
+              this.clearIsSelected
+              foundLabel.isSelected = true
+            } else {
+              if (foundName.PageName) {
+                let foundClass = this.labelClasses.find((cls) => cls.className === foundName.PageName)
+                this.clearIsSelected()
+                foundClass.isSelected = true
+              } else {
+                let foundGroup = this.labelGroups.find((group) => group.groupName === foundName.ClassName)
+                this.clearIsSelected()
+                foundGroup.isSelected = true
+              }
+            }
+          }
+          // надо добавить выделение
+        }
+        
+      } else {
+        this.clearIsSelected()
+      }
+      
     },
   },
   mounted() {
