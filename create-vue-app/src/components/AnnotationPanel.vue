@@ -37,6 +37,7 @@
     <label-editor
       v-if="isLabelEditorShow"
       @mode-change="mode_change"
+      @connectInSeries="ConnectDots"
       @createPolygon="CreatePolygon"
       @changeColor="changeColor"
       @changeCursor="changeCursor"
@@ -77,6 +78,9 @@ export default {
         this.scale = Math.ceil((Number(this.scale) + this.step) * 10) / 10
         this.$emit("slider-change", this.scale)
       }
+    },
+    ConnectDots() {
+      this.$emit("connectInSeries")
     },
     CreatePolygon() {
       this.$emit("createPolygon")

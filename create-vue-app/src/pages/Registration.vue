@@ -65,15 +65,17 @@ export default {
     registration(values) {
       console.log(values)
 
-      const path = "http://localhost:5000/items"
-      axios
-        .post(path, values)
-        .then(() => {
-          console.log("Data sent!")
-        })
-        .catch((error) => {
-          console.log(error)
-        })
+      // const path = "http://localhost:5000/items"
+      // axios
+      //   .post(path, values)
+      //   .then(() => {
+      //     console.log("Data sent!")
+      //   })
+      //   .catch((error) => {
+      //     console.log(error)
+      //   })
+      localStorage.setItem("accessToken", "SomeToken")
+      this.$router.push("/work")
     },
     isRequired(value) {
       if (value && value.trim()) {

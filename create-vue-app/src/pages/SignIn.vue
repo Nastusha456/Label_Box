@@ -46,8 +46,6 @@ export default {
   },
   data() {
     return {
-      currentPassword: "password",
-      userName: "name",
       message: {},
     }
   },
@@ -66,32 +64,28 @@ export default {
     },
     signIn(values) {
       console.log(values)
+      localStorage.setItem("accessToken", "SomeToken")
+      this.$router.push("/work")
 
-      axios
-        .post(path, values)
-        .then(() => {
-          console.log("Data sent!")
-        })
-        .catch((error) => {
-          console.log(error)
-        })
+      // axios
+      //   .post(path, values)
+      //   .then(() => {
+      //     console.log("Data sent!")
+      //   })
+      //   .catch((error) => {
+      //     console.log(error)
+      //   })
 
-      this.GetData()
+      // this.GetData()
     },
     validateUserName(value) {
       if (value && value.trim()) {
-        if (value != this.userName) {
-          return "Incorrect user name"
-        }
         return true
       }
       return "This field is required"
     },
     validatePassword(value) {
       if (value && value.trim()) {
-        if (value != this.currentPassword) {
-          return "Incorrect password"
-        }
         return true
       }
       return "This field is required"

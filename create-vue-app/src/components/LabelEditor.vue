@@ -33,6 +33,10 @@
       <i class="bx bxs-eraser bx-tada-hover"></i>
       <p>Eraser</p>
     </div>
+    <div class="label-editor" @click="ConnectDots">
+      <i class="bx bx-stats bx-tada-hover"></i>
+      <p>Connect in series</p>
+    </div>
     <div class="label-editor" @click="CreatePolygon">
       <i class="bx bx-shape-polygon bx-spin-hover"></i>
       <p>Create Polygon</p>
@@ -76,6 +80,9 @@ export default {
       document.getElementById(value).checked = true
       this.$emit("mode-change", this.selectedMode)
       this.$emit("changeCursor", "crosshair")
+    },
+    ConnectDots() {
+      this.$emit("connectInSeries")
     },
     CreatePolygon() {
       this.$emit("createPolygon")

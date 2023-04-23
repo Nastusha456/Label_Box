@@ -57,6 +57,8 @@ export default {
       labels: [],
       visibleLabels: [],
       selectedLabel: null,
+      isDotMoving: false,
+      movingDotIndex: null,
       isDrowing: false,
       isDragging: false,
       startMouseX: 0,
@@ -226,6 +228,28 @@ export default {
         return
       }
       const coordinates = this.jarvis(this.dots)
+      const contour = this.contour(coordinates)
+      const color = this.color
+      let Id = 1
+      while (this.labels.some((label) => label.labelId === Id)) {
+        Id = Id + 1
+      }
+      const labelId = Id
+      this.dots = []
+      const label = { coordinates, contour, color, labelId }
+      this.labels.push(label)
+      this.visibleLabels.push(label)
+      const canvas = this.$refs.canvas
+      const ctx = canvas.getContext("2d")
+      ctx.canvas.width = ctx.canvas.clientWidth
+      ctx.canvas.height = ctx.canvas.clientHeight
+      this.drawAllLabels(ctx)
+    },
+    ConnectInSeries() {
+      if (this.dots.length === 0) {
+        return
+      }
+      const coordinates = this.dots
       const contour = this.contour(coordinates)
       const color = this.color
       let Id = 1
@@ -581,16 +605,28 @@ export default {
 
       return polygon
     },
+    moveDot(x, y, index) {
+      this.selectedLabel.coordinates[index] = { x, y }
+    },
 
     mouseDown(event) {
-      if (this.selectedMode === "markup") {
-        //Начало рисования
-        // Получаем координаты мыши относительно канваса
-        const canvas = this.$refs.canvas
-        const rect = canvas.getBoundingClientRect()
-        const x = (event.clientX - rect.left) / this.scale
-        const y = (event.clientY - rect.top) / this.scale
+      //Начало рисования
+      // Получаем координаты мыши относительно канваса
+      const canvas = this.$refs.canvas
+      const ctx = canvas.getContext("2d")
+      ctx.canvas.width = ctx.canvas.clientWidth
+      ctx.canvas.height = ctx.canvas.clientHeight
+      const rect = canvas.getBoundingClientRect()
+      const x = (event.clientX - rect.left) / this.scale
+      const y = (event.clientY - rect.top) / this.scale
 
+      // whether the cursor matches the dot in the selected label
+      const dot = this.findDotIntoLabel(x, y, this.selectedLabel)
+      if (dot) {
+        this.isDotMoving = true
+        this.movingDotIndex = this.selectedLabel.coordinates.indexOf(dot)
+        this.deleteLabelFromLabels(this.selectedLabel, this.visibleLabels)
+      } else if (this.selectedMode === "markup") {
         // Сохраняем координаты маркера в свойство
         this.startCoords = { x, y }
         this.isDrowing = true
@@ -601,14 +637,6 @@ export default {
         this.startImageX = parseInt(this.$refs.image_holder.style.left) || 0
         this.startImageY = parseInt(this.$refs.image_holder.style.top) || 0
       } else if (this.selectedMode === "dot") {
-        const canvas = this.$refs.canvas
-        const ctx = canvas.getContext("2d")
-        ctx.canvas.width = ctx.canvas.clientWidth
-        ctx.canvas.height = ctx.canvas.clientHeight
-        const rect = canvas.getBoundingClientRect()
-        const x = (event.clientX - rect.left) / this.scale
-        const y = (event.clientY - rect.top) / this.scale
-
         const newPoint = { x, y }
 
         if (this.selectedLabel) {
@@ -636,18 +664,7 @@ export default {
         } else {
           this.dots.push(newPoint)
         }
-
-        this.drawAllLabels(ctx)
-        this.drawDots(ctx, this.dots, 3, this.color)
       } else if (this.selectedMode === "eraser") {
-        const canvas = this.$refs.canvas
-        const ctx = canvas.getContext("2d")
-        ctx.canvas.width = ctx.canvas.clientWidth
-        ctx.canvas.height = ctx.canvas.clientHeight
-        const rect = canvas.getBoundingClientRect()
-        const x = (event.clientX - rect.left) / this.scale
-        const y = (event.clientY - rect.top) / this.scale
-
         // Удаление точки внутри метки
         const dotFromDots = this.findDotFromDots(x, y)
         if (dotFromDots) {
@@ -657,9 +674,9 @@ export default {
           const dot = this.findDotIntoLabel(x, y, label)
           this.deleteDot(ctx, label, dot)
         }
-        this.drawAllLabels(ctx)
-        this.drawDots(ctx, this.dots, 3, this.color)
       }
+      this.drawAllLabels(ctx)
+      this.drawDots(ctx, this.dots, 3, this.color)
     },
     mouseMove(event) {
       // Процесс рисования
@@ -670,6 +687,10 @@ export default {
       const rect = canvas.getBoundingClientRect()
       const x = (event.clientX - rect.left) / this.scale
       const y = (event.clientY - rect.top) / this.scale
+
+      if (this.isDotMoving) {
+        this.moveDot(x, y, this.movingDotIndex)
+      }
 
       this.drawAllLabels(ctx)
       this.drawDots(ctx, this.dots, 3, this.color)
@@ -710,7 +731,21 @@ export default {
       }
     },
     mouseUp(event) {
-      if (this.isDrowing && this.selectedMode === "markup") {
+      if (this.isDotMoving) {
+        const newCoordinates = this.selectedLabel.coordinates
+        const newContour = this.contour(newCoordinates)
+        const id = this.selectedLabel.labelId
+        for (const label of this.labels) {
+          if (label.labelId == id) {
+            label.coordinates = newCoordinates
+            label.contour = newContour
+          }
+        }
+        this.selectedLabel.contour = newContour
+        this.visibleLabels.push(this.selectedLabel)
+        this.isDotMoving = false
+        this.movingDotIndex = null
+      } else if (this.isDrowing && this.selectedMode === "markup") {
         // Конец рисования
         const canvas = this.$refs.canvas
         const ctx = canvas.getContext("2d")

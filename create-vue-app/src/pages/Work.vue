@@ -8,6 +8,7 @@
         <annotation-panel
           @slider-change="sliderChange"
           @mode-change="modeChange"
+          @connectInSeries="ConnectDots"
           @createPolygon="CreatePolygon"
           @changeColor="changeColor"
           @show-label-editor="ShowLabelEditor"
@@ -82,6 +83,9 @@ export default {
     }
   },
   methods: {
+    ConnectDots() {
+      this.$refs.CenterPanel.ConnectInSeries()
+    },
     CreatePolygon() {
       this.$refs.CenterPanel.CreatePolygon()
     },
@@ -139,7 +143,7 @@ export default {
     },
     selectLabelById(id) {
       this.$refs.CenterPanel.selectLabelById(id)
-    }
+    },
   },
 }
 </script>

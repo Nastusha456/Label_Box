@@ -1,6 +1,10 @@
 <template>
   <div class="box">
     <div>
+      <div class="navBtn">
+        <div @click="$router.push('/work')" class="text">Home</div>
+        <div @click="Exit" class="text">Exit</div>
+      </div>
       <img src="@/images/user-100.png" alt="User image" />
       <div @click="openNameForm" class="text">
         User name: <span>{{ this.userName }}</span>
@@ -91,6 +95,10 @@ export default {
     }
   },
   methods: {
+    Exit() {
+      localStorage.removeItem("accessToken")
+      this.$router.push("/")
+    },
     openNameForm() {
       this.nameFormIsVisible = true
       this.passwordBtn = false
@@ -173,6 +181,18 @@ export default {
 </script>
 
 <style scoped>
+.navBtn {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.navBtn div:hover {
+  color: red;
+  cursor: pointer;
+}
+
 img {
   width: 130px;
   height: 130px;
