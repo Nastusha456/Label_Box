@@ -19,6 +19,7 @@
       :rules="validateUserName"
     />
     <ErrorMessage name="user_name" class="error" />
+    <div v-if="!isUserNameCorrect" class="error">Incorrect user name</div>
     <Field
       name="password"
       class="data"
@@ -27,14 +28,17 @@
       :rules="validatePassword"
     />
     <ErrorMessage name="password" class="error" />
+    <div v-if="!isPasswordCorrect" class="error">Incorrect password</div>
     <input type="submit" value="Login" />
   </Form>
   <button @click="GetData">Get</button>
 </template>
 
 <script>
+import CryptoJS from "crypto-js"
 import { Form, Field, ErrorMessage } from "vee-validate"
 import axios from "axios"
+import { mapMutations, mapGetters } from "vuex"
 
 const path = "http://10.17.17.112:5000/api/v1/classificator?format=json"
 
@@ -46,10 +50,15 @@ export default {
   },
   data() {
     return {
-      message: {},
+      userData: {},
+      isPasswordCorrect: true,
+      isUserNameCorrect: true,
     }
   },
   methods: {
+    ...mapMutations(["setUserData"]),
+    ...mapGetters(["getUserData"]),
+
     GetData() {
       axios
         .get(path)
@@ -63,9 +72,21 @@ export default {
         })
     },
     signIn(values) {
-      console.log(values)
+      // console.log(values)
+
       localStorage.setItem("accessToken", "SomeToken")
+
+      const hashedPassword = CryptoJS.MD5(
+        values.password + "Qit7mef"
+      ).toString()
+
+      // console.log(hashedPassword)
+
       this.$router.push("/work")
+
+      this.setUserData(values)
+      const DATA = this.getUserData()
+      console.log(DATA)
 
       // axios
       //   .post(path, values)
@@ -79,16 +100,24 @@ export default {
       // this.GetData()
     },
     validateUserName(value) {
+      this.isUserNameCorrect = true
       if (value && value.trim()) {
         return true
       }
       return "This field is required"
     },
     validatePassword(value) {
+      this.isPasswordCorrect = true
       if (value && value.trim()) {
         return true
       }
       return "This field is required"
+    },
+    incorrectPassword() {
+      this.isPasswordCorrect = false
+    },
+    incorrectUserName() {
+      this.isUserNameCorrect = false
     },
   },
 }
