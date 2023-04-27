@@ -36,6 +36,7 @@
     </div>
     <label-editor
       v-if="isLabelEditorShow"
+      ref="LabelEditor"
       @mode-change="mode_change"
       @connectInSeries="ConnectDots"
       @createPolygon="CreatePolygon"
@@ -112,6 +113,13 @@ export default {
     },
     changeCursor(value) {
       this.$emit("changeCursor", value)
+    },
+    plusNewLabel() {
+      // if (this.$refs.LabelEditor) {
+      //   this.$refs.LabelEditor.ModeChange('dot')
+      // }
+      this.isLabelEditorShow = true
+      
     },
   },
 }

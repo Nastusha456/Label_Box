@@ -61,6 +61,7 @@ export default {
       movingDotIndex: null,
       isDrowing: false,
       isDragging: false,
+      // labelOnWork: false,
       startMouseX: 0,
       startMouseY: 0,
       startImageX: 0,
@@ -244,6 +245,11 @@ export default {
       ctx.canvas.width = ctx.canvas.clientWidth
       ctx.canvas.height = ctx.canvas.clientHeight
       this.drawAllLabels(ctx)
+      this.$emit("update-labelOnWork", true)
+      const offsetX = (contour.left+contour.right)/2
+        const offsetY = (contour.top+contour.bottom)/2
+      const labelsOverLabel = this.findAllLabels(offsetX, offsetY, this.labels)
+      this.$emit("find-markup-over-label", labelsOverLabel)
     },
     ConnectInSeries() {
       if (this.dots.length === 0) {
@@ -266,6 +272,11 @@ export default {
       ctx.canvas.width = ctx.canvas.clientWidth
       ctx.canvas.height = ctx.canvas.clientHeight
       this.drawAllLabels(ctx)
+      this.$emit("update-labelOnWork", true)
+      const offsetX = (contour.left+contour.right)/2
+        const offsetY = (contour.top+contour.bottom)/2
+      const labelsOverLabel = this.findAllLabels(offsetX, offsetY, this.labels)
+      this.$emit("find-markup-over-label", labelsOverLabel)
     },
 
     drawLabel(ctx, points, color, fill) {
@@ -776,10 +787,16 @@ export default {
           const label = { coordinates, contour, color, labelId }
           this.labels.push(label)
           this.visibleLabels.push(label)
+          this.$emit("update-labelOnWork", true)
+          const offsetX = (contour.left+contour.right)/2
+          const offsetY = (contour.top+contour.bottom)/2
+          const labelsOverLabel = this.findAllLabels(offsetX, offsetY, this.labels)
+          this.$emit("find-markup-over-label", labelsOverLabel)
         }
         this.drawAllLabels(ctx)
         this.drawDots(ctx, this.dots, 3, this.color)
         this.isDrowing = false
+        
       } else {
         this.isDragging = false
       }

@@ -6,6 +6,7 @@
       <classifier v-if="isShowClassifier" />
       <div class="centerBlock">
         <annotation-panel
+          ref="AnnotationPanel"
           @slider-change="sliderChange"
           @mode-change="modeChange"
           @connectInSeries="ConnectDots"
@@ -18,6 +19,8 @@
         <center-panel
           @getImgData="getImgData"
           @update-labels="updateLabels"
+          @update-labelOnWork="updateLabelOnWork"
+          @find-markup-over-label="findMarkupOverLabel"
           @selectedLabelInsideTree="selectedLabel"
           ref="CenterPanel"
           :scale="parseFloat(scale)"
@@ -33,10 +36,13 @@
         :isShowLabelEditor="isShowLabelEditor"
         :labels="labels"
         :color="color"
+        :labelOnWork="labelOnWork"
         @visibleLabelBtn="visibleLabelBtn"
         @changeLabelColorBtn="changeLabelColorBtn"
         @deleteLabelBtn="deleteLabelBtn"
         @selectLabelById="selectLabelById"
+        @plusNewLabel="plusNewLabel"
+        @update-labelOnWork="updateLabelOnWork"
       />
       <right-panel
         @delet="delet"
@@ -74,6 +80,7 @@ export default {
       isShowClassifier: false,
       isShowMarkupPanel: false,
       isShowLabelEditor: false,
+      labelOnWork: false,
       scale: 1,
       selectedMode: "mooving",
       imageData: {},
@@ -143,6 +150,17 @@ export default {
     },
     selectLabelById(id) {
       this.$refs.CenterPanel.selectLabelById(id)
+    },
+    plusNewLabel() {
+      // this.$refs.AnnotationPanel.ShowLabelEditor()
+      this.$refs.AnnotationPanel.plusNewLabel()
+      this.isShowLabelEditor = true
+    },
+    updateLabelOnWork(labelOnWork) {
+      this.labelOnWork = labelOnWork
+    },
+    findMarkupOverLabel(labelsOverLabel) {
+      this.$refs.Markup.findMarkupOverLabel(labelsOverLabel)
     },
   },
 }

@@ -94,6 +94,9 @@ export default {
       this.$emit("changeColor", event.target.value)
     },
   },
+  mounted() {
+    this.ModeChange('dot')
+  }
 }
 </script>
 

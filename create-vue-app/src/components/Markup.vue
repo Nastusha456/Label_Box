@@ -81,6 +81,9 @@
           </li>
         </ul>
       </div>
+      <div>
+        <strong style="color: red" v-if="!formIsValid">Please fill in all fields</strong>
+      </div>
       <button @click="saveLabel()">Save</button>
     </div>
     <div class="markup_tree" v-if="isShowMarkupTree">
@@ -103,6 +106,10 @@
                     : "\u{025BD}"
                 }`
               }}
+            </div>
+            <div style="font-size: 14px;" class="label-editor" @click="plusNewLabelinGroup(group.groupName)">
+              <i class='bx bx-plus-circle'></i>
+              <!-- <p>Add new label</p> -->
             </div>
             <div
               v-if="group.key !== ''"
@@ -166,6 +173,10 @@
                         : ""
                     }`
                   }}
+                </div>
+                <div style="font-size: 14px;" class="label-editor" @click="plusNewLabelinClass(group.groupName, element.className)">
+                  <i class='bx bx-plus-circle'></i>
+                  <!-- <p>Add new label</p> -->
                 </div>
                 <div
                   v-if="element.key !== ''"
@@ -269,8 +280,9 @@ export default {
       showLabels: false,
       selectedMarkupMode: "label",
       labelId: NaN,
-      labelOnWork: false,
+      // isLabelOnWork: false,
       isShowGroups: false,
+      formIsValid: true,
       isShowClasses: [],
       isShowLabels: [],
 
@@ -285,12 +297,12 @@ export default {
     isShowLabelEditor: String,
     labels: Array,
     color: String,
+    labelOnWork: Boolean,
   },
   watch: {
     labels: {
       handler(newVal, oldVal) {
         // Обработка изменений в массиве
-        this.labelOnWork = true
         if (newVal[newVal.length - 1]) {
           this.labelId = newVal[newVal.length - 1].labelId
         }
@@ -309,6 +321,9 @@ export default {
       },
       deep: true,
     },
+    // labelOnWork(newVal, oldVal) {
+    //   this.isLabelOnWork = newVal
+    // },
   },
   computed: {
     filteredGroups() {
@@ -352,7 +367,7 @@ export default {
       this.showLabels = false
       this.selectedMarkupMode = "label"
       this.labelId = NaN
-      this.labelOnWork = false
+      // this.isLabelOnWork = false
       this.isShowGroups = false
       this.isShowClasses = []
       this.isShowLabels = []
@@ -403,18 +418,18 @@ export default {
       // Обработка выбора опции
       this.searchLabel = option.labelName
       this.labelId = option.id
-      for (const page of this.labelClasses) {
-        if (page.labels && page.labels.includes(option.labelName)) {
-          this.searchPage = page.className
-          for (const group of this.labelGroups) {
-            if (page.groups && page.groups.includes(group.groupName)) {
-              this.searchClass = group.groupName
-              break
-            }
-          }
-          break
-        }
-      }
+      // for (const page of this.labelClasses) {
+      //   if (page.labels && page.labels.includes(option.labelName)) {
+      //     this.searchPage = page.className
+      //     for (const group of this.labelGroups) {
+      //       if (page.groups && page.groups.includes(group.groupName)) {
+      //         this.searchClass = group.groupName
+      //         break
+      //       }
+      //     }
+      //     break
+      //   }
+      // }
       this.showLabels = false // Скрытие выпадающего списка
     },
     markupModeChange(event) {
@@ -426,87 +441,31 @@ export default {
     saveLabel() {
       if (this.labelOnWork) {
         if (this.selectedMarkupMode === "label") {
-          let newLabel = {
-            LabelName: this.searchLabel,
-            PageName: this.searchPage,
-            ClassName: this.searchClass,
-            labelId: this.labelId,
-          }
-          if (
-            !this.labelGroups.some(
-              (group) => group.groupName === this.searchClass
-            )
-          ) {
-            let Id = 1
-            while (this.labelGroups.some((group) => group.id === Id)) {
-              Id = Id + 1
-            }
-            this.labelGroups.push({
-              groupName: this.searchClass,
-              id: Id,
-              key: "",
-              color: '',
-              isSelected: false
-            })
-          }
-          let foundClass = this.labelClasses.find(
-            (cls) => cls.className === this.searchPage
-          )
-          if (!foundClass) {
-            let Id = 1
-            while (this.labelClasses.some((cls) => cls.id === Id)) {
-              Id = Id + 1
-            }
-            let newLabelClass = {
-              className: this.searchPage,
-              id: Id,
-              key: "",
-              groups: [this.searchClass],
-              labels: [this.searchLabel],
-              isSelected: false
-            }
-            this.labelClasses.push(newLabelClass)
-          } else {
-            if (!foundClass.groups.includes(this.searchClass)) {
-              foundClass.groups.push(this.searchClass)
+          if (this.searchLabel !== '' && this.searchPage !== '' && this.searchClass !== '') {
+            this.formIsValid = true
+            let newLabel = {
+              LabelName: this.searchLabel,
+              PageName: this.searchPage,
+              ClassName: this.searchClass,
+              labelId: this.labelId,
             }
             if (
-              !foundClass.labels ||
-              !foundClass.labels.includes(this.searchLabel)
+              !this.labelGroups.some(
+                (group) => group.groupName === this.searchClass
+              )
             ) {
-              foundClass.labels.push(this.searchLabel)
+              let Id = 1
+              while (this.labelGroups.some((group) => group.id === Id)) {
+                Id = Id + 1
+              }
+              this.labelGroups.push({
+                groupName: this.searchClass,
+                id: Id,
+                key: "",
+                color: '',
+                isSelected: false
+              })
             }
-          }
-          if (
-            !this.labelLabels.some(
-              (label) => label.labelName === this.searchLabel
-            )
-          ) {
-            let Id = 1
-            while (this.labelLabels.some((label) => label.id === Id)) {
-              Id = Id + 1
-            }
-            this.labelLabels.push({
-              labelName: this.searchLabel,
-              id: Id,
-              color: this.color,
-              key: this.labelId,
-              isSelected: false
-            })
-          }
-          this.labelNames.push(newLabel)
-          this.labelOnWork = false
-        } else {
-          // Если выбран режим class
-          let newLabel = {
-            LabelName: "",
-            PageName: "",
-            ClassName: this.searchClass,
-            labelId: this.labelId,
-          }
-          if (this.searchPage !== "") {
-            newLabel.PageName = this.searchPage
-
             let foundClass = this.labelClasses.find(
               (cls) => cls.className === this.searchPage
             )
@@ -518,10 +477,9 @@ export default {
               let newLabelClass = {
                 className: this.searchPage,
                 id: Id,
-                key: this.labelId,
+                key: "",
                 groups: [this.searchClass],
-                labels: [],
-                color: this.color,
+                labels: [this.searchLabel],
                 isSelected: false
               }
               this.labelClasses.push(newLabelClass)
@@ -530,72 +488,139 @@ export default {
                 foundClass.groups.push(this.searchClass)
               }
               if (
-                this.labelClasses.find(
-                  (cls) => cls.className === this.searchClass
-                ).key === ""
+                !foundClass.labels ||
+                !foundClass.labels.includes(this.searchLabel)
               ) {
-                this.labelClasses.find((cls) => cls.className === this.searchPage).key = this.labelId
-              } 
+                foundClass.labels.push(this.searchLabel)
+              }
             }
             if (
-              !this.labelGroups.some(
-                (group) => group.groupName === this.searchClass
+              !this.labelLabels.some(
+                (label) => label.labelName === this.searchLabel
               )
             ) {
               let Id = 1
-              while (this.labelGroups.some((group) => group.id === Id)) {
+              while (this.labelLabels.some((label) => label.id === Id)) {
                 Id = Id + 1
               }
-              let newGroup = {
-                groupName: this.searchClass,
+              this.labelLabels.push({
+                labelName: this.searchLabel,
                 id: Id,
-                key: "",
                 color: this.color,
-                isSelected: false
-              }
-              this.labelGroups.push(newGroup)
-            } else {
-              if (
-                this.labelGroups.find(
-                  (group) => group.groupName === this.searchClass
-                ).key === ""
-              ) {
-                this.labelGroups.find((group) => group.id === Id).key = this.labelId
-              }
-            }
-          } else {
-            if (
-              !this.labelGroups.some(
-                (group) => group.groupName === this.searchClass
-              )
-            ) {
-              let Id = 1
-              while (this.labelGroups.some((group) => group.id === Id)) {
-                Id = Id + 1
-              }
-              let newGroup = {
-                groupName: this.searchClass,
-                id: Id,
                 key: this.labelId,
-                color: this.color,
                 isSelected: false
+              })
+            }
+            this.labelNames.push(newLabel)
+            this.$emit("update-labelOnWork", false)
+          } else {
+            this.formIsValid = false
+          }
+        } else {
+          // Если выбран режим class
+          if (this.searchClass !== '') {
+            this.formIsValid = true
+            let newLabel = {
+              LabelName: "",
+              PageName: "",
+              ClassName: this.searchClass,
+              labelId: this.labelId,
+            }
+            if (this.searchPage !== "") {
+              newLabel.PageName = this.searchPage
+
+              let foundClass = this.labelClasses.find(
+                (cls) => cls.className === this.searchPage
+              )
+              if (!foundClass) {
+                let Id = 1
+                while (this.labelClasses.some((cls) => cls.id === Id)) {
+                  Id = Id + 1
+                }
+                let newLabelClass = {
+                  className: this.searchPage,
+                  id: Id,
+                  key: this.labelId,
+                  groups: [this.searchClass],
+                  labels: [],
+                  color: this.color,
+                  isSelected: false
+                }
+                this.labelClasses.push(newLabelClass)
+              } else {
+                if (!foundClass.groups.includes(this.searchClass)) {
+                  foundClass.groups.push(this.searchClass)
+                }
+                if (
+                  this.labelClasses.find(
+                    (cls) => cls.className === this.searchClass
+                  ).key === ""
+                ) {
+                  this.labelClasses.find((cls) => cls.className === this.searchPage).key = this.labelId
+                } 
               }
-              this.labelGroups.push(newGroup)
+              if (
+                !this.labelGroups.some(
+                  (group) => group.groupName === this.searchClass
+                )
+              ) {
+                let Id = 1
+                while (this.labelGroups.some((group) => group.id === Id)) {
+                  Id = Id + 1
+                }
+                let newGroup = {
+                  groupName: this.searchClass,
+                  id: Id,
+                  key: "",
+                  color: this.color,
+                  isSelected: false
+                }
+                this.labelGroups.push(newGroup)
+              } else {
+                if (
+                  this.labelGroups.find(
+                    (group) => group.groupName === this.searchClass
+                  ).key === ""
+                ) {
+                  this.labelGroups.find((group) => group.id === Id).key = this.labelId
+                }
+              }
             } else {
               if (
-                this.labelGroups.find(
+                !this.labelGroups.some(
                   (group) => group.groupName === this.searchClass
-                ).key === ''
+                )
               ) {
-                
-                this.labelGroups.find(
-                  (group) => group.groupName === this.searchClass
-                ).key = this.labelId
+                let Id = 1
+                while (this.labelGroups.some((group) => group.id === Id)) {
+                  Id = Id + 1
+                }
+                let newGroup = {
+                  groupName: this.searchClass,
+                  id: Id,
+                  key: this.labelId,
+                  color: this.color,
+                  isSelected: false
+                }
+                this.labelGroups.push(newGroup)
+              } else {
+                if (
+                  this.labelGroups.find(
+                    (group) => group.groupName === this.searchClass
+                  ).key === ''
+                ) {
+                  
+                  this.labelGroups.find(
+                    (group) => group.groupName === this.searchClass
+                  ).key = this.labelId
+                }
               }
             }
+            this.labelNames.push(newLabel)
+            this.$emit("update-labelOnWork", false)
+          } else {
+            this.formIsValid = false
           }
-          this.labelNames.push(newLabel)
-          this.labelOnWork = false
         }
       }
     },
@@ -822,7 +847,54 @@ export default {
       }
       return null
     },
-    
+    plusNewLabelinGroup(groupName) {
+      this.$emit("plusNewLabel")
+      this.selectedMarkupMode = 'label'
+      document.getElementById('label').checked = true
+      this.searchClass = groupName
+      this.searchPage = ''
+      this.searchLabel = ''
+    },
+    plusNewLabelinClass(groupName, className) {
+      this.$emit("plusNewLabel")
+      this.selectedMarkupMode = 'label'
+      document.getElementById('label').checked = true
+      this.searchClass = groupName
+      this.searchPage = className
+      this.searchLabel = ''
+    },
+    findMarkupOverLabel(labelsOverLabel) {
+      console.log(labelsOverLabel)
+      if(labelsOverLabel.length === 1) {
+        let foundClassMarkup = this.labelGroups.find((group) => group.key === labelsOverLabel[0].labelId)
+        if (foundClassMarkup) {
+          this.searchClass = foundClassMarkup.groupName
+        } else {
+          let foundPageMarkup = this.labelClasses.find((cls) => cls.key === labelsOverLabel[0].labelId)
+          if (foundPageMarkup) {
+            this.searchPage = foundPageMarkup.className
+          }
+        }
+        
+      } else {
+        if (labelsOverLabel.length >= 2) {
+          let foundClassMarkup = this.labelGroups.find((group) => group.key === labelsOverLabel[0].labelId)
+          if (foundClassMarkup) {
+            this.searchClass = foundClassMarkup.groupName
+            let foundPageMarkup = this.labelClasses.find((cls) => cls.key === labelsOverLabel[1].labelId)
+            if (foundPageMarkup) {
+              this.searchPage = foundPageMarkup.className
+            }
+          } else {
+            let foundPageMarkup = this.labelClasses.find((cls) => cls.key === labelsOverLabel[0].labelId)
+            if (foundPageMarkup) {
+              this.searchPage = foundPageMarkup.className
+            }
+          }
+        }
+      }
+    },
+
 
     // Функция для подсветки выбранной метки в дереве
     selectedLabelInsideTree(id) {
@@ -852,7 +924,6 @@ export default {
               }
             }
           }
-          // надо добавить выделение
         }
         
       } else {
