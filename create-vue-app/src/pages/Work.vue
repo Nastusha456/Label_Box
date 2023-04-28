@@ -43,6 +43,7 @@
         @selectLabelById="selectLabelById"
         @plusNewLabel="plusNewLabel"
         @update-labelOnWork="updateLabelOnWork"
+        @fetch-annotation="fetchAnnotation"
       />
       <right-panel
         @delet="delet"
@@ -161,6 +162,9 @@ export default {
     },
     findMarkupOverLabel(labelsOverLabel) {
       this.$refs.Markup.findMarkupOverLabel(labelsOverLabel)
+    },
+    fetchAnnotation() {
+      this.$refs.CenterPanel.fetchAnnotation()
     },
   },
 }

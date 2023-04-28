@@ -86,6 +86,8 @@
       </div>
       <button @click="saveLabel()">Save</button>
     </div>
+    <button @click="collectData()">Test Collection Annotation</button> <!-- ВРЕМЕННО!!! ПОТОМ УБРАТЬ!!!  -->
+    <button @click="fetchAnnotation()">Test Download Annotation</button> <!-- ВРЕМЕННО!!! ПОТОМ УБРАТЬ!!!  -->
     <div class="markup_tree" v-if="isShowMarkupTree">
       <span @click="showGroup"
         ><strong>Markup</strong>
@@ -147,7 +149,7 @@
               :key="element.id"
             >
               <div
-                v-if="element.groups.includes(group.groupName)"
+                v-if="element.groups.includes(group.id)"
                 class="label_tools"
                 @dblclick="showClassOnCanvas(element)"
                 :style="{ backgroundColor: element.isSelected ? 'rgba(255, 255, 255, 0.25)' : 'transparent' }"
@@ -221,7 +223,7 @@
                   <div
                     v-if="
                       element.labels != undefined &&
-                      element.labels.includes(label.labelName)
+                      element.labels.includes(label.id)
                     "
                     class="label_tools"
                     @dblclick="showLabelOnCanvas(label)"
@@ -280,7 +282,6 @@ export default {
       showLabels: false,
       selectedMarkupMode: "label",
       labelId: NaN,
-      // isLabelOnWork: false,
       isShowGroups: false,
       formIsValid: true,
       isShowClasses: [],
@@ -290,6 +291,12 @@ export default {
       annotationGroups: {},
       annotationClasses: {},
       annotationLabels: {},
+
+      allData : {
+        'groups': [],
+        'classes': [],
+        'labels': []
+    },
     }
   },
   props: {
@@ -321,9 +328,6 @@ export default {
       },
       deep: true,
     },
-    // labelOnWork(newVal, oldVal) {
-    //   this.isLabelOnWork = newVal
-    // },
   },
   computed: {
     filteredGroups() {
@@ -337,9 +341,6 @@ export default {
       return this.labelClasses.filter(
         (option) =>
           option.className.toLowerCase().includes(this.searchPage.toLowerCase()) //&&
-        //   option.labels &&
-        //   option.groups
-        //   option.labels.includes(this.searchLabel)
       )
     },
     filteredLabels() {
@@ -367,7 +368,6 @@ export default {
       this.showLabels = false
       this.selectedMarkupMode = "label"
       this.labelId = NaN
-      // this.isLabelOnWork = false
       this.isShowGroups = false
       this.isShowClasses = []
       this.isShowLabels = []
@@ -417,19 +417,6 @@ export default {
     selectLabel(option) {
       // Обработка выбора опции
       this.searchLabel = option.labelName
-      this.labelId = option.id
-      // for (const page of this.labelClasses) {
-      //   if (page.labels && page.labels.includes(option.labelName)) {
-      //     this.searchPage = page.className
-      //     for (const group of this.labelGroups) {
-      //       if (page.groups && page.groups.includes(group.groupName)) {
-      //         this.searchClass = group.groupName
-      //         break
-      //       }
-      //     }
-      //     break
-      //   }
-      // }
       this.showLabels = false // Скрытие выпадающего списка
     },
     markupModeChange(event) {
@@ -449,22 +436,61 @@ export default {
               ClassName: this.searchClass,
               labelId: this.labelId,
             }
+            let thisGroupId = 1
+            while (this.labelGroups.some((group) => group.id === thisGroupId)) {
+              thisGroupId = thisGroupId + 1
+            }
             if (
               !this.labelGroups.some(
                 (group) => group.groupName === this.searchClass
               )
             ) {
-              let Id = 1
-              while (this.labelGroups.some((group) => group.id === Id)) {
-                Id = Id + 1
-              }
               this.labelGroups.push({
                 groupName: this.searchClass,
-                id: Id,
+                id: thisGroupId,
                 key: "",
                 color: '',
                 isSelected: false
               })
+            } else {
+              thisGroupId = this.labelGroups.find((group) => group.groupName === this.searchClass).id
+            }
+            let thisLabelId = 1
+            while (this.labelLabels.some((label) => label.id === thisLabelId)) {
+              thisLabelId = thisLabelId + 1
+            }
+            if (
+              !this.labelLabels.some(
+                (label) => label.labelName === this.searchLabel
+              )
+            ) {
+              this.labelLabels.push({
+                labelName: this.searchLabel,
+                id: thisLabelId,
+                color: this.color,
+                key: this.labelId,
+                isSelected: false
+              })
+            } else {
+              if (this.labelClasses.find((cls) => cls.labels.includes(this.labelLabels.find((lbl) => lbl.labelName === this.searchLabel).id)  && cls.className === this.searchPage)) {
+                if (this.labelClasses.find((cls) => cls.labels.includes(this.labelLabels.find((lbl) => lbl.labelName === this.searchLabel).id)  && cls.className === this.searchPage && !cls.groups.includes(this.labelGroups.find((grp) => grp.groupName === this.searchClass).id))) {
+                  this.labelLabels.push({
+                    labelName: this.searchLabel,
+                    id: thisLabelId,
+                    color: this.color,
+                    key: this.labelId,
+                    isSelected: false
+                  })
+                }
+              } else {
+                this.labelLabels.push({
+                  labelName: this.searchLabel,
+                  id: thisLabelId,
+                  color: this.color,
+                  key: this.labelId,
+                  isSelected: false
+                })
+              }
             }
             let foundClass = this.labelClasses.find(
               (cls) => cls.className === this.searchPage
@@ -478,38 +504,38 @@ export default {
                 className: this.searchPage,
                 id: Id,
                 key: "",
-                groups: [this.searchClass],
-                labels: [this.searchLabel],
+                groups: [thisGroupId],
+                labels: [thisLabelId],
                 isSelected: false
               }
               this.labelClasses.push(newLabelClass)
             } else {
-              if (!foundClass.groups.includes(this.searchClass)) {
-                foundClass.groups.push(this.searchClass)
+              if (this.labelClasses.find((cls) => cls.groups.includes(this.labelGroups.find((grp) => grp.groupName === this.searchClass).id) && cls.className === this.searchPage)) {
+                if (!foundClass.groups.includes(thisGroupId)) {
+                  foundClass.groups.push(thisGroupId)
+                }
+                if (
+                  !foundClass.labels ||
+                  !foundClass.labels.includes(thisLabelId)
+                ) {
+                  foundClass.labels.push(thisLabelId)
+                }
+              } else {
+                let Id = 1
+                while (this.labelClasses.some((cls) => cls.id === Id)) {
+                  Id = Id + 1
+                }
+                let newLabelClass = {
+                  className: this.searchPage,
+                  id: Id,
+                  key: "",
+                  groups: [thisGroupId],
+                  labels: [thisLabelId],
+                  isSelected: false
+                }
+                this.labelClasses.push(newLabelClass)
               }
-              if (
-                !foundClass.labels ||
-                !foundClass.labels.includes(this.searchLabel)
-              ) {
-                foundClass.labels.push(this.searchLabel)
-              }
-            }
-            if (
-              !this.labelLabels.some(
-                (label) => label.labelName === this.searchLabel
-              )
-            ) {
-              let Id = 1
-              while (this.labelLabels.some((label) => label.id === Id)) {
-                Id = Id + 1
-              }
-              this.labelLabels.push({
-                labelName: this.searchLabel,
-                id: Id,
-                color: this.color,
-                key: this.labelId,
-                isSelected: false
-              })
+              
             }
             this.labelNames.push(newLabel)
             this.$emit("update-labelOnWork", false)
@@ -526,6 +552,26 @@ export default {
               ClassName: this.searchClass,
               labelId: this.labelId,
             }
+            let thisGroupId = 1
+            while (this.labelGroups.some((group) => group.id === thisGroupId)) {
+              thisGroupId = thisGroupId + 1
+            }
+            if (
+              !this.labelGroups.some(
+                (group) => group.groupName === this.searchClass
+              )
+            ) {
+              let newGroup = {
+                groupName: this.searchClass,
+                id: thisGroupId,
+                key: "",
+                color: this.color,
+                isSelected: false
+              }
+              this.labelGroups.push(newGroup)
+            } else {
+              thisGroupId = this.labelGroups.find((group) => group.groupName === this.searchClass).id
+            }
             if (this.searchPage !== "") {
               newLabel.PageName = this.searchPage
 
@@ -541,48 +587,39 @@ export default {
                   className: this.searchPage,
                   id: Id,
                   key: this.labelId,
-                  groups: [this.searchClass],
+                  groups: [thisGroupId],
                   labels: [],
                   color: this.color,
                   isSelected: false
                 }
                 this.labelClasses.push(newLabelClass)
               } else {
-                if (!foundClass.groups.includes(this.searchClass)) {
-                  foundClass.groups.push(this.searchClass)
-                }
-                if (
-                  this.labelClasses.find(
-                    (cls) => cls.className === this.searchClass
-                  ).key === ""
-                ) {
-                  this.labelClasses.find((cls) => cls.className === this.searchPage).key = this.labelId
-                } 
-              }
-              if (
-                !this.labelGroups.some(
-                  (group) => group.groupName === this.searchClass
-                )
-              ) {
-                let Id = 1
-                while (this.labelGroups.some((group) => group.id === Id)) {
-                  Id = Id + 1
-                }
-                let newGroup = {
-                  groupName: this.searchClass,
-                  id: Id,
-                  key: "",
-                  color: this.color,
-                  isSelected: false
-                }
-                this.labelGroups.push(newGroup)
-              } else {
-                if (
-                  this.labelGroups.find(
-                    (group) => group.groupName === this.searchClass
-                  ).key === ""
-                ) {
-                  this.labelGroups.find((group) => group.id === Id).key = this.labelId
+                if (this.labelClasses.find((cls) => cls.groups.includes(this.labelGroups.find((grp) => grp.groupName === this.searchClass).id)  && cls.className === this.searchPage)) {
+                  if (!foundClass.groups.includes(thisGroupId)) {
+                    foundClass.groups.push(thisGroupId)
+                  }
+                  if (
+                    this.labelClasses.find(
+                      (cls) => cls.className === this.searchClass
+                    ).key === ""
+                  ) {
+                    this.labelClasses.find((cls) => cls.className === this.searchPage).key = this.labelId
+                  } 
+                } else {
+                  let Id = 1
+                  while (this.labelClasses.some((cls) => cls.id === Id)) {
+                    Id = Id + 1
+                  }
+                  let newLabelClass = {
+                    className: this.searchPage,
+                    id: Id,
+                    key: this.labelId,
+                    groups: [thisGroupId],
+                    labels: [],
+                    color: this.color,
+                    isSelected: false
+                  }
+                  this.labelClasses.push(newLabelClass)
                 }
               }
             } else {
@@ -591,13 +628,9 @@ export default {
                   (group) => group.groupName === this.searchClass
                 )
               ) {
-                let Id = 1
-                while (this.labelGroups.some((group) => group.id === Id)) {
-                  Id = Id + 1
-                }
                 let newGroup = {
                   groupName: this.searchClass,
-                  id: Id,
+                  id: thisGroupId,
                   key: this.labelId,
                   color: this.color,
                   isSelected: false
@@ -609,7 +642,6 @@ export default {
                     (group) => group.groupName === this.searchClass
                   ).key === ''
                 ) {
-                  
                   this.labelGroups.find(
                     (group) => group.groupName === this.searchClass
                   ).key = this.labelId
@@ -638,6 +670,7 @@ export default {
 
     async fetchAnnotation() {
       try {
+        this.$emit("fetch-annotation")
         const response = await axios.get(annotationPath)
         this.annotationData = response.data
         this.annotationGroups = this.annotationData.groups
@@ -649,9 +682,13 @@ export default {
           while (this.labelNames.some((name) => name.labelId === Id)) {
             Id = Id + 1
           }
+          let thisGroupId = 1
+          while (this.labelGroups.some((group) => group.id === thisGroupId)) {
+            thisGroupId = thisGroupId + 1
+          }
           let newGroup = {
             groupName: annotationGroup.title,
-            id: annotationGroup.id,
+            id: thisGroupId,
             key: "",
             color: "",
             isSelected: false
@@ -673,61 +710,18 @@ export default {
           }
           this.labelNames.push(newLabel)
         }
-        for (const annotationClass of this.annotationClasses) {
-          let Id = 1
-          while (this.labelNames.some((name) => name.labelId === Id)) {
-            Id = Id + 1
-          }
-          let newLabelClass = {
-            className: annotationClass.title,
-            id: annotationClass.id,
-            key: "",
-            groups: [],
-            labels: [],
-            color: "", 
-            isSelected: false
-          }
-          if ("coordinates" in annotationClass) {
-            newLabelClass.key = Id
-          }
-
-          if (annotationClass.color) {
-            newLabelClass.color = annotationClass.color
-          }
-          let newLabel = {
-            LabelName: "",
-            PageName: annotationClass.title,
-            ClassName: "",
-            labelId: Id,
-          }
-          for (const group of this.annotationGroups) {
-            if (
-              annotationClass.groups &&
-              annotationClass.groups.includes(group.id)
-            ) {
-              newLabelClass.groups.push(group.title)
-              newLabel.ClassName = group.title
-            }
-          }
-          for (const label of this.annotationLabels) {
-            if (
-              annotationClass.labels &&
-              annotationClass.labels.includes(label.id)
-            ) {
-              newLabelClass.labels.push(label.title)
-            }
-          }
-          this.labelClasses.push(newLabelClass)
-          this.labelNames.push(newLabel)
-        }
         for (const annotationLabel of this.annotationLabels) {
           let Id = 1
           while (this.labelNames.some((name) => name.labelId === Id)) {
             Id = Id + 1
           }
+          let thisLabelId = 1
+          while (this.labelLabels.some((label) => label.id === thisLabelId)) {
+            thisLabelId = thisLabelId + 1
+          }
           this.labelLabels.push({
             labelName: annotationLabel.title,
-            id: annotationLabel.id,
+            id: thisLabelId,
             key: Id,
             color: annotationLabel.color, 
             isSelected: false
@@ -754,6 +748,59 @@ export default {
               }
             }
           }
+        }
+        for (const annotationClass of this.annotationClasses) {
+          let Id = 1
+          while (this.labelNames.some((name) => name.labelId === Id)) {
+            Id = Id + 1
+          }
+          let thisClassId = 1
+          while (this.labelClasses.some((cls) => cls.id === thisClassId)) {
+            thisClassId = thisClassId + 1
+          }
+          let newLabelClass = {
+            className: annotationClass.title,
+            id: thisClassId,
+            key: "",
+            groups: [],
+            labels: [],
+            color: "", 
+            isSelected: false
+          }
+          if ("coordinates" in annotationClass) {
+            newLabelClass.key = Id
+          }
+
+          if (annotationClass.color) {
+            newLabelClass.color = annotationClass.color
+          }
+          let newLabel = {
+            LabelName: "",
+            PageName: annotationClass.title,
+            ClassName: "",
+            labelId: Id,
+          }
+          for (const group of this.annotationGroups) {
+            if (
+              annotationClass.groups &&
+              annotationClass.groups.includes(group.id) 
+            ) {
+              let foundAnnGroup = this.labelGroups.find((grp) => grp.groupName === group.title)
+              newLabelClass.groups.push(foundAnnGroup.id)
+              newLabel.ClassName = group.title
+            }
+          }
+          for (const label of this.annotationLabels) {
+            if (
+              annotationClass.labels &&
+              annotationClass.labels.includes(label.id)
+            ) {
+              let foundAnnLabel = this.labelLabels.find((lbl) => lbl.labelName === label.title)
+              newLabelClass.labels.push(foundAnnLabel.id)
+            }
+          }
+          this.labelClasses.push(newLabelClass)
+          this.labelNames.push(newLabel)
         }
       } catch (error) {
         alert(error.message)
@@ -864,7 +911,6 @@ export default {
       this.searchLabel = ''
     },
     findMarkupOverLabel(labelsOverLabel) {
-      console.log(labelsOverLabel)
       if(labelsOverLabel.length === 1) {
         let foundClassMarkup = this.labelGroups.find((group) => group.key === labelsOverLabel[0].labelId)
         if (foundClassMarkup) {
@@ -931,11 +977,39 @@ export default {
       }
       
     },
-  },
-  mounted() {
-    // this.fetchClassifier()
 
-    this.fetchAnnotation()
+
+    //************************************************ 
+    collectData() {
+      this.allData.groups = this.labelGroups
+      for (const group of this.allData.groups) {
+        delete group.isSelected
+        if (group.key !== '') {
+          let thisLabel = this.labels.find((label) => label.labelId === group.key)
+          group.color = thisLabel.color
+          group.coordinates = thisLabel.coordinates
+        }
+      }
+      this.allData.classes = this.labelClasses
+      for (const cls of this.allData.classes) {
+        delete cls.isSelected
+        if (cls.key !== '') {
+          let thisLabel = this.labels.find((label) => label.labelId === cls.key)
+          cls.color = thisLabel.color
+          cls.coordinates = thisLabel.coordinates
+        }
+      }
+      this.allData.labels = this.labelLabels
+      for (const lbl of this.allData.labels) {
+        delete lbl.isSelected
+        if (lbl.key !== '') {
+          let thisLabel = this.labels.find((label) => label.labelId === lbl.key)
+          lbl.color = thisLabel.color
+          lbl.coordinates = thisLabel.coordinates
+        }
+      }
+      console.log(this.allData)
+    },
   },
 }
 </script>

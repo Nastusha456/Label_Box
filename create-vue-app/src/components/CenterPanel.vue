@@ -853,12 +853,12 @@ export default {
             this.labels.push(label)
           }
         }
-        for (const annotationClass of this.annotationClasses) {
-          if (annotationClass.coordinates && annotationClass.color) {
-            const dots = annotationClass.coordinates
+        for (const annotationLabel of this.annotationLabels) {
+          if (annotationLabel.coordinates && annotationLabel.color) {
+            const dots = annotationLabel.coordinates
             const coordinates = this.jarvis(dots)
             const contour = this.contour(coordinates)
-            const color = annotationClass.color
+            const color = annotationLabel.color
             let Id = 1
             while (this.labels.some((label) => label.labelId === Id)) {
               Id = Id + 1
@@ -879,12 +879,12 @@ export default {
             this.labels.push(label)
           }
         }
-        for (const annotationLabel of this.annotationLabels) {
-          if (annotationLabel.coordinates && annotationLabel.color) {
-            const dots = annotationLabel.coordinates
+        for (const annotationClass of this.annotationClasses) {
+          if (annotationClass.coordinates && annotationClass.color) {
+            const dots = annotationClass.coordinates
             const coordinates = this.jarvis(dots)
             const contour = this.contour(coordinates)
-            const color = annotationLabel.color
+            const color = annotationClass.color
             let Id = 1
             while (this.labels.some((label) => label.labelId === Id)) {
               Id = Id + 1
@@ -927,9 +927,6 @@ export default {
     canvasCursor() {
       return this.selectedCursor
     },
-  },
-  mounted() {
-    this.fetchAnnotation()
   },
 }
 </script>
