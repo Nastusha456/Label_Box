@@ -40,8 +40,6 @@ import { Form, Field, ErrorMessage } from "vee-validate"
 import axios from "axios"
 import { mapMutations, mapGetters } from "vuex"
 
-const path = "http://10.17.17.112:5000/api/v1/classificator?format=json"
-
 export default {
   components: {
     Form,
@@ -57,7 +55,7 @@ export default {
   },
   methods: {
     ...mapMutations(["setUserData"]),
-    ...mapGetters(["getUserData"]),
+    ...mapGetters(["getUserData", "getLoginPath"]),
 
     GetData() {
       axios
@@ -72,32 +70,30 @@ export default {
         })
     },
     signIn(values) {
-      // console.log(values)
-
-      localStorage.setItem("accessToken", "SomeToken")
+      const loginPath = this.getLoginPath()
 
       const hashedPassword = CryptoJS.MD5(
         values.password + "Qit7mef"
       ).toString()
 
-      // console.log(hashedPassword)
+      const userData = values
+      userData.password = hashedPassword
 
-      this.$router.push("/work")
-
-      this.setUserData(values)
+      this.setUserData(userData)
       const DATA = this.getUserData()
       console.log(DATA)
 
-      // axios
-      //   .post(path, values)
-      //   .then(() => {
-      //     console.log("Data sent!")
-      //   })
-      //   .catch((error) => {
-      //     console.log(error)
-      //   })
+      axios
+        .post(loginPath, userData)
+        .then(() => {
+          console.log("Data sent!")
+        })
+        .catch((error) => {
+          console.log(error)
+        })
 
-      // this.GetData()
+      localStorage.setItem("accessToken", "SomeToken")
+      // this.$router.push("/work")
     },
     validateUserName(value) {
       this.isUserNameCorrect = true

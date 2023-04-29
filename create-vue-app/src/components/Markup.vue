@@ -82,12 +82,16 @@
         </ul>
       </div>
       <div>
-        <strong style="color: red" v-if="!formIsValid">Please fill in all fields</strong>
+        <strong style="color: red" v-if="!formIsValid"
+          >Please fill in all fields</strong
+        >
       </div>
       <button @click="saveLabel()">Save</button>
     </div>
-    <button @click="collectData()">Test Collection Annotation</button> <!-- ВРЕМЕННО!!! ПОТОМ УБРАТЬ!!!  -->
-    <button @click="fetchAnnotation()">Test Download Annotation</button> <!-- ВРЕМЕННО!!! ПОТОМ УБРАТЬ!!!  -->
+    <button @click="collectData()">Test Collection Annotation</button>
+    <!-- ВРЕМЕННО!!! ПОТОМ УБРАТЬ!!!  -->
+    <button @click="fetchAnnotation()">Test Download Annotation</button>
+    <!-- ВРЕМЕННО!!! ПОТОМ УБРАТЬ!!!  -->
     <div class="markup_tree" v-if="isShowMarkupTree">
       <span @click="showGroup"
         ><strong>Markup</strong>
@@ -99,8 +103,16 @@
           style="padding-left: 30px"
           :key="group.id"
         >
-          <div class="label_tools" @dblclick="showGroupOnCanvas(group)" :style="{ backgroundColor: group.isSelected ? 'rgba(255, 255, 255, 0.25)' : 'transparent' }">
-            <div @click="showClass(group)"  >
+          <div
+            class="label_tools"
+            @dblclick="showGroupOnCanvas(group)"
+            :style="{
+              backgroundColor: group.isSelected
+                ? 'rgba(255, 255, 255, 0.25)'
+                : 'transparent',
+            }"
+          >
+            <div @click="showClass(group)">
               {{
                 `${group.groupName} ${
                   this.isShowClasses[labelGroups.indexOf(group)]
@@ -109,9 +121,13 @@
                 }`
               }}
             </div>
-            <div style="font-size: 14px;" class="label-editor" @click="plusNewLabelinGroup(group.groupName)">
-              <i class='bx bx-plus-circle'></i>
-              <!-- <p>Add new label</p> -->
+            <div
+              style="font-size: 14px"
+              class="label-editor"
+              @click="plusNewLabelinGroup(group.groupName)"
+            >
+              <i class="bx bx-plus-circle bx-xs bx-tada-hover"></i>
+              <p>Add</p>
             </div>
             <div
               v-if="group.key !== ''"
@@ -152,16 +168,13 @@
                 v-if="element.groups.includes(group.id)"
                 class="label_tools"
                 @dblclick="showClassOnCanvas(element)"
-                :style="{ backgroundColor: element.isSelected ? 'rgba(255, 255, 255, 0.25)' : 'transparent' }"
+                :style="{
+                  backgroundColor: element.isSelected
+                    ? 'rgba(255, 255, 255, 0.25)'
+                    : 'transparent',
+                }"
               >
-                <div
-                  @click="
-                    showLabel(
-                      element,
-                      group
-                    )
-                  "
-                >
+                <div @click="showLabel(element, group)">
                   {{
                     `${element.className} ${
                       element.labels
@@ -176,9 +189,15 @@
                     }`
                   }}
                 </div>
-                <div style="font-size: 14px;" class="label-editor" @click="plusNewLabelinClass(group.groupName, element.className)">
-                  <i class='bx bx-plus-circle'></i>
-                  <!-- <p>Add new label</p> -->
+                <div
+                  style="font-size: 14px"
+                  class="label-editor"
+                  @click="
+                    plusNewLabelinClass(group.groupName, element.className)
+                  "
+                >
+                  <i class="bx bx-plus-circle bx-xs bx-tada-hover"></i>
+                  <p>Add</p>
                 </div>
                 <div
                   v-if="element.key !== ''"
@@ -227,7 +246,11 @@
                     "
                     class="label_tools"
                     @dblclick="showLabelOnCanvas(label)"
-                    :style="{ backgroundColor: label.isSelected ? 'rgba(255, 255, 255, 0.25)' : 'transparent' }"
+                    :style="{
+                      backgroundColor: label.isSelected
+                        ? 'rgba(255, 255, 255, 0.25)'
+                        : 'transparent',
+                    }"
                   >
                     <div>
                       {{ label.labelName }}
@@ -261,9 +284,7 @@
 
 <script>
 import axios from "axios"
-// const path = "/try_classifier.json"
-
-const annotationPath = "/try_annotation.json"
+import { mapGetters } from "vuex"
 
 export default {
   data() {
@@ -292,11 +313,11 @@ export default {
       annotationClasses: {},
       annotationLabels: {},
 
-      allData : {
-        'groups': [],
-        'classes': [],
-        'labels': []
-    },
+      allData: {
+        groups: [],
+        classes: [],
+        labels: [],
+      },
     }
   },
   props: {
@@ -428,7 +449,11 @@ export default {
     saveLabel() {
       if (this.labelOnWork) {
         if (this.selectedMarkupMode === "label") {
-          if (this.searchLabel !== '' && this.searchPage !== '' && this.searchClass !== '') {
+          if (
+            this.searchLabel !== "" &&
+            this.searchPage !== "" &&
+            this.searchClass !== ""
+          ) {
             this.formIsValid = true
             let newLabel = {
               LabelName: this.searchLabel,
@@ -449,11 +474,13 @@ export default {
                 groupName: this.searchClass,
                 id: thisGroupId,
                 key: "",
-                color: '',
-                isSelected: false
+                color: "",
+                isSelected: false,
               })
             } else {
-              thisGroupId = this.labelGroups.find((group) => group.groupName === this.searchClass).id
+              thisGroupId = this.labelGroups.find(
+                (group) => group.groupName === this.searchClass
+              ).id
             }
             let thisLabelId = 1
             while (this.labelLabels.some((label) => label.id === thisLabelId)) {
@@ -469,17 +496,41 @@ export default {
                 id: thisLabelId,
                 color: this.color,
                 key: this.labelId,
-                isSelected: false
+                isSelected: false,
               })
             } else {
-              if (this.labelClasses.find((cls) => cls.labels.includes(this.labelLabels.find((lbl) => lbl.labelName === this.searchLabel).id)  && cls.className === this.searchPage)) {
-                if (this.labelClasses.find((cls) => cls.labels.includes(this.labelLabels.find((lbl) => lbl.labelName === this.searchLabel).id)  && cls.className === this.searchPage && !cls.groups.includes(this.labelGroups.find((grp) => grp.groupName === this.searchClass).id))) {
+              if (
+                this.labelClasses.find(
+                  (cls) =>
+                    cls.labels.includes(
+                      this.labelLabels.find(
+                        (lbl) => lbl.labelName === this.searchLabel
+                      ).id
+                    ) && cls.className === this.searchPage
+                )
+              ) {
+                if (
+                  this.labelClasses.find(
+                    (cls) =>
+                      cls.labels.includes(
+                        this.labelLabels.find(
+                          (lbl) => lbl.labelName === this.searchLabel
+                        ).id
+                      ) &&
+                      cls.className === this.searchPage &&
+                      !cls.groups.includes(
+                        this.labelGroups.find(
+                          (grp) => grp.groupName === this.searchClass
+                        ).id
+                      )
+                  )
+                ) {
                   this.labelLabels.push({
                     labelName: this.searchLabel,
                     id: thisLabelId,
                     color: this.color,
                     key: this.labelId,
-                    isSelected: false
+                    isSelected: false,
                   })
                 }
               } else {
@@ -488,7 +539,7 @@ export default {
                   id: thisLabelId,
                   color: this.color,
                   key: this.labelId,
-                  isSelected: false
+                  isSelected: false,
                 })
               }
             }
@@ -506,11 +557,20 @@ export default {
                 key: "",
                 groups: [thisGroupId],
                 labels: [thisLabelId],
-                isSelected: false
+                isSelected: false,
               }
               this.labelClasses.push(newLabelClass)
             } else {
-              if (this.labelClasses.find((cls) => cls.groups.includes(this.labelGroups.find((grp) => grp.groupName === this.searchClass).id) && cls.className === this.searchPage)) {
+              if (
+                this.labelClasses.find(
+                  (cls) =>
+                    cls.groups.includes(
+                      this.labelGroups.find(
+                        (grp) => grp.groupName === this.searchClass
+                      ).id
+                    ) && cls.className === this.searchPage
+                )
+              ) {
                 if (!foundClass.groups.includes(thisGroupId)) {
                   foundClass.groups.push(thisGroupId)
                 }
@@ -531,11 +591,10 @@ export default {
                   key: "",
                   groups: [thisGroupId],
                   labels: [thisLabelId],
-                  isSelected: false
+                  isSelected: false,
                 }
                 this.labelClasses.push(newLabelClass)
               }
-              
             }
             this.labelNames.push(newLabel)
             this.$emit("update-labelOnWork", false)
@@ -544,7 +603,7 @@ export default {
           }
         } else {
           // Если выбран режим class
-          if (this.searchClass !== '') {
+          if (this.searchClass !== "") {
             this.formIsValid = true
             let newLabel = {
               LabelName: "",
@@ -566,11 +625,13 @@ export default {
                 id: thisGroupId,
                 key: "",
                 color: this.color,
-                isSelected: false
+                isSelected: false,
               }
               this.labelGroups.push(newGroup)
             } else {
-              thisGroupId = this.labelGroups.find((group) => group.groupName === this.searchClass).id
+              thisGroupId = this.labelGroups.find(
+                (group) => group.groupName === this.searchClass
+              ).id
             }
             if (this.searchPage !== "") {
               newLabel.PageName = this.searchPage
@@ -590,11 +651,20 @@ export default {
                   groups: [thisGroupId],
                   labels: [],
                   color: this.color,
-                  isSelected: false
+                  isSelected: false,
                 }
                 this.labelClasses.push(newLabelClass)
               } else {
-                if (this.labelClasses.find((cls) => cls.groups.includes(this.labelGroups.find((grp) => grp.groupName === this.searchClass).id)  && cls.className === this.searchPage)) {
+                if (
+                  this.labelClasses.find(
+                    (cls) =>
+                      cls.groups.includes(
+                        this.labelGroups.find(
+                          (grp) => grp.groupName === this.searchClass
+                        ).id
+                      ) && cls.className === this.searchPage
+                  )
+                ) {
                   if (!foundClass.groups.includes(thisGroupId)) {
                     foundClass.groups.push(thisGroupId)
                   }
@@ -603,8 +673,10 @@ export default {
                       (cls) => cls.className === this.searchClass
                     ).key === ""
                   ) {
-                    this.labelClasses.find((cls) => cls.className === this.searchPage).key = this.labelId
-                  } 
+                    this.labelClasses.find(
+                      (cls) => cls.className === this.searchPage
+                    ).key = this.labelId
+                  }
                 } else {
                   let Id = 1
                   while (this.labelClasses.some((cls) => cls.id === Id)) {
@@ -617,7 +689,7 @@ export default {
                     groups: [thisGroupId],
                     labels: [],
                     color: this.color,
-                    isSelected: false
+                    isSelected: false,
                   }
                   this.labelClasses.push(newLabelClass)
                 }
@@ -633,14 +705,14 @@ export default {
                   id: thisGroupId,
                   key: this.labelId,
                   color: this.color,
-                  isSelected: false
+                  isSelected: false,
                 }
                 this.labelGroups.push(newGroup)
               } else {
                 if (
                   this.labelGroups.find(
                     (group) => group.groupName === this.searchClass
-                  ).key === ''
+                  ).key === ""
                 ) {
                   this.labelGroups.find(
                     (group) => group.groupName === this.searchClass
@@ -656,19 +728,11 @@ export default {
         }
       }
     },
-    // async fetchClassifier() {
-    //   try {
-    //     const response = await axios.get(path)
-    //     this.classifierData = response.data
-    //     this.groups = this.classifierData.groups
-    //     this.classes = this.classifierData.classes
-    //     this.lables = this.classifierData.lables
-    //   } catch (error) {
-    //     alert(error.message)
-    //   }
-    // },
+
+    ...mapGetters(["getAnnotationPath"]),
 
     async fetchAnnotation() {
+      const annotationPath = this.getAnnotationPath()
       try {
         this.$emit("fetch-annotation")
         const response = await axios.get(annotationPath)
@@ -691,7 +755,7 @@ export default {
             id: thisGroupId,
             key: "",
             color: "",
-            isSelected: false
+            isSelected: false,
           }
           if ("coordinates" in annotationGroup) {
             newGroup.key = Id
@@ -723,8 +787,8 @@ export default {
             labelName: annotationLabel.title,
             id: thisLabelId,
             key: Id,
-            color: annotationLabel.color, 
-            isSelected: false
+            color: annotationLabel.color,
+            isSelected: false,
           })
 
           let newLabel = {
@@ -764,8 +828,8 @@ export default {
             key: "",
             groups: [],
             labels: [],
-            color: "", 
-            isSelected: false
+            color: "",
+            isSelected: false,
           }
           if ("coordinates" in annotationClass) {
             newLabelClass.key = Id
@@ -783,9 +847,11 @@ export default {
           for (const group of this.annotationGroups) {
             if (
               annotationClass.groups &&
-              annotationClass.groups.includes(group.id) 
+              annotationClass.groups.includes(group.id)
             ) {
-              let foundAnnGroup = this.labelGroups.find((grp) => grp.groupName === group.title)
+              let foundAnnGroup = this.labelGroups.find(
+                (grp) => grp.groupName === group.title
+              )
               newLabelClass.groups.push(foundAnnGroup.id)
               newLabel.ClassName = group.title
             }
@@ -795,7 +861,9 @@ export default {
               annotationClass.labels &&
               annotationClass.labels.includes(label.id)
             ) {
-              let foundAnnLabel = this.labelLabels.find((lbl) => lbl.labelName === label.title)
+              let foundAnnLabel = this.labelLabels.find(
+                (lbl) => lbl.labelName === label.title
+              )
               newLabelClass.labels.push(foundAnnLabel.id)
             }
           }
@@ -822,7 +890,7 @@ export default {
       this.clearIsSelected()
       group.isSelected = true
       let key = group.key
-      if (key !== '') {
+      if (key !== "") {
         this.$emit("selectLabelById", key)
       }
     },
@@ -830,7 +898,7 @@ export default {
       this.clearIsSelected()
       element.isSelected = true
       let key = element.key
-      if (key !== '') {
+      if (key !== "") {
         this.$emit("selectLabelById", key)
       }
     },
@@ -838,7 +906,7 @@ export default {
       this.clearIsSelected()
       label.isSelected = true
       let key = label.key
-      if (key !== '') {
+      if (key !== "") {
         this.$emit("selectLabelById", key)
       }
     },
@@ -896,43 +964,52 @@ export default {
     },
     plusNewLabelinGroup(groupName) {
       this.$emit("plusNewLabel")
-      this.selectedMarkupMode = 'label'
-      document.getElementById('label').checked = true
+      this.selectedMarkupMode = "label"
+      document.getElementById("label").checked = true
       this.searchClass = groupName
-      this.searchPage = ''
-      this.searchLabel = ''
+      this.searchPage = ""
+      this.searchLabel = ""
     },
     plusNewLabelinClass(groupName, className) {
       this.$emit("plusNewLabel")
-      this.selectedMarkupMode = 'label'
-      document.getElementById('label').checked = true
+      this.selectedMarkupMode = "label"
+      document.getElementById("label").checked = true
       this.searchClass = groupName
       this.searchPage = className
-      this.searchLabel = ''
+      this.searchLabel = ""
     },
     findMarkupOverLabel(labelsOverLabel) {
-      if(labelsOverLabel.length === 1) {
-        let foundClassMarkup = this.labelGroups.find((group) => group.key === labelsOverLabel[0].labelId)
+      if (labelsOverLabel.length === 1) {
+        let foundClassMarkup = this.labelGroups.find(
+          (group) => group.key === labelsOverLabel[0].labelId
+        )
         if (foundClassMarkup) {
           this.searchClass = foundClassMarkup.groupName
         } else {
-          let foundPageMarkup = this.labelClasses.find((cls) => cls.key === labelsOverLabel[0].labelId)
+          let foundPageMarkup = this.labelClasses.find(
+            (cls) => cls.key === labelsOverLabel[0].labelId
+          )
           if (foundPageMarkup) {
             this.searchPage = foundPageMarkup.className
           }
         }
-        
       } else {
         if (labelsOverLabel.length >= 2) {
-          let foundClassMarkup = this.labelGroups.find((group) => group.key === labelsOverLabel[0].labelId)
+          let foundClassMarkup = this.labelGroups.find(
+            (group) => group.key === labelsOverLabel[0].labelId
+          )
           if (foundClassMarkup) {
             this.searchClass = foundClassMarkup.groupName
-            let foundPageMarkup = this.labelClasses.find((cls) => cls.key === labelsOverLabel[1].labelId)
+            let foundPageMarkup = this.labelClasses.find(
+              (cls) => cls.key === labelsOverLabel[1].labelId
+            )
             if (foundPageMarkup) {
               this.searchPage = foundPageMarkup.className
             }
           } else {
-            let foundPageMarkup = this.labelClasses.find((cls) => cls.key === labelsOverLabel[0].labelId)
+            let foundPageMarkup = this.labelClasses.find(
+              (cls) => cls.key === labelsOverLabel[0].labelId
+            )
             if (foundPageMarkup) {
               this.searchPage = foundPageMarkup.className
             }
@@ -940,7 +1017,6 @@ export default {
         }
       }
     },
-
 
     // Функция для подсветки выбранной метки в дереве
     selectedLabelInsideTree(id) {
@@ -950,42 +1026,53 @@ export default {
         if (foundName) {
           this.isShowGroups = true
           if (foundName.PageName) {
-            let foundGroup = this.labelGroups.find((group) => group.groupName === foundName.ClassName)
+            let foundGroup = this.labelGroups.find(
+              (group) => group.groupName === foundName.ClassName
+            )
             this.isShowClasses[this.labelGroups.indexOf(foundGroup)] = true
             if (foundName.LabelName) {
-              let foundClass = this.labelClasses.find((cls) => cls.className === foundName.PageName)
-              this.isShowLabels[this.labelGroups.indexOf(foundGroup)][this.labelClasses.indexOf(foundClass)] = true
-              let foundLabel = this.labelLabels.find((label) => label.labelName === foundName.LabelName)
+              let foundClass = this.labelClasses.find(
+                (cls) => cls.className === foundName.PageName
+              )
+              this.isShowLabels[this.labelGroups.indexOf(foundGroup)][
+                this.labelClasses.indexOf(foundClass)
+              ] = true
+              let foundLabel = this.labelLabels.find(
+                (label) => label.labelName === foundName.LabelName
+              )
               this.clearIsSelected
               foundLabel.isSelected = true
             } else {
               if (foundName.PageName) {
-                let foundClass = this.labelClasses.find((cls) => cls.className === foundName.PageName)
+                let foundClass = this.labelClasses.find(
+                  (cls) => cls.className === foundName.PageName
+                )
                 this.clearIsSelected()
                 foundClass.isSelected = true
               } else {
-                let foundGroup = this.labelGroups.find((group) => group.groupName === foundName.ClassName)
+                let foundGroup = this.labelGroups.find(
+                  (group) => group.groupName === foundName.ClassName
+                )
                 this.clearIsSelected()
                 foundGroup.isSelected = true
               }
             }
           }
         }
-        
       } else {
         this.clearIsSelected()
       }
-      
     },
 
-
-    //************************************************ 
+    //************************************************
     collectData() {
       this.allData.groups = this.labelGroups
       for (const group of this.allData.groups) {
         delete group.isSelected
-        if (group.key !== '') {
-          let thisLabel = this.labels.find((label) => label.labelId === group.key)
+        if (group.key !== "") {
+          let thisLabel = this.labels.find(
+            (label) => label.labelId === group.key
+          )
           group.color = thisLabel.color
           group.coordinates = thisLabel.coordinates
         }
@@ -993,7 +1080,7 @@ export default {
       this.allData.classes = this.labelClasses
       for (const cls of this.allData.classes) {
         delete cls.isSelected
-        if (cls.key !== '') {
+        if (cls.key !== "") {
           let thisLabel = this.labels.find((label) => label.labelId === cls.key)
           cls.color = thisLabel.color
           cls.coordinates = thisLabel.coordinates
@@ -1002,7 +1089,7 @@ export default {
       this.allData.labels = this.labelLabels
       for (const lbl of this.allData.labels) {
         delete lbl.isSelected
-        if (lbl.key !== '') {
+        if (lbl.key !== "") {
           let thisLabel = this.labels.find((label) => label.labelId === lbl.key)
           lbl.color = thisLabel.color
           lbl.coordinates = thisLabel.coordinates

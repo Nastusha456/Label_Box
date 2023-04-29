@@ -1,5 +1,5 @@
 <template>
-  <div class="classifier">
+  <div class="classifier" v-if="classifier">
     <span @click="showGroup"
       ><strong>Classifier</strong>
       {{ `${this.isShowGroups ? "\u{025B7}" : "\u{025BD}"}` }}</span
@@ -56,17 +56,19 @@
       </li>
     </ul>
   </div>
+  <div class="classifier" style="overflow-y: auto" v-else>
+    Classifier not found
+  </div>
 </template>
 
 <script>
 import axios from "axios"
-
-// const path = "http://10.17.17.112:5000/api/v1/classificator?format=json"
-const path = "/try_classifier.json"
+import { mapGetters } from "vuex"
 
 export default {
   data() {
     return {
+      classifier: null,
       classifierData: {},
       groups: {},
       classes: {},
@@ -101,20 +103,24 @@ export default {
       this.isShowLables[groupId - 1][classId - 1] =
         !this.isShowLables[groupId - 1][classId - 1]
     },
-    async fetchClassifier() {
+
+    ...mapGetters(["getClassifierPath"]),
+    async fetchClassifier(path) {
       try {
         const response = await axios.get(path)
         this.classifierData = response.data
         this.groups = this.classifierData.groups
         this.classes = this.classifierData.classes
         this.lables = this.classifierData.lables
+        this.classifier = true
       } catch (error) {
         alert(error.message)
       }
     },
   },
   mounted() {
-    this.fetchClassifier()
+    const classifierPath = this.getClassifierPath()
+    this.fetchClassifier(classifierPath)
   },
 }
 </script>

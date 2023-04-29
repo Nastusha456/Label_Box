@@ -48,6 +48,8 @@
 <script>
 import { Form, Field, ErrorMessage } from "vee-validate"
 import axios from "axios"
+import CryptoJS from "crypto-js"
+import { mapMutations, mapGetters } from "vuex"
 
 export default {
   components: {
@@ -62,20 +64,34 @@ export default {
     }
   },
   methods: {
-    registration(values) {
-      console.log(values)
+    ...mapMutations(["setUserData"]),
+    ...mapGetters(["getUserData", "getRegistrationPath"]),
 
-      // const path = "http://localhost:5000/items"
-      // axios
-      //   .post(path, values)
-      //   .then(() => {
-      //     console.log("Data sent!")
-      //   })
-      //   .catch((error) => {
-      //     console.log(error)
-      //   })
+    registration(values) {
+      const registrationPath = this.getRegistrationPath()
+
+      const hashedPassword = CryptoJS.MD5(
+        values.password + "Qit7mef"
+      ).toString()
+
+      const userData = values
+      userData.password = hashedPassword
+
+      axios
+        .post(registrationPath, userData)
+        .then(() => {
+          console.log("Data sent!")
+        })
+        .catch((error) => {
+          console.log(error)
+        })
+
+      this.setUserData(userData)
+      // const DATA = this.getUserData()
+      // console.log(DATA)
+
       localStorage.setItem("accessToken", "SomeToken")
-      this.$router.push("/work")
+      // this.$router.push("/work")
     },
     isRequired(value) {
       if (value && value.trim()) {

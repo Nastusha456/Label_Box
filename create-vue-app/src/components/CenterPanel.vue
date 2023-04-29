@@ -38,8 +38,7 @@
 
 <script>
 import axios from "axios"
-
-const annotationPath = "/try_annotation.json"
+import { mapGetters } from "vuex"
 
 export default {
   data() {
@@ -246,8 +245,8 @@ export default {
       ctx.canvas.height = ctx.canvas.clientHeight
       this.drawAllLabels(ctx)
       this.$emit("update-labelOnWork", true)
-      const offsetX = (contour.left+contour.right)/2
-        const offsetY = (contour.top+contour.bottom)/2
+      const offsetX = (contour.left + contour.right) / 2
+      const offsetY = (contour.top + contour.bottom) / 2
       const labelsOverLabel = this.findAllLabels(offsetX, offsetY, this.labels)
       this.$emit("find-markup-over-label", labelsOverLabel)
     },
@@ -273,8 +272,8 @@ export default {
       ctx.canvas.height = ctx.canvas.clientHeight
       this.drawAllLabels(ctx)
       this.$emit("update-labelOnWork", true)
-      const offsetX = (contour.left+contour.right)/2
-        const offsetY = (contour.top+contour.bottom)/2
+      const offsetX = (contour.left + contour.right) / 2
+      const offsetY = (contour.top + contour.bottom) / 2
       const labelsOverLabel = this.findAllLabels(offsetX, offsetY, this.labels)
       this.$emit("find-markup-over-label", labelsOverLabel)
     },
@@ -788,15 +787,18 @@ export default {
           this.labels.push(label)
           this.visibleLabels.push(label)
           this.$emit("update-labelOnWork", true)
-          const offsetX = (contour.left+contour.right)/2
-          const offsetY = (contour.top+contour.bottom)/2
-          const labelsOverLabel = this.findAllLabels(offsetX, offsetY, this.labels)
+          const offsetX = (contour.left + contour.right) / 2
+          const offsetY = (contour.top + contour.bottom) / 2
+          const labelsOverLabel = this.findAllLabels(
+            offsetX,
+            offsetY,
+            this.labels
+          )
           this.$emit("find-markup-over-label", labelsOverLabel)
         }
         this.drawAllLabels(ctx)
         this.drawDots(ctx, this.dots, 3, this.color)
         this.isDrowing = false
-        
       } else {
         this.isDragging = false
       }
@@ -819,7 +821,10 @@ export default {
 
       return `rgba(${r}, ${g}, ${b}, ${alpha})`
     },
+
+    ...mapGetters(["getAnnotationPath"]),
     async fetchAnnotation() {
+      const annotationPath = this.getAnnotationPath()
       try {
         const response = await axios.get(annotationPath)
         this.annotationData = response.data

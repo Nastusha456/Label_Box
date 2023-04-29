@@ -7,10 +7,10 @@
       </div>
       <img src="@/images/user-100.png" alt="User image" />
       <div @click="openNameForm" class="text">
-        User name: <span>{{ this.userName }}</span>
+        User name: <span>{{ this.userData.user_name }}</span>
       </div>
       <div @click="openEmailForm" class="text">
-        User email: <span>{{ this.userEmail }}</span>
+        User email: <span>{{ this.userData.user_email }}</span>
       </div>
     </div>
     <div>
@@ -46,7 +46,7 @@
           name="currentPassword"
           class="data"
           type="password"
-          placeholder="currentPassword"
+          placeholder="Current Password"
           :rules="validateCurrentPassword"
         />
         <ErrorMessage name="currentPassword" class="error" />
@@ -74,6 +74,8 @@
 
 <script>
 import { Form, Field, ErrorMessage } from "vee-validate"
+import CryptoJS from "crypto-js"
+import { mapMutations, mapGetters } from "vuex"
 
 export default {
   components: {
@@ -83,11 +85,9 @@ export default {
   },
   data() {
     return {
-      currentPassword: "currentPassword",
-      userName: "userName",
-      userEmail: "userEmail",
       minPasswordLength: 7,
       password: "",
+      userData: {},
       nameFormIsVisible: false,
       emailFormIsVisible: false,
       passwordFormIsVisible: false,
@@ -95,8 +95,13 @@ export default {
     }
   },
   methods: {
+    ...mapMutations(["setUserData"]),
+    ...mapGetters(["getUserData"]),
+
     Exit() {
       localStorage.removeItem("accessToken")
+      this.setUserData(null)
+      this.userData = {}
       this.$router.push("/")
     },
     openNameForm() {
@@ -106,8 +111,9 @@ export default {
     changeName(values) {
       this.nameFormIsVisible = false
       this.passwordBtn = true
-      this.userName = values.user_name
-      console.log(values)
+      this.userData.user_name = values.user_name
+      this.setUserData(this.userData)
+      console.log(this.userData)
     },
     openEmailForm() {
       this.emailFormIsVisible = true
@@ -116,8 +122,9 @@ export default {
     changeEmail(values) {
       this.emailFormIsVisible = false
       this.passwordBtn = true
-      this.userEmail = values.user_email
-      console.log(values)
+      this.userData.user_email = values.user_email
+      this.setUserData(this.userData)
+      console.log(this.userData)
     },
     openPasswordForm() {
       this.passwordFormIsVisible = true
@@ -127,6 +134,11 @@ export default {
       this.passwordFormIsVisible = false
       this.passwordBtn = true
       console.log(values)
+      this.userData.password = CryptoJS.MD5(
+        values.password.trim() + "Qit7mef"
+      ).toString()
+      this.setUserData(this.userData)
+      console.log(this.userData)
     },
     isRequired(value) {
       if (value && value.trim()) {
@@ -149,7 +161,10 @@ export default {
     },
     validateCurrentPassword(value) {
       if (value && value.trim()) {
-        if (value != this.currentPassword) {
+        if (
+          CryptoJS.MD5(value.trim() + "Qit7mef").toString() !=
+          this.userData.password
+        ) {
           return "Incorrect password"
         }
         return true
@@ -161,21 +176,26 @@ export default {
         if (value.length < this.minPasswordLength) {
           return `Minimum password length is ${this.minPasswordLength}, currently ${value.length}`
         }
-        this.password = value.trim()
+        this.password = CryptoJS.MD5(value.trim() + "Qit7mef").toString()
         return true
       }
       return "This field is required"
     },
     validateConfirmPassword(value) {
       if (value && value.trim()) {
-        if (value != this.password) {
+        if (
+          CryptoJS.MD5(value.trim() + "Qit7mef").toString() != this.password
+        ) {
           return "Passwords must match"
         }
-        this.password = value.trim()
         return true
       }
       return "This field is required"
     },
+  },
+  mounted() {
+    this.userData = this.getUserData()
+    console.log(this.userData)
   },
 }
 </script>
