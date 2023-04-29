@@ -133,7 +133,6 @@ export default {
     changePassword(values) {
       this.passwordFormIsVisible = false
       this.passwordBtn = true
-      console.log(values)
       this.userData.password = CryptoJS.MD5(
         values.password.trim() + "Qit7mef"
       ).toString()
