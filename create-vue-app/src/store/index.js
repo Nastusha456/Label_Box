@@ -3,8 +3,12 @@ import { createStore } from "vuex"
 const store = createStore({
   state() {
     return {
-      // userData: null,
-      userData: { password: "Ezro30" },
+      userData: null,
+      // userData: {
+      //   user_name: "St.enot",
+      //   user_email: "bahmetiev.st@gmail.com",
+      //   password: "1d75e069520afbdaabba4dd3eea5c07e",
+      // },
       // classifierPath: "/try_classifier.json",
       classifierPath:
         "http://192.168.129.178:5000/classificator/4/classifier/1?format=json",
