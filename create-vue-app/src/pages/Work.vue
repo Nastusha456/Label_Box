@@ -3,7 +3,12 @@
   <div class="main">
     <div class="container">
       <left-panel @download="download" @showClassifier="showClassifier" />
-      <classifier v-if="isShowClassifier" />
+      <div class="leftBlock">
+        <images-panel  
+          @chooseThisImage="chooseThisImage"
+        />
+        <classifier v-if="isShowClassifier" />
+      </div>
       <div class="centerBlock">
         <annotation-panel
           ref="AnnotationPanel"
@@ -63,6 +68,7 @@ import Classifier from "@/components/Classifier.vue"
 import AnnotationPanel from "@/components/AnnotationPanel.vue"
 import ImageData from "@/components/ImageData.vue"
 import Markup from "@/components/Markup.vue"
+import ImagesPanel from "@/components/ImagesPanel.vue"
 
 export default {
   components: {
@@ -74,6 +80,7 @@ export default {
     AnnotationPanel,
     ImageData,
     Markup,
+    ImagesPanel
   },
   data() {
     return {
@@ -166,6 +173,9 @@ export default {
     fetchAnnotation() {
       this.$refs.CenterPanel.fetchAnnotation()
     },
+    chooseThisImage(image) {
+      this.$refs.CenterPanel.chooseThisImage(image)
+    },
   },
 }
 </script>
@@ -215,5 +225,12 @@ export default {
   letter-spacing: 3px;
   font-family: "Staatliches", cursive;
   color: rgba(255, 255, 255, 0.5);
+}
+
+.leftBlock {
+  display: block;
+  max-height: 50vh;
+  width: 15%;
+  margin-top: 10px;
 }
 </style>

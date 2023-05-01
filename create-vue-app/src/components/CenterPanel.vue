@@ -111,9 +111,10 @@ export default {
     onImageLoad() {
       this.imageWidth = this.$refs.Image.naturalWidth
       this.imageHeigth = this.$refs.Image.naturalHeight
-      this.imageSize = Math.ceil((this.selectedFile.size / 1024) * 10) / 10
-      this.imageName = this.selectedFile.name
-
+      if (this.selectedFile) {
+        this.imageSize = Math.ceil((this.selectedFile.size / 1024) * 10) / 10
+        this.imageName = this.selectedFile.name
+      }
       this.imageData = {
         imageWidth: this.imageWidth,
         imageHeigth: this.imageWidth,
@@ -128,6 +129,29 @@ export default {
     onFileSelected(event) {
       this.selectedFile = event.target.files[0]
       this.imageUrl = URL.createObjectURL(this.selectedFile)
+    },
+    chooseThisImage(image) {
+      this.imageWidth = null
+      this.imageHeigth = null
+      this.imageSize = null
+      this.imageName = null
+      this.rectangles = []
+      this.dots = []
+      ;(this.labels = []), (this.isDrowing = false)
+
+      this.imageData = {
+        imageWidth: this.imageWidth,
+        imageHeigth: this.imageWidth,
+        imageSize: this.imageSize,
+        imageName: this.imageName,
+      }
+      this.$emit("getImgData", this.imageData)
+      this.imageWidth = null
+      this.imageWidth = null
+      this.imageSize = null
+      this.imageName = null
+      this.visibleLabels = []
+      this.imageUrl = image
     },
     remove_img_btn() {
       this.imageUrl = null
@@ -715,8 +739,8 @@ export default {
 
       if (this.isDrowing && this.selectedMode === "markup") {
         // Процесс рисования
-        const width = x - this.startCoords.x * this.scale
-        const height = y - this.startCoords.y * this.scale
+        const width = (x - this.startCoords.x) * this.scale
+        const height = (y - this.startCoords.y) * this.scale
 
         this.drawRect(ctx, width, height, this.color)
         this.drawDots(ctx, this.dots, 3, this.color)
