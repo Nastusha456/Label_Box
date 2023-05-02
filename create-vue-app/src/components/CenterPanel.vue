@@ -102,7 +102,6 @@ export default {
       handler(newVal, oldVal) {
         // Обработка изменений в массиве
         this.$emit("update-labels", this.labels)
-        // console.log(this.labels)
       },
       deep: true,
     },
@@ -151,7 +150,9 @@ export default {
       this.imageSize = null
       this.imageName = null
       this.visibleLabels = []
-      this.imageUrl = image
+      this.imageUrl = image.src
+      this.imageSize = Math.ceil((image.size / 1024) * 10) / 10
+      this.imageName = image.name
     },
     remove_img_btn() {
       this.imageUrl = null
