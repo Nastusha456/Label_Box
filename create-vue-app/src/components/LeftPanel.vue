@@ -1,7 +1,7 @@
 <template>
   <div class="Tools">
     <ul>
-      <li>
+      <li @click="showImagesPanel">
         <i class="bx bx-images"></i>
         <p>Images</p>
       </li>
@@ -28,6 +28,9 @@ export default {
     },
     Show_classifier() {
       this.$emit("showClassifier")
+    },
+    showImagesPanel() {
+      this.$emit("showImagesPanel")
     },
   },
 }

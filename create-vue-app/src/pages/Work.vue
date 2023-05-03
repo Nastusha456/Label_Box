@@ -2,9 +2,14 @@
   <nav-bar @addImages="addImages" />
   <div class="main">
     <div class="container">
-      <left-panel @download="download" @showClassifier="showClassifier" />
+      <left-panel
+        @download="download"
+        @showClassifier="showClassifier"
+        @showImagesPanel="showImagesPanel"
+      />
       <div class="leftBlock">
-        <images-panel  
+        <images-panel
+          v-if="isShowImagesPanel"
           @chooseThisImage="chooseThisImage"
         />
         <classifier v-if="isShowClassifier" />
@@ -80,11 +85,12 @@ export default {
     AnnotationPanel,
     ImageData,
     Markup,
-    ImagesPanel
+    ImagesPanel,
   },
   data() {
     return {
       projectName: "Project name",
+      isShowImagesPanel: false,
       isShowClassifier: false,
       isShowMarkupPanel: false,
       isShowLabelEditor: false,
@@ -109,6 +115,9 @@ export default {
     },
     addImages() {
       this.$refs.CenterPanel.SelectFile()
+    },
+    showImagesPanel() {
+      this.isShowImagesPanel = !this.isShowImagesPanel
     },
     showClassifier() {
       this.isShowClassifier = !this.isShowClassifier

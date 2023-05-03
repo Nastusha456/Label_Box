@@ -19,7 +19,9 @@
       :rules="validateUserName"
     />
     <ErrorMessage name="user_name" class="error" />
-    <div v-if="!isUserNameCorrect" class="error">Incorrect user name</div>
+    <div v-if="!isUsersDataCorrect" class="error">
+      Incorrect password or user name
+    </div>
     <Field
       name="password"
       class="data"
@@ -28,10 +30,11 @@
       :rules="validatePassword"
     />
     <ErrorMessage name="password" class="error" />
-    <div v-if="!isPasswordCorrect" class="error">Incorrect password</div>
+    <div v-if="!isUsersDataCorrect" class="error">
+      Incorrect password or user name
+    </div>
     <input type="submit" value="Login" />
   </Form>
-  <button @click="GetData">Get</button>
 </template>
 
 <script>
@@ -49,26 +52,32 @@ export default {
   data() {
     return {
       userData: {},
-      isPasswordCorrect: true,
-      isUserNameCorrect: true,
+      isUsersDataCorrect: true,
     }
   },
   methods: {
     ...mapMutations(["setUserData"]),
     ...mapGetters(["getUserData", "getLoginPath"]),
 
-    GetData() {
-      axios
-        .get(path)
-        .then((response) => {
-          console.log("You received:")
-          console.log(response)
-          // console.log(response.data.items)
-        })
-        .catch((error) => {
-          console.error(error)
-        })
-    },
+    // For work without server *********************************************************************
+
+    // signIn(values) {
+    //   const hashedPassword = CryptoJS.MD5(
+    //     values.password + "Qit7mef"
+    //   ).toString()
+
+    //   const userData = values
+    //   userData.password = hashedPassword
+    //   userData.user_email = "some.email@gmail.com"
+
+    //   this.setUserData(userData)
+    //   localStorage.setItem("accessToken", "SomeToken")
+    //   this.$router.push("/work")
+    // },
+    // **********************************************************************************************
+
+    // For work with server *************************************************************************
+
     signIn(values) {
       const loginPath = this.getLoginPath()
 
@@ -79,41 +88,42 @@ export default {
       const userData = values
       userData.password = hashedPassword
 
-      this.setUserData(userData)
-      const DATA = this.getUserData()
-      console.log(DATA)
-
       axios
         .post(loginPath, userData)
-        .then(() => {
-          console.log("Data sent!")
+        .then((response) => {
+          if (response.data.status == "success") {
+            userData.user_email = response.data.user_email
+            this.setUserData(userData)
+            localStorage.setItem("accessToken", "SomeToken")
+            this.$router.push("/work")
+            console.log(response.data.message)
+          } else {
+            this.incorrectUsersData()
+            console.log(response.data.message)
+          }
         })
         .catch((error) => {
-          console.log(error)
+          alert(error)
         })
-
-      localStorage.setItem("accessToken", "SomeToken")
-      // this.$router.push("/work")
     },
+    // **********************************************************************************************
+
     validateUserName(value) {
-      this.isUserNameCorrect = true
+      this.isUsersDataCorrect = true
       if (value && value.trim()) {
         return true
       }
       return "This field is required"
     },
     validatePassword(value) {
-      this.isPasswordCorrect = true
+      this.isUsersDataCorrect = true
       if (value && value.trim()) {
         return true
       }
       return "This field is required"
     },
-    incorrectPassword() {
-      this.isPasswordCorrect = false
-    },
-    incorrectUserName() {
-      this.isUserNameCorrect = false
+    incorrectUsersData() {
+      this.isUsersDataCorrect = false
     },
   },
 }

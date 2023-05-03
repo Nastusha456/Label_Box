@@ -4,19 +4,15 @@ const store = createStore({
   state() {
     return {
       userData: null,
-      // userData: {
-      //   user_name: "St.enot",
-      //   user_email: "bahmetiev.st@gmail.com",
-      //   password: "1d75e069520afbdaabba4dd3eea5c07e",
-      // },
       // classifierPath: "/try_classifier.json",
       classifierPath:
-        "http://192.168.129.178:5000/classificator/4/classifier/1?format=json",
+        "http://192.168.84.178:5000/classificator/2/classifier/1?format=json",
       // annotationPath: "/try_annotation.json",
       annotationPath:
-        "http://192.168.129.178:5000/ann/4/annotation/1?format=json",
-      loginPath: "http://192.168.129.178:5000/users/login",
-      registrationPath: "http://192.168.129.178:5000/users/register",
+        "http://192.168.84.178:5000/ann/2/annotation/1?format=json",
+      loginPath: "http://192.168.84.178:5000/users/login",
+      registrationPath: "http://192.168.84.178:5000/users/register?format=json",
+      accountPath: "http://192.168.84.178:5000/users/change",
     }
   },
   mutations: {
@@ -39,6 +35,9 @@ const store = createStore({
     },
     getRegistrationPath(state) {
       return state.registrationPath
+    },
+    getAccountPath(state) {
+      return state.accountPath
     },
   },
 })

@@ -49,7 +49,7 @@
           placeholder="Current Password"
           :rules="validateCurrentPassword"
         />
-        <ErrorMessage name="currentPassword" class="error" />
+        <ErrorMessage name="current_password" class="error" />
         <Field
           name="password"
           class="data"
@@ -75,6 +75,7 @@
 <script>
 import { Form, Field, ErrorMessage } from "vee-validate"
 import CryptoJS from "crypto-js"
+import axios from "axios"
 import { mapMutations, mapGetters } from "vuex"
 
 export default {
@@ -85,7 +86,7 @@ export default {
   },
   data() {
     return {
-      minPasswordLength: 7,
+      minPasswordLength: 5,
       password: "",
       userData: {},
       nameFormIsVisible: false,
@@ -96,8 +97,27 @@ export default {
   },
   methods: {
     ...mapMutations(["setUserData"]),
-    ...mapGetters(["getUserData"]),
+    ...mapGetters(["getUserData", "getAccountPath"]),
 
+    async postNewData(newData, setData) {
+      const path = this.getAccountPath()
+
+      await axios
+        .post(path, newData)
+        .then((response) => {
+          if (response.data.status == "success") {
+            this.userData = setData
+            this.setUserData(this.userData)
+            console.log(response.data.message)
+          } else {
+            this.allowChangeData = false
+            alert(response.data.message)
+          }
+        })
+        .catch((error) => {
+          alert(error)
+        })
+    },
     Exit() {
       localStorage.removeItem("accessToken")
       this.setUserData(null)
@@ -111,9 +131,14 @@ export default {
     changeName(values) {
       this.nameFormIsVisible = false
       this.passwordBtn = true
-      this.userData.user_name = values.user_name
-      this.setUserData(this.userData)
-      console.log(this.userData)
+
+      const newUserName = values.user_name
+      const userName = this.userData.user_name
+      const newData = { user_name: userName, new_username: newUserName }
+      const setData = this.userData
+      setData.user_name = newUserName
+
+      this.postNewData(newData, setData)
     },
     openEmailForm() {
       this.emailFormIsVisible = true
@@ -122,22 +147,33 @@ export default {
     changeEmail(values) {
       this.emailFormIsVisible = false
       this.passwordBtn = true
-      this.userData.user_email = values.user_email
-      this.setUserData(this.userData)
-      console.log(this.userData)
+
+      const newEmail = values.user_email
+      const userName = this.userData.user_name
+      const newData = { user_name: userName, new_email: newEmail }
+      const setData = this.userData
+      setData.user_email = newEmail
+
+      this.postNewData(newData, setData)
     },
     openPasswordForm() {
       this.passwordFormIsVisible = true
       this.passwordBtn = false
     },
     changePassword(values) {
+      console.log(values)
       this.passwordFormIsVisible = false
       this.passwordBtn = true
-      this.userData.password = CryptoJS.MD5(
+
+      const newPassword = CryptoJS.MD5(
         values.password.trim() + "Qit7mef"
       ).toString()
-      this.setUserData(this.userData)
-      console.log(this.userData)
+      const userName = this.userData.user_name
+      const newData = { user_name: userName, new_password: newPassword }
+      const setData = this.userData
+      setData.password = newPassword
+
+      this.postNewData(newData, setData)
     },
     isRequired(value) {
       if (value && value.trim()) {
@@ -194,7 +230,6 @@ export default {
   },
   mounted() {
     this.userData = this.getUserData()
-    console.log(this.userData)
   },
 }
 </script>

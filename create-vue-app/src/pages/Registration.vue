@@ -59,7 +59,7 @@ export default {
   },
   data() {
     return {
-      minPasswordLength: 3,
+      minPasswordLength: 5,
       password: "",
     }
   },
@@ -76,22 +76,23 @@ export default {
 
       const userData = values
       userData.password = hashedPassword
+      userData.confirm_password = hashedPassword
 
       axios
         .post(registrationPath, userData)
-        .then(() => {
-          console.log("Data sent!")
+        .then((response) => {
+          if (response.data.status == "success") {
+            this.setUserData(userData)
+            localStorage.setItem("accessToken", "SomeToken")
+            this.$router.push("/work")
+            console.log(response.data.message)
+          } else {
+            alert(response.data.message)
+          }
         })
         .catch((error) => {
-          console.log(error)
+          alert(error)
         })
-
-      this.setUserData(userData)
-      // const DATA = this.getUserData()
-      // console.log(DATA)
-
-      localStorage.setItem("accessToken", "SomeToken")
-      // this.$router.push("/work")
     },
     isRequired(value) {
       if (value && value.trim()) {
