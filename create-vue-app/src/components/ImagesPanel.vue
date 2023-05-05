@@ -1,57 +1,90 @@
 <template>
-    <!-- <button @click="getImagesFromFolder">Upload images</button> -->
-    <div class="Images">
-        <img v-for="(image, index) in images" :key="index" :src="image.src" :style="{ borderColor: activeIndex === index ? '#2ecc71' : 'rgba(255, 255, 255, 0.5)' }" @click="chooseThisImage(image, index)" />
+  <div class="Images">
+    <div
+      v-for="image in images"
+      :key="image.id"
+      @dblclick="chooseThisImage(image)"
+    >
+      <img
+        :src="image.urls.full"
+        :style="{
+          border:
+            activeIndex === image.id
+              ? '3px solid #2ecc71'
+              : '2px solid rgba(255, 255, 255, 0.5)',
+        }"
+      />
     </div>
+  </div>
 </template>
 
 <script>
+import axios from "axios"
+import { mapGetters } from "vuex"
+
 export default {
   data() {
     return {
-        images: [],
-        activeIndex: -1,
+      images: [],
+      activeIndex: -1,
     }
   },
   methods: {
-    chooseThisImage(image, index) {
-        this.$emit("chooseThisImage", image)
-        this.activeIndex = index
-    }
-  },
-  created() {
-    const imageContext = require.context('@/images', false, /\.(png|jpe?g|gif|webp)$/i)
-    console.log(imageContext(imageContext.keys()[0]))
-    this.images = imageContext.keys().map(key => ({
-        name: key.split('/').pop(),
-        size: NaN,
-        src: imageContext(key)
-    }))
+    ...mapGetters(["getImagesPath", "getAPI_KEY"]),
+
+    async openProject() {
+      const path = this.getImagesPath()
+      const API_KEY = this.getAPI_KEY()
+
+      await axios
+        .get(path, {
+          headers: { Authorization: API_KEY },
+        })
+        .then((response) => {
+          this.images = response.data
+        })
+        .catch((error) => {
+          alert.log(error)
+        })
+    },
+
+    chooseThisImage(image) {
+      this.$emit("chooseThisImage", image)
+      this.activeIndex = image.id
+    },
+    addImg(newImg) {
+      this.images.push(newImg)
+    },
   },
 }
 </script>
 
-<style>
+<style scoped>
 .Images {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-left: 10px;
-    margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  /* gap: 5px; */
+  /* margin-left: 10px;
+  margin-top: 10px; */
+  height: 300px;
+  width: 230px;
+  overflow-y: scroll;
 }
 
 .Images img {
-    width: 60px; 
-    background: none;
-    border: 2px solid rgba(255, 255, 255, 0.5);
-    color: rgba(255, 255, 255, 0.5);
-    border-radius: 15px;
-    transition: 0.25s;
-    cursor: pointer;
+  margin-top: 3px;
+  margin-left: 5px;
+  height: 60px;
+  width: 60px;
+  background: none;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.5);
+  border-radius: 15px;
+  transition: 0.25s;
+  cursor: pointer;
 }
 .Images img:hover {
-    background: #2ecc71;
-    border: 2px solid #17202a;
-    color: #17202a;
+  background: #2ecc71;
+  border: 2px solid #2ecc71;
 }
 </style>

@@ -128,8 +128,8 @@ export default {
 <style scoped>
 .classifier {
   display: block;
-  max-height: 50vh;
-  /* width: 15%; */
+  height: 300px;
+  width: 230px;
   color: rgba(255, 255, 255, 0.5);
   margin-top: 10px;
   overflow-y: scroll;

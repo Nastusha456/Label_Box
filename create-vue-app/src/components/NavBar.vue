@@ -4,8 +4,11 @@
     <nav>
       <ul class="list">
         <li><div @click="$router.push('/main')" class="item">Home</div></li>
-        <project-list @addImages="Add_images" />
-        <annotation-list />
+        <project-list @addImages="Add_images" @openProject="openProject" />
+        <annotation-list
+          @saveAnnotation="saveAnnotation"
+          @downloadAnnotation="downloadAnnotation"
+        />
         <li>
           <div @click="$router.push('/account')" class="item">Account</div>
         </li>
@@ -25,6 +28,15 @@ export default {
   methods: {
     Add_images() {
       this.$emit("addImages")
+    },
+    saveAnnotation() {
+      this.$emit("saveAnnotation")
+    },
+    downloadAnnotation() {
+      this.$emit("downloadAnnotation")
+    },
+    openProject() {
+      this.$emit("openProject")
     },
   },
 }

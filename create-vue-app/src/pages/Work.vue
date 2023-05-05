@@ -1,5 +1,10 @@
 <template>
-  <nav-bar @addImages="addImages" />
+  <nav-bar
+    @addImages="addImages"
+    @saveAnnotation="saveAnnotation"
+    @downloadAnnotation="downloadAnnotation"
+    @openProject="openProject"
+  />
   <div class="main">
     <div class="container">
       <left-panel
@@ -9,6 +14,7 @@
       />
       <div class="leftBlock">
         <images-panel
+          ref="imagesPanel"
           v-if="isShowImagesPanel"
           @chooseThisImage="chooseThisImage"
         />
@@ -32,6 +38,7 @@
           @update-labelOnWork="updateLabelOnWork"
           @find-markup-over-label="findMarkupOverLabel"
           @selectedLabelInsideTree="selectedLabel"
+          @addNewImg="addNewImg"
           ref="CenterPanel"
           :scale="parseFloat(scale)"
           :selectedMode="selectedMode"
@@ -40,21 +47,23 @@
         />
         <image-data :imageData="imageData" />
       </div>
-      <markup
-        ref="Markup"
-        :isShowMarkupPanel="isShowMarkupPanel"
-        :isShowLabelEditor="isShowLabelEditor"
-        :labels="labels"
-        :color="color"
-        :labelOnWork="labelOnWork"
-        @visibleLabelBtn="visibleLabelBtn"
-        @changeLabelColorBtn="changeLabelColorBtn"
-        @deleteLabelBtn="deleteLabelBtn"
-        @selectLabelById="selectLabelById"
-        @plusNewLabel="plusNewLabel"
-        @update-labelOnWork="updateLabelOnWork"
-        @fetch-annotation="fetchAnnotation"
-      />
+      <div class="rightBlock">
+        <markup
+          ref="Markup"
+          :isShowMarkupPanel="isShowMarkupPanel"
+          :isShowLabelEditor="isShowLabelEditor"
+          :labels="labels"
+          :color="color"
+          :labelOnWork="labelOnWork"
+          @visibleLabelBtn="visibleLabelBtn"
+          @changeLabelColorBtn="changeLabelColorBtn"
+          @deleteLabelBtn="deleteLabelBtn"
+          @selectLabelById="selectLabelById"
+          @plusNewLabel="plusNewLabel"
+          @update-labelOnWork="updateLabelOnWork"
+          @fetch-annotation="fetchAnnotation"
+        />
+      </div>
       <right-panel
         @delet="delet"
         @beginAnnotation="beginAnnotation"
@@ -185,20 +194,32 @@ export default {
     chooseThisImage(image) {
       this.$refs.CenterPanel.chooseThisImage(image)
     },
+    saveAnnotation() {
+      this.$refs.Markup.saveAnnotation()
+    },
+    downloadAnnotation() {
+      this.$refs.Markup.fetchAnnotation()
+    },
+    openProject() {
+      // this.showImagesPanel()
+      this.$refs.imagesPanel.openProject()
+    },
+    addNewImg(newImg) {
+      this.$refs.imagesPanel.addImg(newImg)
+    },
   },
 }
 </script>
 
-<style>
+<style scoped>
 * {
   box-sizing: border-box;
 }
 
 .main {
   height: 100%;
-  margin-top: 150px;
+  margin-top: 145px;
   padding: 10px;
-  /* max-height: 100vh; */
   width: 100%;
   display: flex;
   align-items: center;
@@ -207,9 +228,8 @@ export default {
 }
 
 .container {
-  margin-top: 45px;
-  height: 100%;
-  width: 98%;
+  height: 100vh;
+  width: 97%;
   display: flex;
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.05);
@@ -238,6 +258,13 @@ export default {
 
 .leftBlock {
   display: block;
+  max-height: 50vh;
+  width: 15%;
+  margin-top: 10px;
+}
+
+.rightBlock {
+  display: flex;
   max-height: 50vh;
   width: 15%;
   margin-top: 10px;

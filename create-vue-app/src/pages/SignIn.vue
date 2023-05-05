@@ -61,51 +61,51 @@ export default {
 
     // For work without server *********************************************************************
 
-    // signIn(values) {
-    //   const hashedPassword = CryptoJS.MD5(
-    //     values.password + "Qit7mef"
-    //   ).toString()
-
-    //   const userData = values
-    //   userData.password = hashedPassword
-    //   userData.user_email = "some.email@gmail.com"
-
-    //   this.setUserData(userData)
-    //   localStorage.setItem("accessToken", "SomeToken")
-    //   this.$router.push("/work")
-    // },
-    // **********************************************************************************************
-
-    // For work with server *************************************************************************
-
     signIn(values) {
-      const loginPath = this.getLoginPath()
-
       const hashedPassword = CryptoJS.MD5(
         values.password + "Qit7mef"
       ).toString()
 
       const userData = values
       userData.password = hashedPassword
+      userData.user_email = "some.email@gmail.com"
 
-      axios
-        .post(loginPath, userData)
-        .then((response) => {
-          if (response.data.status == "success") {
-            userData.user_email = response.data.user_email
-            this.setUserData(userData)
-            localStorage.setItem("accessToken", "SomeToken")
-            this.$router.push("/work")
-            console.log(response.data.message)
-          } else {
-            this.incorrectUsersData()
-            console.log(response.data.message)
-          }
-        })
-        .catch((error) => {
-          alert(error)
-        })
+      this.setUserData(userData)
+      localStorage.setItem("accessToken", "SomeToken")
+      this.$router.push("/work")
     },
+    // **********************************************************************************************
+
+    // For work with server *************************************************************************
+
+    // signIn(values) {
+    //   const loginPath = this.getLoginPath()
+
+    //   const hashedPassword = CryptoJS.MD5(
+    //     values.password + "Qit7mef"
+    //   ).toString()
+
+    //   const userData = values
+    //   userData.password = hashedPassword
+
+    //   axios
+    //     .post(loginPath, userData)
+    //     .then((response) => {
+    //       if (response.data.status == "success") {
+    //         userData.user_email = response.data.user_email
+    //         this.setUserData(userData)
+    //         localStorage.setItem("accessToken", "SomeToken")
+    //         this.$router.push("/work")
+    //         console.log(response.data.message)
+    //       } else {
+    //         this.incorrectUsersData()
+    //         console.log(response.data.message)
+    //       }
+    //     })
+    //     .catch((error) => {
+    //       alert(error)
+    //     })
+    // },
     // **********************************************************************************************
 
     validateUserName(value) {

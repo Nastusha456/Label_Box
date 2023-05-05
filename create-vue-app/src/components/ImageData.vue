@@ -8,7 +8,7 @@
       {{
         imageData.imageHeigth ? ` heigth: ${imageData.imageHeigth}px;` : null
       }}
-      {{ imageData.imageSize ? ` size: ${imageData.imageSize}КБ` : null }}
+      {{ imageData.imageSize ? ` size: ${imageData.imageSize}` : null }}
     </div>
   </div>
 </template>

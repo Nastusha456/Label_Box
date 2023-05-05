@@ -4,7 +4,7 @@
       Project {{ `${this.isSubListShow ? "\u{025B7}" : "\u{025BD}"}` }}
     </div>
     <ul class="subList" v-if="isSubListShow">
-      <li><div class="item">Open project</div></li>
+      <li><div class="item" @click="openProject">Open project</div></li>
       <li><div class="item">Create project</div></li>
       <li><div @click="Add_images" class="item">Add images</div></li>
     </ul>
@@ -24,6 +24,9 @@ export default {
     },
     Show_subList() {
       this.isSubListShow = !this.isSubListShow
+    },
+    openProject() {
+      this.$emit("openProject")
     },
   },
 }

@@ -4,9 +4,11 @@
       Annotation {{ `${this.isSubListShow ? "\u{025B7}" : "\u{025BD}"}` }}
     </div>
     <ul class="subList" v-if="isSubListShow">
-      <li><div class="item">Download annotation</div></li>
+      <li>
+        <div class="item" @click="downloadAnnotation">Download annotation</div>
+      </li>
       <li><div class="item">Unload annotation</div></li>
-      <li><div class="item">Save annotation</div></li>
+      <li><div class="item" @click="saveAnnotation">Save annotation</div></li>
     </ul>
   </li>
 </template>
@@ -21,6 +23,12 @@ export default {
   methods: {
     Show_subList() {
       this.isSubListShow = !this.isSubListShow
+    },
+    saveAnnotation() {
+      this.$emit("saveAnnotation")
+    },
+    downloadAnnotation() {
+      this.$emit("downloadAnnotation")
     },
   },
 }

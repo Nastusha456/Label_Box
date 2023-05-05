@@ -107,13 +107,35 @@ export default {
     },
   },
   methods: {
+    async logImageInfo() {
+      const response = await axios.get(this.imageUrl, {
+        responseType: "blob",
+      })
+      const blob = await response.data
+      const size = Math.ceil((blob.size / 1024) * 10) / 10
+      this.imageSize =
+        size < 10000 ? `${size} KB` : `${Math.ceil((size / 1024) * 10) / 10} MB`
+    },
     onImageLoad() {
       this.imageWidth = this.$refs.Image.naturalWidth
       this.imageHeigth = this.$refs.Image.naturalHeight
       if (this.selectedFile) {
-        this.imageSize = Math.ceil((this.selectedFile.size / 1024) * 10) / 10
+        const size = Math.ceil((this.selectedFile.size / 1024) * 10) / 10
+        this.imageSize =
+          size < 10000
+            ? `${size} KB`
+            : `${Math.ceil((size / 1024) * 10) / 10} MB`
         this.imageName = this.selectedFile.name
+
+        // Create information to push in array of images
+        const Img = {
+          id: Date.now(),
+          alt_description: this.imageName,
+          urls: { full: this.imageUrl },
+        }
+        this.$emit("addNewImg", Img)
       }
+
       this.imageData = {
         imageWidth: this.imageWidth,
         imageHeigth: this.imageWidth,
@@ -130,13 +152,16 @@ export default {
       this.imageUrl = URL.createObjectURL(this.selectedFile)
     },
     chooseThisImage(image) {
+      this.selectedFile = null
       this.imageWidth = null
       this.imageHeigth = null
       this.imageSize = null
       this.imageName = null
       this.rectangles = []
       this.dots = []
-      ;(this.labels = []), (this.isDrowing = false)
+      this.labels = []
+      this.visibleLabels = []
+      this.isDrowing = false
 
       this.imageData = {
         imageWidth: this.imageWidth,
@@ -145,14 +170,9 @@ export default {
         imageName: this.imageName,
       }
       this.$emit("getImgData", this.imageData)
-      this.imageWidth = null
-      this.imageWidth = null
-      this.imageSize = null
-      this.imageName = null
-      this.visibleLabels = []
-      this.imageUrl = image.src
-      this.imageSize = Math.ceil((image.size / 1024) * 10) / 10
-      this.imageName = image.name
+      this.imageUrl = image.urls.full
+      this.imageName = image.alt_description
+      this.logImageInfo()
     },
     remove_img_btn() {
       this.imageUrl = null
@@ -161,8 +181,10 @@ export default {
       this.imageSize = null
       this.imageName = null
       this.rectangles = []
+      this.visibleLabels = []
       this.dots = []
-      ;(this.labels = []), (this.isDrowing = false)
+      this.labels = []
+      this.isDrowing = false
 
       this.imageData = {
         imageWidth: this.imageWidth,
@@ -171,11 +193,6 @@ export default {
         imageName: this.imageName,
       }
       this.$emit("getImgData", this.imageData)
-      this.imageWidth = null
-      this.imageWidth = null
-      this.imageSize = null
-      this.imageName = null
-      this.visibleLabels = []
     },
     Download_btn() {
       if (this.imageUrl !== "") {
@@ -1037,10 +1054,10 @@ export default {
 .image_holder {
   position: relative;
   display: block;
-  width: 1000%;
+  width: 100%;
   max-height: 100vh;
-  padding-top: 40px; /* отступ сверху */
-  padding-bottom: 40px; /* отступ снизу */
+  padding-top: 10px; /* отступ сверху */
+  padding-bottom: 10px; /* отступ снизу */
 }
 
 .image_holder img {

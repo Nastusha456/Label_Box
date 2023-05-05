@@ -88,10 +88,6 @@
       </div>
       <button @click="saveLabel()">Save</button>
     </div>
-    <button @click="collectData()">Test Collection Annotation</button>
-    <!-- ВРЕМЕННО!!! ПОТОМ УБРАТЬ!!!  -->
-    <button @click="fetchAnnotation()">Test Download Annotation</button>
-    <!-- ВРЕМЕННО!!! ПОТОМ УБРАТЬ!!!  -->
     <div class="markup_tree" v-if="isShowMarkupTree">
       <span @click="showGroup"
         ><strong>Markup</strong>
@@ -1065,7 +1061,7 @@ export default {
     },
 
     //************************************************
-    collectData() {
+    saveAnnotation() {
       this.allData.groups = this.labelGroups
       for (const group of this.allData.groups) {
         delete group.isSelected
@@ -1108,8 +1104,8 @@ export default {
 }
 .markup {
   display: block;
-  max-height: 50vh;
-  width: 15%;
+  max-height: 300px;
+  width: 200px;
   color: rgba(255, 255, 255, 0.5);
   margin-top: 10px;
 }
@@ -1140,8 +1136,8 @@ export default {
 
 .markup_tree {
   display: block;
-  max-height: 300px;
-  width: 200px;
+  height: 300px;
+  width: 230px;
   color: rgba(255, 255, 255, 0.5);
   margin-top: 10px;
   overflow-y: scroll;
