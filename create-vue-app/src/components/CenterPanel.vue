@@ -2,7 +2,7 @@
   <div class="content" ref="content">
     <div class="image_container" ref="image_container">
       <div class="choose_image">
-        <div v-if="!imageUrl" class="upload_img_box" @click="SelectFile">
+        <div v-show="!imageUrl" class="upload_img_box" @click="SelectFile">
           <i class="bx bxs-image-add"></i><br />
           <input
             ref="fileInput"
@@ -145,6 +145,7 @@ export default {
       this.$emit("getImgData", this.imageData)
     },
     SelectFile() {
+      this.remove_img_btn()
       this.$refs.fileInput.click()
     },
     onFileSelected(event) {

@@ -15,7 +15,7 @@
       <div class="leftBlock">
         <images-panel
           ref="imagesPanel"
-          v-if="isShowImagesPanel"
+          v-show="isShowImagesPanel"
           @chooseThisImage="chooseThisImage"
         />
         <classifier v-if="isShowClassifier" />

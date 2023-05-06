@@ -67,7 +67,8 @@ export default {
   /* margin-left: 10px;
   margin-top: 10px; */
   height: 300px;
-  width: 230px;
+  /* width: 200px; */
+  width: 100%;
   overflow-y: scroll;
 }
 

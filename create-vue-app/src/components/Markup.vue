@@ -1105,7 +1105,8 @@ export default {
 .markup {
   display: block;
   max-height: 300px;
-  width: 200px;
+  /* width: 200px; */
+  width: 100%;
   color: rgba(255, 255, 255, 0.5);
   margin-top: 10px;
 }
