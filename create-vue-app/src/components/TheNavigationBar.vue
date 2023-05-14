@@ -4,8 +4,11 @@
     <nav>
       <ul class="list">
         <li><div @click="$router.push('/main')" class="item">Home</div></li>
-        <project-list @addImages="Add_images" @openProject="openProject" />
-        <annotation-list
+        <the-navigation-bar-project-list
+          @addImages="Add_images"
+          @openProject="openProject"
+        />
+        <the-navigation-bar-annotation-list
           @saveAnnotation="saveAnnotation"
           @downloadAnnotation="downloadAnnotation"
         />
@@ -18,12 +21,13 @@
 </template>
 
 <script>
-import ProjectList from "@/components/ProjectList.vue"
-import AnnotationList from "@/components/AnnotationList.vue"
+import TheNavigationBarProjectList from "@/components/TheNavigationBarProjectList.vue"
+import TheNavigationBarAnnotationList from "@/components/TheNavigationBarAnnotationList.vue"
+
 export default {
-  components: { ProjectList, AnnotationList },
-  data() {
-    return {}
+  components: {
+    TheNavigationBarProjectList,
+    TheNavigationBarAnnotationList,
   },
   methods: {
     Add_images() {

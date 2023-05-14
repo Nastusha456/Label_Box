@@ -34,7 +34,7 @@
       <i class="bx bx-move bx-burst-hover"></i>
       <p>Move</p>
     </div>
-    <label-editor
+    <the-annotation-panel-toolbar
       v-if="isLabelEditorShow"
       ref="LabelEditor"
       @mode-change="mode_change"
@@ -51,11 +51,11 @@
 </template>
 
 <script>
-import LabelEditor from "@/components/LabelEditor.vue"
+import TheAnnotationPanelToolbar from "@/components/TheAnnotationPanelToolbar.vue"
 
 export default {
   components: {
-    LabelEditor,
+    TheAnnotationPanelToolbar,
   },
   data() {
     return {
@@ -118,11 +118,7 @@ export default {
       this.$emit("changeCursor", value)
     },
     plusNewLabel() {
-      // if (this.$refs.LabelEditor) {
-      //   this.$refs.LabelEditor.ModeChange('dot')
-      // }
       this.isLabelEditorShow = true
-      
     },
   },
 }

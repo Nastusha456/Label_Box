@@ -7,7 +7,7 @@
       </li>
       <li @click="showMarkupTree">
         <i class="bx bxs-droplet-half"></i>
-        <p>Colour</p>
+        <p>Markup</p>
       </li>
       <li @click="Delet_btn">
         <i class="bx bxs-trash"></i>
@@ -28,7 +28,7 @@ export default {
     },
     showMarkupTree() {
       this.$emit("showMarkupTree")
-    }
+    },
   },
 }
 </script>

@@ -317,7 +317,6 @@ export default {
     }
   },
   props: {
-    isShowMarkupPanel: String,
     isShowLabelEditor: String,
     labels: Array,
     color: String,

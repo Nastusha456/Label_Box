@@ -57,12 +57,7 @@
 </template>
 
 <script scoped>
-import ColorPalette from "@/components/ColorPalette.vue"
-
 export default {
-  components: {
-    ColorPalette,
-  },
   data() {
     return {
       selectedMode: "mooving",
@@ -95,8 +90,8 @@ export default {
     },
   },
   mounted() {
-    this.ModeChange('dot')
-  }
+    this.ModeChange("dot")
+  },
 }
 </script>
 

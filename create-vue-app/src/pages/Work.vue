@@ -1,107 +1,109 @@
 <template>
-  <navigation-bar
-    @addImages="addImages"
-    @saveAnnotation="saveAnnotation"
-    @downloadAnnotation="downloadAnnotation"
-    @openProject="openProject"
-  />
-  <div class="main">
-    <div class="container">
-      <left-panel
-        @download="download"
-        @showClassifier="showClassifier"
-        @showImagesPanel="showImagesPanel"
-      />
-      <div class="leftBlock">
-        <images-panel
-          ref="imagesPanel"
-          v-show="isShowImagesPanel"
-          @chooseThisImage="chooseThisImage"
+  <div>
+    <the-navigation-bar
+      @addImages="addImages"
+      @saveAnnotation="saveAnnotation"
+      @downloadAnnotation="downloadAnnotation"
+      @openProject="openProject"
+    />
+
+    <div class="main">
+      <div class="container">
+        <the-left-panel
+          @download="download"
+          @showClassifier="showClassifier"
+          @showImagesPanel="showImagesPanel"
         />
-        <classifier v-if="isShowClassifier" />
+        <div class="leftBlock">
+          <the-images-panel
+            ref="imagesPanel"
+            v-show="isShowImagesPanel"
+            @chooseThisImage="chooseThisImage"
+          />
+          <classifier-panel v-if="isShowClassifier" />
+        </div>
+        <div class="centerBlock">
+          <the-annotation-panel
+            ref="AnnotationPanel"
+            @slider-change="sliderChange"
+            @mode-change="modeChange"
+            @connectInSeries="ConnectDots"
+            @createPolygon="CreatePolygon"
+            @changeColor="changeColor"
+            @show-label-editor="ShowLabelEditor"
+            @changeCursor="changeCursor"
+          />
+          <p id="projectName">*** {{ projectName }} ***</p>
+          <center-panel
+            @getImgData="getImgData"
+            @update-labels="updateLabels"
+            @update-labelOnWork="updateLabelOnWork"
+            @find-markup-over-label="findMarkupOverLabel"
+            @selectedLabelInsideTree="selectedLabel"
+            @addNewImg="addNewImg"
+            ref="CenterPanel"
+            :scale="parseFloat(scale)"
+            :selectedMode="selectedMode"
+            :color="color"
+            :selectedCursor="selectedCursor"
+          />
+          <image-data :imageData="imageData" />
+        </div>
+        <div class="rightBlock">
+          <markup-panel
+            ref="MarkupPanel"
+            :isShowLabelEditor="isShowLabelEditor"
+            :labels="labels"
+            :color="color"
+            :labelOnWork="labelOnWork"
+            @visibleLabelBtn="visibleLabelBtn"
+            @changeLabelColorBtn="changeLabelColorBtn"
+            @deleteLabelBtn="deleteLabelBtn"
+            @selectLabelById="selectLabelById"
+            @plusNewLabel="plusNewLabel"
+            @update-labelOnWork="updateLabelOnWork"
+            @fetch-annotation="fetchAnnotation"
+          />
+        </div>
+        <the-right-panel
+          @delet="delet"
+          @beginAnnotation="beginAnnotation"
+          @showMarkupTree="showMarkupTree"
+        />
       </div>
-      <div class="centerBlock">
-        <annotation-panel
-          ref="AnnotationPanel"
-          @slider-change="sliderChange"
-          @mode-change="modeChange"
-          @connectInSeries="ConnectDots"
-          @createPolygon="CreatePolygon"
-          @changeColor="changeColor"
-          @show-label-editor="ShowLabelEditor"
-          @changeCursor="changeCursor"
-        />
-        <p id="projectName">*** {{ projectName }} ***</p>
-        <center-panel
-          @getImgData="getImgData"
-          @update-labels="updateLabels"
-          @update-labelOnWork="updateLabelOnWork"
-          @find-markup-over-label="findMarkupOverLabel"
-          @selectedLabelInsideTree="selectedLabel"
-          @addNewImg="addNewImg"
-          ref="CenterPanel"
-          :scale="parseFloat(scale)"
-          :selectedMode="selectedMode"
-          :color="color"
-          :selectedCursor="selectedCursor"
-        />
-        <image-data :imageData="imageData" />
-      </div>
-      <div class="rightBlock">
-        <markup-panel
-          ref="MarkupPanel"
-          :isShowMarkupPanel="isShowMarkupPanel"
-          :isShowLabelEditor="isShowLabelEditor"
-          :labels="labels"
-          :color="color"
-          :labelOnWork="labelOnWork"
-          @visibleLabelBtn="visibleLabelBtn"
-          @changeLabelColorBtn="changeLabelColorBtn"
-          @deleteLabelBtn="deleteLabelBtn"
-          @selectLabelById="selectLabelById"
-          @plusNewLabel="plusNewLabel"
-          @update-labelOnWork="updateLabelOnWork"
-          @fetch-annotation="fetchAnnotation"
-        />
-      </div>
-      <right-panel
-        @delet="delet"
-        @beginAnnotation="beginAnnotation"
-        @showMarkupTree="showMarkupTree"
-      />
     </div>
   </div>
 </template>
 
 <script>
-import NavigationBar from "@/components/NavigationBar.vue"
-import LeftPanel from "@/components/LeftPanel.vue"
-import RightPanel from "@/components/RightPanel.vue"
+import TheNavigationBar from "@/components/TheNavigationBar.vue"
+import TheLeftPanel from "@/components/TheLeftPanel.vue"
+import TheRightPanel from "@/components/TheRightPanel.vue"
 import CenterPanel from "@/components/CenterPanel.vue"
 import ClassifierPanel from "@/components/ClassifierPanel.vue"
-import AnnotationPanel from "@/components/AnnotationPanel.vue"
+import TheAnnotationPanel from "@/components/TheAnnotationPanel.vue"
 import ImageData from "@/components/ImageData.vue"
 import MarkupPanel from "@/components/MarkupPanel.vue"
-import ImagesPanel from "@/components/ImagesPanel.vue"
+
+import TheImagesPanel from "@/components/TheImagesPanel.vue"
 
 export default {
   components: {
-    NavigationBar,
-    LeftPanel,
-    RightPanel,
+    TheNavigationBar,
+    TheLeftPanel,
+    TheRightPanel,
     CenterPanel,
     ClassifierPanel,
-    AnnotationPanel,
+    TheAnnotationPanel,
     ImageData,
     MarkupPanel,
-    ImagesPanel,
+    TheImagesPanel,
   },
   data() {
     return {
       projectName: "Project name",
       isShowImagesPanel: false,
       isShowClassifier: false,
-      isShowMarkupPanel: false,
       isShowLabelEditor: false,
       labelOnWork: false,
       scale: 1,
@@ -136,7 +138,7 @@ export default {
       this.$refs.MarkupPanel.remove_img_btn()
     },
     beginAnnotation() {
-      this.isShowMarkupPanel = !this.isShowMarkupPanel
+      this.$refs.AnnotationPanel.ShowLabelEditor()
     },
     showMarkupTree() {
       this.$refs.MarkupPanel.showMarkupTree()
@@ -178,7 +180,6 @@ export default {
       this.$refs.CenterPanel.selectLabelById(id)
     },
     plusNewLabel() {
-      // this.$refs.AnnotationPanel.ShowLabelEditor()
       this.$refs.AnnotationPanel.plusNewLabel()
       this.isShowLabelEditor = true
     },

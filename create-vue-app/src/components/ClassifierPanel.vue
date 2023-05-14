@@ -129,7 +129,7 @@ export default {
 .classifier {
   display: block;
   height: 300px;
-  width: 230px;
+  width: 100%;
   color: rgba(255, 255, 255, 0.5);
   margin-top: 10px;
   overflow-y: scroll;
