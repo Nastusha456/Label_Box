@@ -1,5 +1,5 @@
 <template>
-  <nav-bar
+  <navigation-bar
     @addImages="addImages"
     @saveAnnotation="saveAnnotation"
     @downloadAnnotation="downloadAnnotation"
@@ -48,8 +48,8 @@
         <image-data :imageData="imageData" />
       </div>
       <div class="rightBlock">
-        <markup
-          ref="Markup"
+        <markup-panel
+          ref="MarkupPanel"
           :isShowMarkupPanel="isShowMarkupPanel"
           :isShowLabelEditor="isShowLabelEditor"
           :labels="labels"
@@ -74,26 +74,26 @@
 </template>
 
 <script>
-import NavBar from "@/components/NavBar.vue"
+import NavigationBar from "@/components/NavigationBar.vue"
 import LeftPanel from "@/components/LeftPanel.vue"
 import RightPanel from "@/components/RightPanel.vue"
 import CenterPanel from "@/components/CenterPanel.vue"
-import Classifier from "@/components/Classifier.vue"
+import ClassifierPanel from "@/components/ClassifierPanel.vue"
 import AnnotationPanel from "@/components/AnnotationPanel.vue"
 import ImageData from "@/components/ImageData.vue"
-import Markup from "@/components/Markup.vue"
+import MarkupPanel from "@/components/MarkupPanel.vue"
 import ImagesPanel from "@/components/ImagesPanel.vue"
 
 export default {
   components: {
-    NavBar,
+    NavigationBar,
     LeftPanel,
     RightPanel,
     CenterPanel,
-    Classifier,
+    ClassifierPanel,
     AnnotationPanel,
     ImageData,
-    Markup,
+    MarkupPanel,
     ImagesPanel,
   },
   data() {
@@ -105,7 +105,7 @@ export default {
       isShowLabelEditor: false,
       labelOnWork: false,
       scale: 1,
-      selectedMode: "mooving",
+      selectedMode: "moving",
       imageData: {},
       color: "#ff0000",
       selectedCursor: "move",
@@ -133,13 +133,13 @@ export default {
     },
     delet() {
       this.$refs.CenterPanel.remove_img_btn()
-      this.$refs.Markup.remove_img_btn()
+      this.$refs.MarkupPanel.remove_img_btn()
     },
     beginAnnotation() {
       this.isShowMarkupPanel = !this.isShowMarkupPanel
     },
     showMarkupTree() {
-      this.$refs.Markup.showMarkupTree()
+      this.$refs.MarkupPanel.showMarkupTree()
     },
     sliderChange(newScale) {
       this.scale = newScale
@@ -172,7 +172,7 @@ export default {
       this.$refs.CenterPanel.deleteLabelBtn(id)
     },
     selectedLabel(id) {
-      this.$refs.Markup.selectedLabelInsideTree(id)
+      this.$refs.MarkupPanel.selectedLabelInsideTree(id)
     },
     selectLabelById(id) {
       this.$refs.CenterPanel.selectLabelById(id)
@@ -186,7 +186,7 @@ export default {
       this.labelOnWork = labelOnWork
     },
     findMarkupOverLabel(labelsOverLabel) {
-      this.$refs.Markup.findMarkupOverLabel(labelsOverLabel)
+      this.$refs.MarkupPanel.findMarkupOverLabel(labelsOverLabel)
     },
     fetchAnnotation() {
       this.$refs.CenterPanel.fetchAnnotation()
@@ -195,10 +195,10 @@ export default {
       this.$refs.CenterPanel.chooseThisImage(image)
     },
     saveAnnotation() {
-      this.$refs.Markup.saveAnnotation()
+      this.$refs.MarkupPanel.saveAnnotation()
     },
     downloadAnnotation() {
-      this.$refs.Markup.fetchAnnotation()
+      this.$refs.MarkupPanel.fetchAnnotation()
     },
     openProject() {
       // this.showImagesPanel()
@@ -268,5 +268,6 @@ export default {
   max-height: 50vh;
   width: 15%;
   margin-top: 10px;
+  /* overflow-x: auto; */
 }
 </style>

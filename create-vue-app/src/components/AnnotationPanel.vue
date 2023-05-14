@@ -24,13 +24,13 @@
     />
     <input
       type="radio"
-      id="mooving"
+      id="moving"
       name="workSettings"
-      value="mooving"
+      value="moving"
       @input="onModeChange"
       checked
     />
-    <div class="label-editor" @click="ModeChange('mooving')">
+    <div class="label-editor" @click="ModeChange('moving')">
       <i class="bx bx-move bx-burst-hover"></i>
       <p>Move</p>
     </div>
@@ -63,7 +63,7 @@ export default {
       maxScale: 5,
       scale: 1,
       step: 0.1,
-      selectedMode: "mooving",
+      selectedMode: "moving",
       isLabelEditorShow: false,
     }
   },
@@ -106,6 +106,9 @@ export default {
     },
     ShowLabelEditor() {
       this.isLabelEditorShow = !this.isLabelEditorShow
+      if (this.isLabelEditorShow === false) {
+        this.ModeChange("moving")
+      }
       this.$emit("show-label-editor")
     },
     changeColor(color) {

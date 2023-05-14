@@ -96,7 +96,7 @@
       <ul v-if="isShowGroups">
         <li
           v-for="group in labelGroups"
-          style="padding-left: 30px"
+          style="padding-left: 20px"
           :key="group.id"
         >
           <div
@@ -157,7 +157,7 @@
           <ul v-if="isShowClasses[labelGroups.indexOf(group)]">
             <li
               v-for="element in labelClasses"
-              style="padding-left: 30px"
+              style="padding-left: 20px"
               :key="element.id"
             >
               <div
@@ -232,7 +232,7 @@
               >
                 <li
                   v-for="label in labelLabels"
-                  style="padding-left: 30px"
+                  style="padding-left: 20px"
                   :key="label.id"
                 >
                   <div
@@ -1111,7 +1111,7 @@ export default {
   margin-top: 10px;
 }
 .search_input {
-  width: 100%;
+  width: 90%;
   padding: 8px;
   border: 1px solid #ccc;
   border-radius: 4px;
@@ -1138,7 +1138,7 @@ export default {
 .markup_tree {
   display: block;
   height: 300px;
-  width: 230px;
+  width: 100%;
   color: rgba(255, 255, 255, 0.5);
   margin-top: 10px;
   overflow-y: scroll;
@@ -1202,5 +1202,10 @@ input[type="color"] {
   width: 30px;
   background: rgba(255, 255, 255, 0.1);
   margin-top: 3px;
+}
+
+.create_markup {
+  /* display: block; */
+  width: 100%;
 }
 </style>

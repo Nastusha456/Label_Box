@@ -683,7 +683,7 @@ export default {
         // Сохраняем координаты маркера в свойство
         this.startCoords = { x, y }
         this.isDrowing = true
-      } else if (this.selectedMode === "mooving") {
+      } else if (this.selectedMode === "moving") {
         this.isDragging = true
         this.startMouseX = event.clientX
         this.startMouseY = event.clientY
