@@ -41,6 +41,16 @@ import axios from "axios"
 import { mapGetters } from "vuex"
 
 export default {
+  props: {
+    scale: {
+      // Определение пропса scale
+      type: Number,
+      required: true,
+    },
+    selectedMode: String,
+    color: String,
+    selectedCursor: String,
+  },
   data() {
     return {
       imageUrl: null,
@@ -60,7 +70,6 @@ export default {
       movingDotIndex: null,
       isDrowing: false,
       isDragging: false,
-      // labelOnWork: false,
       startMouseX: 0,
       startMouseY: 0,
       startImageX: 0,
@@ -72,15 +81,10 @@ export default {
       annotationLabels: {},
     }
   },
-  props: {
-    scale: {
-      // Определение пропса scale
-      type: Number,
-      required: true,
+  computed: {
+    canvasCursor() {
+      return this.selectedCursor
     },
-    selectedMode: String,
-    color: String,
-    selectedCursor: String,
   },
   watch: {
     scale(newVal, oldVal) {
@@ -105,6 +109,19 @@ export default {
       },
       deep: true,
     },
+  },
+  updated() {
+    // установка высоты и ширины изображения в натуральный размер
+    const image = this.$refs.Image
+    const canvas = this.$refs.canvas
+    if (image) {
+      image.onload = () => {
+        image.style.width = `${image.naturalWidth * this.scale}px`
+        image.style.height = `${image.naturalHeight * this.scale}px`
+        canvas.style.width = `${image.naturalWidth * this.scale}px`
+        canvas.style.height = `${image.naturalHeight * this.scale}px`
+      }
+    }
   },
   methods: {
     async logImageInfo() {
@@ -956,24 +973,6 @@ export default {
       } catch (error) {
         alert(error.message)
       }
-    },
-  },
-  updated() {
-    // установка высоты и ширины изображения в натуральный размер
-    const image = this.$refs.Image
-    const canvas = this.$refs.canvas
-    if (image) {
-      image.onload = () => {
-        image.style.width = `${image.naturalWidth * this.scale}px`
-        image.style.height = `${image.naturalHeight * this.scale}px`
-        canvas.style.width = `${image.naturalWidth * this.scale}px`
-        canvas.style.height = `${image.naturalHeight * this.scale}px`
-      }
-    }
-  },
-  computed: {
-    canvasCursor() {
-      return this.selectedCursor
     },
   },
 }

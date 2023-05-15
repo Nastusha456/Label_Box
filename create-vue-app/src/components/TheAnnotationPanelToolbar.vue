@@ -42,6 +42,7 @@
       <p>Create Polygon</p>
     </div>
     <input
+      class="color-input"
       v-if="isShowPalette"
       type="color"
       id="color"
@@ -63,6 +64,9 @@ export default {
       selectedMode: "mooving",
       isShowPalette: false,
     }
+  },
+  mounted() {
+    this.ModeChange("dot")
   },
   methods: {
     onModeChange(event) {
@@ -88,9 +92,6 @@ export default {
     changeColor(event) {
       this.$emit("changeColor", event.target.value)
     },
-  },
-  mounted() {
-    this.ModeChange("dot")
   },
 }
 </script>
@@ -127,7 +128,7 @@ export default {
   opacity: 0;
 }
 
-input[type="color"] {
+.color-input {
   width: 30px;
   background: rgba(255, 255, 255, 0.1);
   margin-top: 3px;

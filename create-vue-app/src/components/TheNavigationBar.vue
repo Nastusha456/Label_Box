@@ -1,5 +1,5 @@
 <template>
-  <header>
+  <header class="header">
     <div @click="$router.push('/main')" class="logo">Label Box</div>
     <nav>
       <ul class="list">
@@ -46,10 +46,10 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 /*Drop down menu*/
 
-header {
+.header {
   top: 0;
   left: 0;
   right: 0;

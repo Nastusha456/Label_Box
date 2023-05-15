@@ -1,41 +1,15 @@
-  first start: {  
-    // If the VUE isn't connected to the folder where the project is stored (folder "create-vue-app"), 
-        then this can be done using the command:
+*** Инструкция по связи приложения с backend ***
 
-        npm install -g @vue/cli
+1. Все необходимые ссылки, которые нужны для связи приложения с сервером,
+    находятся в файле, отвечающему за модуль vuex: "@/src/store/index.js"
 
-    // Get the latest data from girhub using the command:
+2. Для работы классификатора и аннотации без сервера по умолчанию стоят ссылки "/try_classifier.json" и 
+    "/try_annotation.json", которые подгружают json файл из папки public.
 
-        git pull
+3. Для допуска к навигации по страницам необходимо залогиниться в приложении.
+    В файле "@/src/pages/SignIn" в methods есть две функции с названием signIn и 
+    пометками // For work without server и // For work with server.
+    По умолчанию активна функция с пометкой // For work without server, в таком случае
+    достаточно ввести произвольные логин и пароль, а затем нажать кнопку "login"
 
-    // To install the necessary VUE packages use the command in the folder "create-vue-app":
-
-        npm install
-
-    // Now there is a folder "node_modules" containing the necessary packages. 
-        Each time, after adding new packages, you should delete this folder and reinstall it 
-        using the command "npm install".
-
-    // Now everything is ready for development or viewing. 
-        To run the application use the command:
-
-        npm run serve
-
-    // Link will appear on the command line that will open the application in the browser.
-  }
-
-  subsequent launches: {
-    // In "create-vue-app" delet folder "node_modules".
-
-    // Then Get the latest data from girhub using the command:
-
-         git pull
-
-    // Install the necessary VUE packages using the command in the folder "create-vue-app":
-
-        npm install
-
-    // To run the application use the command:
-
-        npm run serve
-  }
+4. Подробно ознакомиться со значением каждой ссылки можно в файле README на backend-е

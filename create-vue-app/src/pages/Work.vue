@@ -43,19 +43,19 @@
             @addNewImg="addNewImg"
             ref="CenterPanel"
             :scale="parseFloat(scale)"
-            :selectedMode="selectedMode"
+            :selected-mode="selectedMode"
             :color="color"
-            :selectedCursor="selectedCursor"
+            :selected-cursor="selectedCursor"
           />
-          <image-data :imageData="imageData" />
+          <image-data :image-data="imageData" />
         </div>
         <div class="rightBlock">
           <markup-panel
             ref="MarkupPanel"
-            :isShowLabelEditor="isShowLabelEditor"
+            :is-show-label-editor="isShowLabelEditor"
             :labels="labels"
             :color="color"
-            :labelOnWork="labelOnWork"
+            :label-on-work="labelOnWork"
             @visibleLabelBtn="visibleLabelBtn"
             @changeLabelColorBtn="changeLabelColorBtn"
             @deleteLabelBtn="deleteLabelBtn"

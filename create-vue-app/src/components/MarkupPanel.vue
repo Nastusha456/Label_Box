@@ -86,7 +86,7 @@
           >Please fill in all fields</strong
         >
       </div>
-      <button @click="saveLabel()">Save</button>
+      <button @click="saveLabel()" class="btn">Save</button>
     </div>
     <div class="markup_tree" v-if="isShowMarkupTree">
       <span @click="showGroup"
@@ -283,6 +283,12 @@ import axios from "axios"
 import { mapGetters } from "vuex"
 
 export default {
+  props: {
+    isShowLabelEditor: String,
+    labels: Array,
+    color: String,
+    labelOnWork: Boolean,
+  },
   data() {
     return {
       classifierData: {},
@@ -316,11 +322,26 @@ export default {
       },
     }
   },
-  props: {
-    isShowLabelEditor: String,
-    labels: Array,
-    color: String,
-    labelOnWork: Boolean,
+  computed: {
+    filteredGroups() {
+      // Фильтрация вариантов на основе текущего ввода поиска
+      return this.labelGroups.filter((option) =>
+        option.groupName.toLowerCase().includes(this.searchClass.toLowerCase())
+      )
+    },
+    filteredClasses() {
+      // Фильтрация вариантов на основе текущего ввода поиска
+      return this.labelClasses.filter(
+        (option) =>
+          option.className.toLowerCase().includes(this.searchPage.toLowerCase()) //&&
+      )
+    },
+    filteredLabels() {
+      // Фильтрация вариантов на основе текущего ввода поиска
+      return this.labelLabels.filter((option) =>
+        option.labelName.toLowerCase().includes(this.searchLabel.toLowerCase())
+      )
+    },
   },
   watch: {
     labels: {
@@ -343,27 +364,6 @@ export default {
         )
       },
       deep: true,
-    },
-  },
-  computed: {
-    filteredGroups() {
-      // Фильтрация вариантов на основе текущего ввода поиска
-      return this.labelGroups.filter((option) =>
-        option.groupName.toLowerCase().includes(this.searchClass.toLowerCase())
-      )
-    },
-    filteredClasses() {
-      // Фильтрация вариантов на основе текущего ввода поиска
-      return this.labelClasses.filter(
-        (option) =>
-          option.className.toLowerCase().includes(this.searchPage.toLowerCase()) //&&
-      )
-    },
-    filteredLabels() {
-      // Фильтрация вариантов на основе текущего ввода поиска
-      return this.labelLabels.filter((option) =>
-        option.labelName.toLowerCase().includes(this.searchLabel.toLowerCase())
-      )
     },
   },
   methods: {
@@ -1059,7 +1059,6 @@ export default {
       }
     },
 
-    //************************************************
     saveAnnotation() {
       this.allData.groups = this.labelGroups
       for (const group of this.allData.groups) {
@@ -1104,7 +1103,6 @@ export default {
 .markup {
   display: block;
   max-height: 300px;
-  /* width: 200px; */
   width: 100%;
   color: rgba(255, 255, 255, 0.5);
   margin-top: 10px;
@@ -1143,7 +1141,7 @@ export default {
   overflow-y: scroll;
 }
 
-button {
+.btn {
   font-weight: 700;
   background: none;
   border: 2px solid rgba(255, 255, 255, 0.5);
@@ -1154,7 +1152,7 @@ button {
   cursor: pointer;
 }
 
-button:hover {
+.btn:hover {
   background: #2ecc71;
   border: 2px solid #17202a;
   color: #17202a;
@@ -1164,7 +1162,7 @@ button:hover {
   display: flex;
   flex-direction: row;
 }
-/* ********************************************************** */
+
 .label-editor {
   width: 15px;
   height: 30px;
@@ -1197,14 +1195,7 @@ button:hover {
   opacity: 0;
 }
 
-input[type="color"] {
-  width: 30px;
-  background: rgba(255, 255, 255, 0.1);
-  margin-top: 3px;
-}
-
 .create_markup {
-  /* display: block; */
   width: 100%;
 }
 </style>

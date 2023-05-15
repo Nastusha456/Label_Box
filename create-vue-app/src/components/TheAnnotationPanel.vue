@@ -15,6 +15,7 @@
       <i class="bx bxs-plus-circle"></i>
     </div>
     <input
+      class="number-input"
       type="number"
       :min="minScale"
       :max="maxScale"
@@ -166,7 +167,7 @@ export default {
   opacity: 0;
 }
 
-input[type="number"] {
+.number-input {
   width: 40px;
   background: rgba(255, 255, 255, 0.1);
   color: rgba(255, 255, 255, 0.5);

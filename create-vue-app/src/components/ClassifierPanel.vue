@@ -78,6 +78,10 @@ export default {
       isShowLables: [],
     }
   },
+  mounted() {
+    const classifierPath = this.getClassifierPath()
+    this.fetchClassifier(classifierPath)
+  },
   methods: {
     showGroup() {
       this.isShowGroups = !this.isShowGroups
@@ -118,10 +122,6 @@ export default {
       }
     },
   },
-  mounted() {
-    const classifierPath = this.getClassifierPath()
-    this.fetchClassifier(classifierPath)
-  },
 }
 </script>
 
@@ -134,7 +134,7 @@ export default {
   margin-top: 10px;
   overflow-y: scroll;
 }
-li {
+.classifier li {
   margin-top: 10px;
 }
 </style>
