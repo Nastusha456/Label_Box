@@ -46,7 +46,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style>
 /*Drop down menu*/
 
 .header {

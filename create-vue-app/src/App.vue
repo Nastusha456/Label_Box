@@ -21,14 +21,4 @@ export default {}
 body {
   background: #17202a;
 }
-
-/* body {
-  padding: 10px;
-  min-height: 100vh;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #17202a;
-} */
 </style>
