@@ -1,0 +1,81 @@
+{
+  "groups": [
+    {
+      "id": 1,
+      "title": "Документы удостоверяющие личность",
+      "code": "dulDoc"
+    },
+    {
+      "id": 2,
+      "title": "Документы подтверждающие регистрацию",
+      "code": "addrRegDoc"
+    }
+  ],
+  "classes": [
+    {
+      "id": 1,
+      "title": "Паспорт гражданина РФ",
+      "code": "rusPassport",
+      "groups": [1]
+    },
+    {
+      "id": 2,
+      "title": "Свидетельство о рождении РФ",
+      "code": "birthDoc",
+      "lables": [1, 2, 3, 4],
+      "groups": [1]
+    },
+    {
+      "id": 3,
+      "parent": 1,
+      "title": "Главная страница",
+      "code": "rusPassport_main",
+      "lables": [1, 2, 3, 4, 5],
+      "groups": [1]
+    },
+    {
+      "id": 4,
+      "parent": 1,
+      "title": "Регистрация",
+      "code": "rusPassport_register",
+      "lables": [1],
+      "groups": [1, 2]
+    }
+  ],
+  "lables": [
+    {
+      "id": 1,
+      "title": "Тип документа",
+      "code": "classType",
+      "type": "string"
+    },
+    {
+      "id": 2,
+      "title": "Фамилия",
+      "code": "fioSurname",
+      "type": "string",
+      "mask": "[а-яА-Я\\-\\.]+"
+    },
+    {
+      "id": 3,
+      "title": "Имя",
+      "code": "fioName",
+      "type": "string",
+      "mask": "[а-яА-Я\\-\\.]+"
+    },
+    {
+      "id": 4,
+      "title": "Отчество",
+      "code": "fioSecondName",
+      "type": "string",
+      "mask": "[а-яА-Я\\-\\.]+"
+    },
+    {
+      "id": 5,
+      "title": "Серия",
+      "code": "docSeries4",
+      "type": "string",
+      "mask": "\\d{2}\\s*\\d{2}"
+    }
+  ]
+}
